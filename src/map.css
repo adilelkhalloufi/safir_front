@@ -1,0 +1,97 @@
+/* Base map background color */
+.leaflet-container {
+    background-color: #303030;
+  }
+  
+  /* Attribution control */
+  .leaflet-control-attribution {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    color: #aaa !important;
+    padding: 3px 5px;
+  }
+  
+  .leaflet-control-attribution a {
+    color: #8ab4f8 !important;
+  }
+  
+  /* Zoom controls styling */
+  .leaflet-control-zoom a {
+    background-color: #303030 !important;
+    color: #fff !important;
+    border-color: #555 !important;
+  }
+  
+  .leaflet-control-zoom a:hover {
+    background-color: #444 !important;
+  }
+  
+  /* Popup styling */
+  .leaflet-popup-content-wrapper, 
+  .leaflet-popup-tip {
+    background-color: #303030;
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Tile borders */
+  .leaflet-tile-container img {
+    filter: brightness(0.8) contrast(1.2) grayscale(0.8) invert(1) hue-rotate(180deg);
+  }
+  
+  /* Scale control */
+  .leaflet-control-scale-line {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ddd;
+    border-color: #888;
+  }
+  
+  /* Layer control */
+  .leaflet-control-layers {
+    background-color: #303030;
+    color: #fff;
+    border-color: #555;
+  }
+  
+  .leaflet-control-layers-expanded {
+    background-color: #303030;
+    color: #fff;
+  }
+  
+  /* Improve tile contrast */
+  .leaflet-tile {
+    filter: brightness(0.6) contrast(1.1) saturate(0.9);
+  }
+
+  .dark-themed-map .leaflet-tile-pane {
+    filter: invert(92%) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+  }
+  
+  /* Ensure markers and text aren't inverted */
+  .dark-themed-map .leaflet-marker-pane,
+  .dark-themed-map .leaflet-overlay-pane,
+  .dark-themed-map .leaflet-popup-pane,
+  .dark-themed-map .leaflet-tooltip-pane {
+    filter: invert(100%) hue-rotate(180deg) brightness(1.15) contrast(0.9);
+  }
+ .leaflet-control-attribution {
+    display: none !important;
+  }
+  .custom-marker-cluster {
+    background: #16A34A;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 0 0 4px rgba(12, 240, 24, 0.3);
+  }
+  
+  .cluster-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
