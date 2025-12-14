@@ -75,10 +75,10 @@
       --card-foreground: 240 10% 3.9%;
       --popover: 0 0% 100%;
       --popover-foreground: 240 10% 3.9%;
-      --primary: 142.1 76.2% 36.3%;
-      --primary-foreground: 355.7 100% 97.3%;
-      --secondary: 240 4.8% 95.9%;
-      --secondary-foreground: 240 5.9% 10%;
+      --primary: 228 94% 14%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 40 100% 44%;
+      --secondary-foreground: 0 0% 100%;
       --muted: 240 4.8% 95.9%;
       --muted-foreground: 240 3.8% 46.1%;
       --accent: 240 4.8% 95.9%;
@@ -95,7 +95,7 @@
       --chart-4: 43 74% 66%;
       --chart-5: 27 87% 67%;
     }
-  
+
     .dark {
       --background: 20 14.3% 4.1%;
       --foreground: 0 0% 95%;
@@ -103,10 +103,10 @@
       --card-foreground: 0 0% 95%;
       --popover: 0 0% 9%;
       --popover-foreground: 0 0% 95%;
-      --primary: 142.1 70.6% 45.3%;
-      --primary-foreground: 144.9 80.4% 10%;
-      --secondary: 240 3.7% 15.9%;
-      --secondary-foreground: 0 0% 98%;
+      --primary: 228 94% 20%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 40 100% 50%;
+      --secondary-foreground: 0 0% 100%;
       --muted: 0 0% 15%;
       --muted-foreground: 240 5% 64.9%;
       --accent: 12 6.5% 15.1%;
@@ -123,14 +123,16 @@
       --chart-5: 340 75% 55%;
     }
   }
-  
+
   /* styles.css */
   .collapsibleDropdown {
     overflow: hidden;
   }
+
   .collapsibleDropdown[data-state='open'] {
     animation: slideDown 200ms ease-out;
   }
+
   .collapsibleDropdown[data-state='closed'] {
     animation: slideUp 200ms ease-out;
   }
@@ -139,6 +141,7 @@
     from {
       height: 0;
     }
+
     to {
       height: var(--radix-collapsible-content-height);
     }
@@ -148,6 +151,7 @@
     from {
       height: var(--radix-collapsible-content-height);
     }
+
     to {
       height: 0;
     }
@@ -156,15 +160,18 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply min-h-svh w-full bg-background text-foreground;
   }
-  body > #root {
+
+  body>#root {
     @apply h-svh;
   }
 
   /* Prevent focus zoom on mobile devices */
   @media screen and (max-width: 767px) {
+
     input,
     select,
     textarea {
@@ -174,23 +181,17 @@
 }
 
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-
-  .faded-bottom {
-    @apply after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:hidden after:h-32 after:w-full after:bg-[linear-gradient(180deg,_transparent_10%,_hsl(var(--background))_70%)] after:md:block;
-  }
-}
-
-@media print {
-  .hidden-print {
-    display: none;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }

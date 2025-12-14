@@ -24,7 +24,7 @@ export function DatePicker({ defaultValue, onChange, label = "Pick a date", disa
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate)
     if (onChange && selectedDate) {
-      const formattedDate = format(selectedDate, "Y-MM-dd")
+      const formattedDate = format(selectedDate, "yyyy-MM-dd")
       onChange(formattedDate as any)
     }
   }

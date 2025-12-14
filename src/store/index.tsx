@@ -14,7 +14,7 @@ import {
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { CONFIG } from '@/CONFIG';
-  
+
 const persistConfig = {
   key: CONFIG.APP_NAME,
   storage,
@@ -22,8 +22,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   admin: adminSlice,
-  cart: cartSlice,  
-  setting: settingSlice,  
+
 
 });
 
@@ -41,7 +40,7 @@ export const store = configureStore({
 
 export type RootState = {
   admin: AdminState;
- 
+
 
 };
 export type AppDispatch = typeof store.dispatch;

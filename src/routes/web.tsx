@@ -1,4 +1,4 @@
- 
+
 
 export const webRoutes = {
   home: '/',
@@ -7,9 +7,6 @@ export const webRoutes = {
   clear: '/clear',
   logout: '/logout',
   Dashboard: '/Dashbord',
- 
-
-
- 
-
+  booking: '/booking',
 };
+
