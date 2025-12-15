@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
-import { memo, useEffect, useState } from 'react'
+import { memo } from 'react'
 
 import { LayoutSh } from '../custom/layout'
 import ThemeSwitch from '../theme-switch'
@@ -8,20 +8,12 @@ import { TopNav } from '../top-nav'
 import SkipToMain from '../skip-to-main'
 import Sidebar from '../sidebar'
 import useIsCollapsed from '@/hooks/use-is-collapsed'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store'
+
 
 const Layout = () => {
 
   const [isCollapsed, setIsCollapsed] = useIsCollapsed()
-  const [OpenModel, setOpenModel] = useState<boolean>(false)
-  const store = useSelector((state: RootState) => state?.setting.store)
 
-  useEffect(() => {
-    if (store == null) {
-      setOpenModel(true)
-    }
-  }, [])
 
   const topNav: any = [
     // {

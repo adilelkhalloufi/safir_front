@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CreditCard, Shield, ChevronRight, AlertCircle } from 'lucide-react'
+import { CreditCard, Shield, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 
 interface GuaranteeProps {
-    totalPrice: number
+    totalPrice: any
     onNext: () => void
     onPrev: () => void
 }

@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { apiRoutes } from '../../../routes/api'
-import http from '../../../utils/http'
+
 import { showNotification, NotificationType } from '../../../utils'
 import type {
     Service,
@@ -31,7 +30,7 @@ export default function BookingWizard() {
     const [personCount, setPersonCount] = useState<number>(1)
     const [selectedGender, setSelectedGender] = useState<APIGender | undefined>(undefined)
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-    const [selectedScenario, setSelectedScenario] = useState<AvailabilityScenario | null>(null)
+    const [selectedScenario, setSelectedScenario] = useState<AvailabilityScenario | any>(null)
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
         name: '',
         email: '',
@@ -82,7 +81,7 @@ export default function BookingWizard() {
                     duration: 60,
                     is_active: true
                 }
-            ] as Service[]
+            ] as any[]
         }
     })
 
@@ -121,7 +120,7 @@ export default function BookingWizard() {
                     gender: 'M',
                     is_active: true
                 }
-            ] as Staff[]
+            ] as any[]
         }
     })
 
@@ -135,8 +134,8 @@ export default function BookingWizard() {
             await new Promise(resolve => setTimeout(resolve, 1000))
 
             // Generate fake availability scenarios
-            const totalPrice = selectedServiceDetails.reduce((sum, svc) => sum + svc.price, 0) * personCount
-            const totalDuration = selectedServiceDetails.reduce((sum, svc) => sum + svc.duration, 0)
+            const totalPrice: any = selectedServiceDetails.reduce((sum: any, svc) => sum + svc.price, 0) * personCount
+            const totalDuration = selectedServiceDetails.reduce((sum: any, svc: any) => sum + svc.duration, 0)
 
             return [
                 {
@@ -184,7 +183,7 @@ export default function BookingWizard() {
                         hammam_session_id: selectedServiceDetails.find(s => s.id === serviceId)?.type_service === 'hammam' ? 3 : undefined
                     }))
                 }
-            ] as AvailabilityScenario[]
+            ] as any[]
         },
         enabled: selectedDate !== undefined && selectedServices.length > 0
     })
@@ -381,7 +380,7 @@ export default function BookingWizard() {
                                 language: 'fr',
                                 group_size: personCount,
                                 notes: customerInfo.notes || `Réservation pour ${customerInfo.name}`,
-                                services: selectedScenario.services.map(svc => ({
+                                services: selectedScenario.services.map((svc: any) => ({
                                     service_id: svc.service_id,
                                     order_index: svc.order_index,
                                     start_datetime: svc.start_datetime,

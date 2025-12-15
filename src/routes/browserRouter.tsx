@@ -1,5 +1,4 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Redirect from '../components/layout/Redirect';
 import { webRoutes } from './web';
 import loadable from '@loadable/component';
 import ProgressBar from '@/components/loader/progressBar';

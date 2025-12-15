@@ -1,9 +1,8 @@
-import { Spin } from 'antd';
 import { ImSpinner2 } from 'react-icons/im';
 
 const defaultSpinner = (
-  <Spin size="large" indicator={<ImSpinner2 className="icon-spin" />} />
-);
+  <ImSpinner2 className="animate-spin text-4xl mx-auto" />);
+
 
 export interface LoaderProps {
   text?: string;

@@ -15,16 +15,14 @@ const http = axios.create();
 http.interceptors.request.use(
   (config) => {
     const state: RootState = store.getState();
- 
+
     const apiToken = state.admin?.token;
-    const storeId = state.setting?.store ? state.setting.store.id : null;
-     if (apiToken) {
+    if (apiToken) {
       config.headers.Authorization = `Bearer ${apiToken}`;
       config.params = {
         ...config.params,
-        store_id : storeId
       }
- 
+
     }
     return config;
   },

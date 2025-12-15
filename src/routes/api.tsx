@@ -7,6 +7,7 @@ export const apiRoutes = {
   register: `${API_URL}/register`,
   users: `${API_URL}/user`,
   dashboard: `${API_URL}/dashboard`,
+  
 
   // Booking API
   services: `${API_URL}/services`,

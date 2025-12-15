@@ -7,7 +7,8 @@ import type { Service, Staff } from '@/interfaces/models/booking'
 interface SelectOptionsProps {
     selectedServices: Service[]
     staff: Staff[]
-    staffSelections: Record<number, number>
+    staffSelections: any
+    // Record<number, number>
     onSelectStaff: (selections: Record<number, number>) => void
     gender: string
     onSelectGender: (gender: string) => void
