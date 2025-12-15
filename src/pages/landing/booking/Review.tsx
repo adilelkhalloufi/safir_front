@@ -11,7 +11,7 @@ interface ReviewProps {
     selectedServices: Service[]
     selectedStaff: { [key: number]: Staff }
     personCount: number
-    selectedScenario: AvailabilityScenario | null
+    selectedScenario: AvailabilityScenario | any
     selectedDate: Date | undefined
     customerInfo: CustomerInfo
     selectedGender?: 'femme' | 'homme' | 'mixte'
@@ -58,7 +58,7 @@ export function Review({
                             <h3 className="font-semibold">Services sélectionnés</h3>
                         </div>
                         <div className="space-y-2">
-                            {selectedServices.map((service) => (
+                            {selectedServices.map((service: any) => (
                                 <div key={service.id} className="flex justify-between items-center">
                                     <div>
                                         <p className="font-medium">{service.name}</p>

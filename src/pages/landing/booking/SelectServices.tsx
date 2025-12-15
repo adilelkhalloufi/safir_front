@@ -27,7 +27,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        {services.map((svc) => {
+                        {services.map((svc: any) => {
                             const Icon = SERVICE_ICONS[svc.type_service] || Sparkles
                             const isSelected = selected.includes(svc.id)
 

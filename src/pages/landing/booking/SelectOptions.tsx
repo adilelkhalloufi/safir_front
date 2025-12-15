@@ -72,7 +72,7 @@ export function SelectOptions({
                         </div>
                     )}
 
-                    {selectedServices.map((service) => {
+                    {selectedServices.map((service: any) => {
                         const Icon = SERVICE_ICONS[service.type_service] || Sparkles
                         const serviceStaff = staff.filter(s => s.type_staff === service.type_service)
 
@@ -103,7 +103,7 @@ export function SelectOptions({
                                             >
                                                 Pas de préférence
                                             </button>
-                                            {serviceStaff.map((st) => (
+                                            {serviceStaff.map((st: any) => (
                                                 <button
                                                     key={st.id}
                                                     onClick={() => handleStaffSelect(service.id, st.id)}
@@ -117,7 +117,7 @@ export function SelectOptions({
                                                     <div>{st.name}</div>
                                                     {st.services.length > 0 && (
                                                         <div className="text-xs text-muted-foreground">
-                                                            {st.services.map(s => s.name).join(', ')}
+                                                            {st.services.map((s: any) => s.name).join(', ')}
                                                         </div>
                                                     )}
                                                 </button>

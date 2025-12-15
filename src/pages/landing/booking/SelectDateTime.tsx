@@ -59,7 +59,7 @@ export function SelectDateTime({
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {availability.map((scenario) => {
+                                    {availability.map((scenario: any) => {
                                         const isSelected = selectedScenario?.scenario_id === scenario.scenario_id
                                         const startTime = format(new Date(scenario.start_datetime), 'HH:mm')
                                         const endTime = format(new Date(scenario.end_datetime), 'HH:mm')
@@ -85,7 +85,7 @@ export function SelectDateTime({
                                                     <span className="font-semibold text-amber-600">{scenario.total_price} MAD</span>
                                                 </div>
                                                 <div className="space-y-1 text-sm text-muted-foreground">
-                                                    {scenario.services.map((svc, idx) => (
+                                                    {scenario.services.map((svc: any, idx: any) => (
                                                         <div key={idx}>
                                                             • {svc.service_name}
                                                             {svc.staff_name && ` avec ${svc.staff_name}`}
