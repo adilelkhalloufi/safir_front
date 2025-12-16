@@ -31,6 +31,8 @@ export default function BookingWizard() {
     const [selectedGender, setSelectedGender] = useState<APIGender | undefined>(undefined)
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
     const [selectedScenario, setSelectedScenario] = useState<AvailabilityScenario | any>(null)
+    // New: Track selected time slots per service
+    const [selectedTimeSlots, setSelectedTimeSlots] = useState<Record<number, AvailabilityScenario>>({})
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
         name: '',
         email: '',
@@ -125,6 +127,7 @@ export default function BookingWizard() {
     })
 
     // Fetch availability when date and services are selected - FAKE DATA for testing
+    // This generates service-specific availability for each selected service
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
         queryKey: ['availability', selectedServices, selectedDate, personCount, selectedGender],
         queryFn: async () => {
@@ -133,57 +136,54 @@ export default function BookingWizard() {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000))
 
-            // Generate fake availability scenarios
-            const totalPrice: any = selectedServiceDetails.reduce((sum: any, svc) => sum + svc.price, 0) * personCount
-            const totalDuration = selectedServiceDetails.reduce((sum: any, svc: any) => sum + svc.duration, 0)
+            // Generate availability per service type
+            // This allows each service (hammam, massage, etc.) to have its own time slots
+            const availabilityByService: Record<number, any[]> = {}
 
-            return [
-                {
-                    scenario_id: 1,
-                    start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T09:00:00`,
-                    end_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(9 + Math.floor(totalDuration / 60)).padStart(2, '0')}:${String(totalDuration % 60).padStart(2, '0')}:00`,
-                    total_duration: totalDuration,
-                    total_price: totalPrice,
-                    services: selectedServices.map((serviceId, index) => ({
+            selectedServiceDetails.forEach((service: any) => {
+                const serviceId = service.id
+                const duration = service.duration || service.duration_minutes || 60
+                const price = typeof service.price === 'string' ? parseFloat(service.price) : (service.price || 0)
+                const totalPrice = price * personCount
+
+                // Generate different time slots based on service type
+                const timeSlots = service.type_service === 'hammam'
+                    ? ['09:00', '11:00', '14:00', '16:00', '18:00'] // Hammam sessions
+                    : service.type_service === 'massage'
+                        ? ['09:30', '11:00', '13:30', '15:00', '16:30', '18:00'] // Massage slots
+                        : ['10:00', '12:00', '14:30', '16:00', '17:30'] // Other services
+
+                // Generate scenarios for this service
+                availabilityByService[serviceId] = timeSlots.map((startTime, index) => {
+                    const [hours, minutes] = startTime.split(':').map(Number)
+                    const endHours = hours + Math.floor(duration / 60)
+                    const endMinutes = minutes + (duration % 60)
+
+                    return {
+                        scenario_id: `${serviceId}-${index + 1}`,
                         service_id: serviceId,
-                        order_index: index,
-                        start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(9 + index).padStart(2, '0')}:00:00`,
-                        staff_id: Object.keys(selectedStaff).length > 0 ? selectedStaff[serviceId]?.id : undefined,
-                        room_id: 1,
-                        hammam_session_id: selectedServiceDetails.find(s => s.id === serviceId)?.type_service === 'hammam' ? 1 : undefined
-                    }))
-                },
-                {
-                    scenario_id: 2,
-                    start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T14:00:00`,
-                    end_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(14 + Math.floor(totalDuration / 60)).padStart(2, '0')}:${String(totalDuration % 60).padStart(2, '0')}:00`,
-                    total_duration: totalDuration,
-                    total_price: totalPrice,
-                    services: selectedServices.map((serviceId, index) => ({
-                        service_id: serviceId,
-                        order_index: index,
-                        start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(14 + index).padStart(2, '0')}:00:00`,
-                        staff_id: Object.keys(selectedStaff).length > 0 ? selectedStaff[serviceId]?.id : undefined,
-                        room_id: 2,
-                        hammam_session_id: selectedServiceDetails.find(s => s.id === serviceId)?.type_service === 'hammam' ? 2 : undefined
-                    }))
-                },
-                {
-                    scenario_id: 3,
-                    start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T16:30:00`,
-                    end_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(16 + Math.floor(totalDuration / 60)).padStart(2, '0')}:${String(30 + (totalDuration % 60)).padStart(2, '0')}:00`,
-                    total_duration: totalDuration,
-                    total_price: totalPrice,
-                    services: selectedServices.map((serviceId, index) => ({
-                        service_id: serviceId,
-                        order_index: index,
-                        start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(16 + index).padStart(2, '0')}:30:00`,
-                        staff_id: Object.keys(selectedStaff).length > 0 ? selectedStaff[serviceId]?.id : undefined,
-                        room_id: 1,
-                        hammam_session_id: selectedServiceDetails.find(s => s.id === serviceId)?.type_service === 'hammam' ? 3 : undefined
-                    }))
-                }
-            ] as any[]
+                        service_type: service.type_service,
+                        service_name: service.name,
+                        start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${startTime}:00`,
+                        end_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00`,
+                        total_duration: duration,
+                        total_price: totalPrice,
+                        available_capacity: Math.floor(Math.random() * 3) + 1, // Random capacity 1-3
+                        services: [{
+                            service_id: serviceId,
+                            service_name: service.name,
+                            order_index: 0,
+                            start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${startTime}:00`,
+                            staff_id: Object.keys(selectedStaff).length > 0 ? selectedStaff[serviceId]?.id : undefined,
+                            room_id: (index % 3) + 1,
+                            hammam_session_id: service.type_service === 'hammam' ? (index + 1) : undefined
+                        }]
+                    }
+                })
+            })
+
+            // Return the availability grouped by service
+            return availabilityByService
         },
         enabled: selectedDate !== undefined && selectedServices.length > 0
     })
@@ -218,6 +218,7 @@ export default function BookingWizard() {
                 setSelectedGender(undefined)
                 setSelectedDate(undefined)
                 setSelectedScenario(null)
+                setSelectedTimeSlots({})
                 setCustomerInfo({ name: '', email: '', phone: '', notes: '' })
             }, 2000)
         },
@@ -333,7 +334,53 @@ export default function BookingWizard() {
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
                         onSelectScenario={setSelectedScenario}
-                        onNext={() => (selectedDate && selectedScenario) ? next() : null}
+                        selectedTimeSlots={selectedTimeSlots}
+                        onSelectTimeSlot={(serviceId, scenario) => {
+                            setSelectedTimeSlots(prev => ({
+                                ...prev,
+                                [serviceId]: scenario
+                            }))
+                        }}
+                        selectedServices={selectedServiceDetails}
+                        onNext={() => {
+                            // Check if we have service-specific availability
+                            const isServiceSpecific = availability && !Array.isArray(availability)
+                            if (isServiceSpecific) {
+                                // Check all services have selected time slots
+                                const allSelected = Object.keys(availability || {}).every(
+                                    serviceId => selectedTimeSlots[Number(serviceId)]
+                                )
+                                if (allSelected && selectedDate) {
+                                    // Merge all selected time slots into one scenario for compatibility
+                                    const mergedServices = Object.values(selectedTimeSlots).flatMap(
+                                        (slot, index) => slot.services?.map((svc: any) => ({
+                                            ...svc,
+                                            order_index: index
+                                        })) || []
+                                    )
+                                    const totalPrice = Object.values(selectedTimeSlots).reduce(
+                                        (sum, slot) => sum + (Number(slot.total_price) || 0), 0
+                                    )
+                                    const totalDuration = Object.values(selectedTimeSlots).reduce(
+                                        (sum, slot) => sum + (slot.total_duration || 0), 0
+                                    )
+                                    setSelectedScenario({
+                                        scenario_id: 'merged',
+                                        start_datetime: Object.values(selectedTimeSlots)[0]?.start_datetime,
+                                        end_datetime: Object.values(selectedTimeSlots)[Object.values(selectedTimeSlots).length - 1]?.end_datetime,
+                                        total_duration: totalDuration,
+                                        total_price: totalPrice,
+                                        services: mergedServices
+                                    })
+                                    next()
+                                }
+                            } else {
+                                // Original flow for combined scenarios
+                                if (selectedDate && selectedScenario) {
+                                    next()
+                                }
+                            }
+                        }}
                         onPrev={prev}
                     />
                 )}

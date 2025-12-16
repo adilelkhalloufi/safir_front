@@ -1,6 +1,6 @@
 // Booking API Types based on Laravel backend
 
-export type ServiceType = 'masso' | 'coiffure' | 'hammam'
+export type ServiceType = 'masso' | 'coiffure' | 'hammam' | 'massage' | 'gommage' | 'spa' | 'other'
 export type Gender = 'femme' | 'homme' | 'mixte'
 export type BookingStatus = 'draft' | 'confirmed' | 'cancelled' | 'no_show' | 'completed'
 export type StaffType = 'masso' | 'coiffure' | 'hammam'
@@ -11,7 +11,8 @@ export interface Service {
   name?: string
   description?: string
   duration_minutes?: number
-  price?: string
+  duration?: number  // Alias for compatibility
+  price?: string | number  // Support both string and number
   
   requires_room?: boolean
   requires_chair?: boolean
@@ -73,8 +74,11 @@ export interface AvailabilityScenario {
   start_datetime?: string
   end_datetime?: string
   total_duration_minutes?: number
-  total_price?: string
+  total_duration?: number  // Alias for compatibility
+  total_price?: string | number  // Support both string and number
   services?: AvailabilityServiceDetail[]
+  service_type?: ServiceType  // For service-specific availability
+  service_id?: number  // For service-specific availability
 }
 
 export interface AvailabilityResponse {
