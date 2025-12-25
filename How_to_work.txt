@@ -1,0 +1,736 @@
+## 🔐 **Admin Dashboard Menus** (Staff & Admin Only)
+
+### **1. 📊 Dashboard / Overview** ⭐ START HERE
+**Purpose:** KPIs & real-time metrics
+
+**Components:**
+- **Stats Cards (Top Row):**
+  - Today's bookings count
+  - Today's revenue (€)
+  - Active clients count
+  - Pending health forms count
+
+- **Charts:**
+  - Revenue trend (last 7/30 days) - Line chart
+  - Bookings by service type - Pie chart
+  - Bookings by status - Bar chart
+  - Peak hours heatmap
+
+- **Quick Actions Panel:**
+  - Create manual booking
+  - View today's schedule
+  - Approve pending health forms
+  - Generate report
+
+- **Recent Activity Feed:**
+  - Latest bookings (last 10)
+  - Recent cancellations
+  - New user registrations
+
+**API Used:**
+- `GET /api/admin/statistics` - Overall stats
+- `GET /api/admin/statistics/revenue` - Revenue data
+- `GET /api/admin/bookings?date=today` - Today's bookings
+
+---
+
+### **2. 📅 Booking Management**
+**Purpose:** Manage all bookings (CRUD operations)
+
+#### **Bookings List View**
+**Components:**
+- **Filters/Search Bar:**
+  - Date range picker
+  - Status dropdown (all/pending/confirmed/completed/cancelled/no-show)
+  - Service type filter
+  - Client name search
+  - Staff member filter
+
+- **Bookings Table:**
+  | Booking ID | Date/Time | Client | Services | Staff | Status | Total | Actions |
+  |------------|-----------|--------|----------|-------|--------|-------|---------|
+  | #1234 | Dec 26 10:00 | Marie D. | Massage | Sophie | Confirmed | €80 | View/Cancel/Complete |
+
+- **Bulk Actions:**
+  - Export to Excel/PDF
+  - Send reminder emails
+  - Cancel selected
+
+- **Action Buttons per Row:**
+  - 👁️ View details
+  - ✅ Mark completed
+  - ❌ Cancel booking
+  - 🚫 Mark no-show
+  - 📧 Send reminder
+
+**API Used:**
+```php
+GET  /api/admin/bookings              // List with filters
+GET  /api/admin/bookings/{id}         // Single booking details
+POST /api/admin/bookings/{id}/cancel  // Cancel booking
+POST /api/admin/bookings/{id}/no-show // Mark no-show
+POST /api/admin/bookings/{id}/complete // Mark completed
+```
+
+#### **Booking Details Modal**
+**Components:**
+- **Client Information:**
+  - Name, email, phone
+  - Gender, booking history count
+  - Link to client profile
+
+- **Booking Details:**
+  - Services list with durations
+  - Date & time
+  - Staff assigned
+  - Room/resource assignments
+  - Group size
+  - Special notes
+
+- **Payment Information:**
+  - Payment method
+  - Amount paid
+  - Payment status
+  - Subscription used (if applicable)
+
+- **Timeline/Activity Log:**
+  - Created at
+  - Confirmed at
+  - Completed/cancelled at
+  - Status changes history
+
+- **Actions:**
+  - Edit booking (reschedule)
+  - Cancel with reason
+  - Mark completed
+  - Mark no-show
+  - Send confirmation email
+  - Print receipt
+
+---
+
+### **3. 👥 Client Management**
+**Purpose:** Manage customer database
+
+**Components:**
+- **Clients Table:**
+  | ID | Name | Email | Phone | Gender | Total Bookings | Total Spent | Status | Actions |
+  |----|------|-------|-------|--------|----------------|-------------|--------|---------|
+  | 1 | Marie Dupont | marie@... | +33... | F | 15 | €1,200 | Active | View/Edit |
+
+- **Filters:**
+  - Active/inactive status
+  - Gender
+  - Registration date range
+  - Total bookings (0-5, 5-10, 10+)
+
+- **Search:** Name, email, phone
+
+- **Client Details View:**
+  - Personal info (editable)
+  - Booking history timeline
+  - Health forms submitted
+  - Subscriptions owned
+  - Payment history
+  - Notes/comments (admin only)
+  - Activity log
+
+**API Used:**
+```php
+GET  /api/admin/clients           // List all clients
+GET  /api/admin/clients/{id}      // Client details
+PUT  /api/admin/clients/{id}      // Update client info
+POST /api/admin/clients/{id}/note // Add internal note
+```
+
+---
+
+### **4. 🎟️ Subscription Management**
+**Purpose:** Track subscription packages
+
+**Components:**
+- **Subscriptions Table:**
+  | ID | Client | Package Type | Sessions Total | Sessions Used | Sessions Remaining | Start Date | End Date | Status | Actions |
+  |----|--------|--------------|----------------|---------------|-------------------|------------|----------|--------|---------|
+  | 1 | Marie D. | 10 Sessions | 10 | 3 | 7 | Jan 1 | Mar 31 | Active | View/Edit |
+
+- **Filters:**
+  - Status (active/expired/suspended)
+  - Package type (5/10/20 sessions)
+  - Expiry date range
+  - Sessions remaining (<3, 3-5, >5)
+
+- **Stats Cards:**
+  - Total active subscriptions
+  - Expiring soon (within 7 days)
+  - Revenue from subscriptions (this month)
+  - Average sessions per subscription
+
+- **Actions:**
+  - Create manual subscription
+  - Extend expiry date
+  - Add bonus sessions
+  - Suspend/reactivate
+  - Refund (partial/full)
+
+**API Used:**
+```php
+GET  /api/admin/subscriptions              // List all
+GET  /api/admin/subscriptions/{id}         // Details
+POST /api/admin/subscriptions              // Create manual
+PUT  /api/admin/subscriptions/{id}         // Update/extend
+POST /api/admin/subscriptions/{id}/suspend // Suspend
+```
+
+---
+
+### **5. 📝 Health Forms Management**
+**Purpose:** Review medical questionnaires
+
+**Components:**
+- **Pending Forms Queue:**
+  - Priority list (newest first)
+  - Client name & submission date
+  - Quick review button
+
+- **Health Forms Table:**
+  | ID | Client | Submitted Date | Status | Reviewed By | Actions |
+  |----|--------|----------------|--------|-------------|---------|
+  | 1 | Marie D. | Dec 20 | Pending | - | Review/View |
+  | 2 | Sophie L. | Dec 18 | Approved | Admin | View |
+
+- **Form Review Modal:**
+  - All submitted answers
+  - Medical conditions checklist
+  - Allergies, medications, injuries
+  - Pregnancy status
+  - Approve/reject buttons
+  - Add internal notes (visible to staff only)
+  - Request more information
+
+- **Filters:**
+  - Status (pending/approved/needs-update)
+  - Date range
+  - Assigned reviewer
+
+**API Used:**
+```php
+GET  /api/admin/health-forms              // List all
+GET  /api/admin/health-forms/pending      // Pending only
+GET  /api/admin/health-forms/{id}         // Details
+POST /api/admin/health-forms/{id}/review  // Approve/reject
+POST /api/admin/health-forms/{id}/note    // Add note
+```
+
+---
+
+### **6. 👔 Staff Management**
+**Purpose:** Manage team members & schedules
+
+**Components:**
+- **Staff Members Table:**
+  | ID | Name | Type | Phone | Email | Status | Total Bookings | Actions |
+  |----|------|------|-------|-------|--------|----------------|---------|
+  | 1 | Sophie | Massage | +33... | sophie@... | Active | 145 | View/Edit |
+
+- **Staff Types:**
+  - Massage therapist (masso)
+  - Hair stylist (coiffure)
+  - Hammam attendant (hammam)
+
+- **Staff Details View:**
+  - Personal information
+  - **Weekly Schedule Editor:** (IMPORTANT)
+    - Day-by-day availability grid
+    - Start/end times per day
+    - Visual calendar view
+    - Bulk edit (copy Mon-Fri)
+  - Services qualified for
+  - Booking history
+  - Performance stats (bookings completed, revenue generated)
+
+- **Schedule Management:**
+  - Today's assigned bookings
+  - Weekly view (calendar)
+  - Conflicts/double-bookings alert
+  - Time-off requests
+
+**API Used:**
+```php
+GET  /api/admin/staff                     // List all staff
+GET  /api/admin/staff/{id}                // Staff details
+POST /api/admin/staff                     // Add new staff
+PUT  /api/admin/staff/{id}                // Update info
+GET  /api/admin/staff/{id}/schedule       // Weekly schedule
+PUT  /api/admin/staff/{id}/availability   // Update availability
+GET  /api/staff/schedule                  // Staff's own schedule
+GET  /api/staff/bookings                  // Staff's bookings
+```
+
+**Weekly Availability Editor Component:**
+```
+┌─────────────────────────────────────────┐
+│ Monday    [✓] Available                  │
+│           09:00 ──────── 17:00          │
+│                                          │
+│ Tuesday   [✓] Available                  │
+│           09:00 ──────── 17:00          │
+│                                          │
+│ Wednesday [✗] Not Working                │
+│                                          │
+│ [Copy to All Weekdays] [Save Changes]   │
+└─────────────────────────────────────────┘
+```
+
+---
+
+### **7. 💆 Services Management**
+**Purpose:** Manage service catalog
+
+**Components:**
+- **Services List:**
+  | ID | Name | Type | Duration | Price | Status | Total Bookings | Actions |
+  |----|------|------|----------|-------|--------|----------------|---------|
+  | 1 | Swedish Massage | Massage | 60 min | €80 | Active | 245 | Edit/View |
+
+- **Service Types:**
+  - Massage (massage, gommage)
+  - Hammam (hammam sessions)
+  - Hair Salon (coiffure)
+
+- **Add/Edit Service Form:**
+  - Name (FR/EN)
+  - Description (FR/EN)
+  - Type/category
+  - Duration (minutes)
+  - Price (€)
+  - Group capacity (min/max)
+  - Requires health form (yes/no)
+  - Image upload
+  - Active status toggle
+
+- **Stats per Service:**
+  - Total bookings (all-time)
+  - Revenue generated
+  - Average rating (if reviews enabled)
+  - Most booked days/times
+
+**API Used:**
+```php
+GET  /api/services              // List all (public)
+POST /api/admin/services        // Create new
+PUT  /api/admin/services/{id}   // Update
+DELETE /api/admin/services/{id} // Soft delete
+```
+
+---
+
+### **8. 🏠 Resources Management**
+**Purpose:** Manage rooms, chairs, equipment
+
+**Components:**
+- **Resource Types:**
+  - 🛏️ Rooms (for massage)
+  - 💺 Chairs (for hair salon)
+  - 🚿 Wash Stations (for hair salon)
+
+- **Resources Table:**
+  | ID | Name | Type | Capacity | Status | Utilization % | Actions |
+  |----|------|------|----------|--------|---------------|---------|
+  | 1 | Room A | Massage Room | 1 | Active | 78% | Edit/View |
+  | 2 | Chair 1 | Hair Chair | 1 | Maintenance | - | Edit |
+
+- **Add/Edit Resource:**
+  - Name/number
+  - Type
+  - Capacity
+  - Status (active/maintenance/inactive)
+  - Assigned services
+  - Notes
+
+- **Resource Calendar:**
+  - Daily/weekly view of bookings per resource
+  - Visual timeline showing occupancy
+
+**API Used:**
+```php
+GET  /api/admin/resources           // List all
+POST /api/admin/resources           // Create
+PUT  /api/admin/resources/{id}      // Update
+GET  /api/admin/resources/{id}/schedule // Bookings timeline
+```
+
+---
+
+### **9. 🛁 Hammam Sessions**
+**Purpose:** Manage hammam session scheduling
+
+**Components:**
+- **Session Types:**
+  - Women only (Monday, Wednesday, Sunday PM)
+  - Men only (Tuesday)
+  - Mixed (Thursday, Friday, Saturday, Sunday AM)
+
+- **Sessions Calendar View:**
+  - Date picker
+  - List of sessions per day
+  - Capacity indicator (e.g., 5/8 booked)
+  - Gender type badge
+
+- **Session Details:**
+  - Date & time
+  - Type (female/male/mixed)
+  - Capacity (current/max)
+  - Booked clients list
+  - Actions:
+    - Edit capacity
+    - Cancel session
+    - Add client manually
+
+- **Create Session:**
+  - Date
+  - Time
+  - Type (auto-suggested based on day)
+  - Capacity
+
+**API Used:**
+```php
+GET  /api/admin/hammam-sessions              // List sessions
+POST /api/admin/hammam-sessions              // Create
+PUT  /api/admin/hammam-sessions/{id}         // Update
+DELETE /api/admin/hammam-sessions/{id}       // Cancel
+GET  /api/admin/hammam-sessions/{id}/bookings // Clients in session
+```
+
+---
+
+### **10. 💳 Payment Management**
+**Purpose:** Track financial transactions
+
+**Components:**
+- **Payments Table:**
+  | ID | Date | Client | Booking/Subscription | Amount | Method | Status | Actions |
+  |----|------|--------|---------------------|--------|--------|--------|---------|
+  | 1 | Dec 26 | Marie | Booking #1234 | €80 | Card | Success | View/Refund |
+
+- **Payment Methods:**
+  - Credit card
+  - Cash
+  - Subscription
+  - Bank transfer
+
+- **Status Types:**
+  - ✅ Success
+  - ⏳ Pending
+  - ❌ Failed
+  - 🔄 Refunded
+
+- **Filters:**
+  - Date range
+  - Payment method
+  - Status
+  - Amount range
+
+- **Financial Reports:**
+  - Daily/weekly/monthly revenue
+  - Revenue by service type
+  - Revenue by payment method
+  - Refunds summary
+
+- **Actions:**
+  - Issue refund (full/partial)
+  - Mark as paid (for cash)
+  - Generate invoice/receipt
+  - Export transactions
+
+**API Used:**
+```php
+GET  /api/admin/payments              // List all
+GET  /api/admin/payments/{id}         // Details
+POST /api/admin/payments/{id}/refund  // Process refund
+GET  /api/admin/payments/summary      // Revenue summary
+```
+
+---
+
+### **11. 📈 Statistics & Reports**
+**Purpose:** Business intelligence & analytics
+
+**Components:**
+
+#### **Revenue Analytics:**
+- Total revenue (daily/weekly/monthly/yearly)
+- Revenue by service type (chart)
+- Revenue by payment method
+- Revenue trends (line chart)
+- Average booking value
+
+#### **Booking Analytics:**
+- Total bookings count
+- Bookings by status distribution
+- Bookings by service type
+- Peak hours analysis
+- Booking conversion rate (guests → confirmed)
+
+#### **Client Analytics:**
+- New clients (this month)
+- Returning clients rate
+- Client retention rate
+- Most frequent clients (top 10)
+- Client acquisition source (if tracked)
+
+#### **Staff Performance:**
+- Bookings per staff member
+- Revenue generated per staff
+- Average session rating per staff
+- Staff utilization rate
+
+#### **Service Performance:**
+- Most booked services
+- Least booked services
+- Service revenue ranking
+- Service popularity trends
+
+#### **Export Options:**
+- PDF reports
+- Excel spreadsheets
+- Date range selector
+- Custom report builder
+
+**API Used:**
+```php
+GET /api/admin/statistics              // Overall stats
+GET /api/admin/statistics/revenue      // Revenue breakdown
+GET /api/admin/statistics/bookings     // Booking metrics
+GET /api/admin/statistics/clients      // Client metrics
+GET /api/admin/statistics/staff        // Staff performance
+GET /api/admin/statistics/services     // Service analytics
+```
+
+---
+
+### **12. ⚙️ Settings**
+**Purpose:** System configuration
+
+**Sections:**
+
+#### **Business Information:**
+- Business name
+- Address
+- Phone & email
+- Business hours
+- Timezone
+
+#### **Booking Settings:**
+- Booking buffer time (minutes between bookings)
+- Max advance booking days
+- Min advance booking hours
+- Cancellation policy (hours before)
+- Auto-confirmation (yes/no)
+
+#### **Hammam Settings:**
+- Default session capacity
+- Gender schedule rules
+- Session duration
+- Break time between sessions
+
+#### **Payment Settings:**
+- Accepted payment methods
+- Stripe/payment gateway keys
+- Refund policy
+- Deposit requirements
+
+#### **Notification Settings:**
+- Email templates (booking confirmation, reminder, cancellation)
+- SMS settings
+- Reminder timing (24h, 2h before)
+
+#### **User Roles & Permissions:**
+- Admin permissions
+- Staff permissions
+- View audit logs
+
+**API Used:**
+```php
+GET  /api/admin/settings           // All settings
+PUT  /api/admin/settings           // Update settings
+GET  /api/admin/settings/audit     // Audit logs
+```
+
+---
+
+### **13. 👤 My Profile (Admin)**
+**Purpose:** Admin account management
+
+**Components:**
+- Personal information
+- Change password
+- Two-factor authentication
+- Activity log
+- Notification preferences
+
+**API Used:**
+- `GET /api/me` - Current admin
+- `PUT /api/profile` - Update
+- `PUT /api/password` - Change password
+
+---
+
+### **14. 🚪 Logout**
+**API Used:**
+- `POST /api/logout`
+
+---
+
+## 🎨 **Admin Layout Structure**
+
+### **Sidebar Menu (Desktop)**
+```
+┌─────────────────────────────┐
+│ 📊 Dashboard                 │ ⭐ START
+├─────────────────────────────┤
+│ 📅 Bookings                  │
+│ 👥 Clients                   │
+│ 🎟️ Subscriptions             │
+│ 📝 Health Forms              │
+├─────────────────────────────┤
+│ 👔 Staff                     │
+│ 💆 Services                  │
+│ 🏠 Resources                 │
+│ 🛁 Hammam Sessions           │
+├─────────────────────────────┤
+│ 💳 Payments                  │
+│ 📈 Statistics & Reports      │
+├─────────────────────────────┤
+│ ⚙️ Settings                  │
+│ 👤 My Profile                │
+│ 🚪 Logout                    │
+└─────────────────────────────┘
+```
+
+### **Top Bar**
+```
+┌────────────────────────────────────────────────────┐
+│ [☰] SAFIR Admin  [🔍 Search...]  [🔔3]  [Admin ▼] │
+└────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 **Implementation Priority (Admin)**
+
+### **Phase 1: Core Operations** ⭐
+1. **Dashboard** - Overview & stats
+2. **Bookings** - List, view, cancel, complete
+3. **Clients** - List, view details
+4. **Staff Schedule** - View & edit availability
+
+### **Phase 2: Management**
+5. **Health Forms** - Review & approve
+6. **Subscriptions** - Track & manage
+7. **Services** - CRUD operations
+8. **Hammam Sessions** - Schedule management
+
+### **Phase 3: Analytics & Config**
+9. **Payments** - Transaction history
+10. **Statistics** - Reports & charts
+11. **Resources** - Manage rooms/chairs
+12. **Settings** - System configuration
+
+---
+
+## 🎨 **Admin Dashboard Design Principles**
+
+### **Data Tables:**
+- Sortable columns
+- Pagination (10/25/50/100 per page)
+- Search & filters
+- Bulk actions
+- Export to CSV/Excel/PDF
+
+### **Action Buttons:**
+- Primary: Blue (view, edit, save)
+- Success: Green (confirm, approve, complete)
+- Warning: Orange (pending, needs review)
+- Danger: Red (cancel, delete, reject)
+
+### **Status Badges:**
+```
+Confirmed:  [✓ Confirmed]  (green)
+Pending:    [⏳ Pending]    (yellow)
+Cancelled:  [✗ Cancelled]  (red)
+Completed:  [✓ Completed]  (blue)
+No-show:    [🚫 No-show]   (gray)
+```
+
+### **Permissions:**
+```php
+// In routes/api.php - Add middleware when ready
+Route::middleware(['auth:sanctum', 'role:admin,staff'])->group(function() {
+    Route::prefix('admin')->group(function() {
+        // Admin routes here
+    });
+});
+```
+
+---
+
+## 📊 **Dashboard Widgets (Homepage)**
+
+```
+┌──────────────┬──────────────┬──────────────┬──────────────┐
+│ Today's      │ Today's      │ Active       │ Pending      │
+│ Bookings     │ Revenue      │ Clients      │ Forms        │
+│   12         │  €960        │   145        │    3         │
+└──────────────┴──────────────┴──────────────┴──────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Revenue Trend (Last 7 Days)        [Line Chart]             │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────┬──────────────────────────────────┐
+│ Bookings by Service      │ Recent Bookings                  │
+│ [Pie Chart]              │ • #1234 - Marie D. - 10:00      │
+│                          │ • #1235 - Sophie L. - 11:30     │
+└──────────────────────────┴──────────────────────────────────┘
+```
+
+---
+
+## ✅ **Key Features Per Admin Menu**
+
+| Menu | Search | Filters | Bulk Actions | Export | Real-time |
+|------|--------|---------|--------------|--------|-----------|
+| Dashboard | ❌ | Date range | ❌ | ✅ PDF | ✅ Live stats |
+| Bookings | ✅ | 5+ filters | ✅ Cancel | ✅ Excel | ✅ Updates |
+| Clients | ✅ | Status/Date | ❌ | ✅ CSV | ❌ |
+| Staff | ✅ | Type/Status | ❌ | ✅ PDF | ❌ |
+| Payments | ✅ | Date/Method | ❌ | ✅ Excel | ✅ Updates |
+
+---
+
+## 🎯 **Start Implementation Order for Admin**
+
+### **Week 1: Foundation**
+1. Admin layout with sidebar
+2. Dashboard with stats API integration
+3. Authentication & role check
+
+### **Week 2: Core CRUD**
+4. Bookings list & details
+5. Clients list & details
+6. Staff list with schedule editor ⭐
+
+### **Week 3: Operations**
+7. Health forms review queue
+8. Hammam sessions calendar
+9. Services management
+
+### **Week 4: Analytics**
+10. Payment history
+11. Statistics dashboard
+12. Reports & exports
+
+---
+
+This admin dashboard gives you complete control over the SAFIR booking system! Start with **Dashboard** → **Bookings** → **Staff Schedule** for immediate productivity. 🚀

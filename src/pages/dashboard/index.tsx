@@ -1,170 +1,115 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { RecentSales } from './components/recent-sales'
-import { Overview } from './components/overview'
-import { useEffect, useState } from 'react'
-import { setPageTitle } from '@/utils'
-import { IconUsersGroup, IconZoomMoney } from '@tabler/icons-react'
-import http from '@/utils/http'
-import { apiRoutes } from '@/routes/api'
-import { OrderSale } from '@/interfaces/models/admin'
-import { GenderOrder } from './components/gender-order'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { useEffect, useState } from 'react';
+import { setPageTitle } from '@/utils';
+import http from '@/utils/http';
+import { apiRoutes } from '@/routes/api';
+import { useTranslation } from 'react-i18next';
+import { StatsCards } from './components/stats-cards';
+import { QuickActions } from './components/quick-actions';
+import { RecentActivityFeed } from './components/recent-activity';
+import { BookingStatusChart } from './components/booking-status-chart';
+import { ServiceTypeChart } from './components/service-type-chart';
+import { Overview } from './components/overview';
 
-interface DashboardData {
-  monthly_order_count: number;
-  daily_order_count: number;
-  daily_sales: number;
-  monthly_sales: number;
-  monthly_revenue: number[];
-  recent_orders: Array<OrderSale>;
-  orders_by_gender: Array<any>;
+interface DashboardStatistics {
+  today_bookings: number;
+  today_revenue: number;
+  active_clients: number;
+  pending_health_forms: number;
+  bookings_by_status: Array<{ status: string; count: number }>;
+  bookings_by_service: Array<{ service_type: string; count: number }>;
+  revenue_trend: number[];
+  recent_activities: Array<{
+    id: number;
+    type: 'booking' | 'cancellation' | 'registration';
+    title: string;
+    description: string;
+    user: string;
+    timestamp: string;
+    status?: string;
+  }>;
 }
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
-    monthly_order_count: 0,
-    daily_order_count: 0,
-    daily_sales: 0,
-    monthly_sales: 0,
-    monthly_revenue: [],
-    recent_orders: [],
-    orders_by_gender: []
+  const { t } = useTranslation();
+  const [dashboardData, setDashboardData] = useState<DashboardStatistics>({
+    today_bookings: 0,
+    today_revenue: 0,
+    active_clients: 0,
+    pending_health_forms: 0,
+    bookings_by_status: [],
+    bookings_by_service: [],
+    revenue_trend: [],
+    recent_activities: [],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setPageTitle("Dashboard");
+    setPageTitle(t('dashboard.title'));
     fetchDashboardData();
-  }, []);
+  }, [t]);
 
   const fetchDashboardData = async () => {
-
-    http.get(apiRoutes.dashboard).then((response) => {
+    try {
+      setLoading(true);
+      const response = await http.get(apiRoutes.adminStatistics);
       setDashboardData(response.data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-    );
-
   };
 
-  return (
-    <>
-
-      <div className='mb-2 flex items-center justify-between space-y-2'>
-        <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
-        <div className='flex items-center space-x-2'>
-          {/* <Button>Download</Button> */}
-        </div>
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center min-h-[400px]'>
+        <div className='text-muted-foreground'>{t('common.loading')}</div>
       </div>
-      <Tabs
-        orientation='vertical'
-        defaultValue='overview'
-        className='space-y-4'
-      >
-        <div className='w-full overflow-x-auto pb-2'>
-          {/* <TabsList>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-             
-            </TabsList> */}
-        </div>
+    );
+  }
+
+  return (
+    <div className='space-y-4'>
+      <div className='flex items-center justify-between'>
+        <h1 className='text-2xl font-bold tracking-tight'>{t('dashboard.title')}</h1>
+      </div>
+
+      <Tabs defaultValue='overview' className='space-y-4'>
         <TabsContent value='overview' className='space-y-4'>
-          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Total de chiffre d'affaire
-                </CardTitle>
-                <IconZoomMoney />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{dashboardData.daily_sales} DH</div>
-                <p className='text-xs text-muted-foreground'>
-                  Par jour
-                </p>
-              </CardContent>
-            </Card>
+          {/* Stats Cards */}
+          <StatsCards
+            todayBookings={dashboardData.today_bookings}
+            todayRevenue={dashboardData.today_revenue}
+            activeClients={dashboardData.active_clients}
+            pendingForms={dashboardData.pending_health_forms}
+          />
 
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Total Viste
-                </CardTitle>
-                <IconUsersGroup />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{dashboardData.daily_order_count}</div>
-                <p className='text-xs text-muted-foreground'>
-                  Par jour
-                </p>
-              </CardContent>
-            </Card>
+          {/* Revenue Trend Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('dashboard.revenueTrend')}</CardTitle>
+            </CardHeader>
+            <CardContent className='pl-2'>
+              <Overview monthly_revenue={dashboardData.revenue_trend} />
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Total de chiffre d'affaires
-                </CardTitle>
-                <IconZoomMoney />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{dashboardData.monthly_sales} DH</div>
-                <p className='text-xs text-muted-foreground'>
-                  Par Mois
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Total Viste
-                </CardTitle>
-                <IconUsersGroup />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{dashboardData.monthly_order_count}</div>
-                <p className='text-xs text-muted-foreground'>
-                  Par Mois
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Charts Row */}
           <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
-            <Card className='col-span-1 lg:col-span-4'>
-              <CardHeader>
-                <CardTitle>Aperçu</CardTitle>
-              </CardHeader>
-              <CardContent className='pl-2'>
-                <Overview monthly_revenue={dashboardData.monthly_revenue} />
-              </CardContent>
-            </Card>
-            <Card className='col-span-1 lg:col-span-3'>
-              <CardHeader>
-                <CardTitle>Ventes récentes</CardTitle>
-
-              </CardHeader>
-              <CardContent>
-                <RecentSales recent_orders={dashboardData.recent_orders} />
-              </CardContent>
-            </Card>
+            <BookingStatusChart data={dashboardData.bookings_by_status} />
+            <ServiceTypeChart data={dashboardData.bookings_by_service} />
           </div>
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
-            <Card className='col-span-1 lg:col-span-4'>
-              <CardHeader>
-                <CardTitle>Sexe</CardTitle>
-              </CardHeader>
-              <CardContent className='pl-2'>
-                <GenderOrder chartData={dashboardData.orders_by_gender} />
-              </CardContent>
-            </Card>
 
+          {/* Quick Actions and Recent Activity */}
+          <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+            <QuickActions />
+            <RecentActivityFeed activities={dashboardData.recent_activities} />
           </div>
         </TabsContent>
       </Tabs>
-    </>
-  )
+    </div>
+  );
 }
 

@@ -1,19 +1,28 @@
-import { webRoutes } from '@/routes/web'
+import { webRoutes } from '@/routes/web';
 import {
-  IconBrandMedium,
   IconLayoutDashboard,
   IconSettings,
-} from '@tabler/icons-react'
+  IconCalendar,
+  IconUsers,
+  IconTicket,
+  IconClipboardCheck,
+  IconUserCog,
+  IconMassage,
+  IconHome,
+  IconSwimming,
+  IconCreditCard,
+  IconChartBar,
+} from '@tabler/icons-react';
 
 export interface NavLink {
-  title: string
-  label?: string
-  href: string
-  icon: JSX.Element
+  title: string;
+  label?: string;
+  href: string;
+  icon: JSX.Element;
 }
 
 export interface SideLink extends NavLink {
-  sub?: NavLink[]
+  sub?: NavLink[];
 }
 
 export const sidelinks: SideLink[] = [
@@ -23,25 +32,70 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.Dashboard,
     icon: <IconLayoutDashboard size={18} />,
   },
-
-
-
-
-
+  {
+    title: 'Bookings',
+    label: '',
+    href: webRoutes.bookings.index,
+    icon: <IconCalendar size={18} />,
+  },
+  {
+    title: 'Clients',
+    label: '',
+    href: webRoutes.clients.index,
+    icon: <IconUsers size={18} />,
+  },
+  {
+    title: 'Subscriptions',
+    label: '',
+    href: webRoutes.subscriptions.index,
+    icon: <IconTicket size={18} />,
+  },
+  {
+    title: 'Health Forms',
+    label: '',
+    href: webRoutes.healthForms.index,
+    icon: <IconClipboardCheck size={18} />,
+  },
+  {
+    title: 'Staff',
+    label: '',
+    href: webRoutes.staff.index,
+    icon: <IconUserCog size={18} />,
+  },
+  {
+    title: 'Services',
+    label: '',
+    href: webRoutes.services.index,
+    icon: <IconMassage size={18} />,
+  },
+  {
+    title: 'Resources',
+    label: '',
+    href: webRoutes.resources.index,
+    icon: <IconHome size={18} />,
+  },
+  {
+    title: 'Hammam Sessions',
+    label: '',
+    href: webRoutes.hammamSessions.index,
+    icon: <IconSwimming size={18} />,
+  },
+  {
+    title: 'Payments',
+    label: '',
+    href: webRoutes.payments.index,
+    icon: <IconCreditCard size={18} />,
+  },
+  {
+    title: 'Reports',
+    label: '',
+    href: webRoutes.reports.index,
+    icon: <IconChartBar size={18} />,
+  },
   {
     title: 'Settings',
     label: '',
-    href: '',
+    href: webRoutes.settings.index,
     icon: <IconSettings size={18} />,
-    sub: [
-      {
-        title: 'clear',
-        label: '',
-        href: webRoutes.clear,
-        icon: <IconBrandMedium size={18} />,
-      },
-     
-
-    ],
   },
-]
+];

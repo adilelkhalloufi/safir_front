@@ -2,7 +2,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Sparkles, Scissors, Droplets } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Service, Staff } from '@/interfaces/models/booking'
+import { getLocalizedValue } from '@/interfaces/models/booking'
 
 interface SelectOptionsProps {
     selectedServices: Service[]
@@ -32,6 +34,9 @@ export function SelectOptions({
     onNext,
     onPrev
 }: SelectOptionsProps) {
+    const { i18n } = useTranslation()
+    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
+
     const hasHammam = selectedServices.some(s => s.type_service === 'hammam')
 
     const handleStaffSelect = (serviceId: number, staffId: number) => {
@@ -83,7 +88,7 @@ export function SelectOptions({
                                         <Icon className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <div className="font-semibold text-lg">{service.name}</div>
+                                        <div className="font-semibold text-lg">{getLocalizedValue(service.name, currentLang)}</div>
                                         <div className="text-sm text-muted-foreground">{service.duration_minutes} min • {service.price} MAD</div>
                                     </div>
                                 </div>

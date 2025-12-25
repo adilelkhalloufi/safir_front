@@ -6,8 +6,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import enNs1 from "./locales/en/translation.json";
 import frNs1 from "./locales/fr/translation.json";
-import arNs1 from "./locales/ar/translation.json";
-i18next
+ i18next
   .use(Backend)
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -22,10 +21,8 @@ i18next
       },
       fr: {
         ns1: frNs1,
-      },
-      ar: {
-        ns1: arNs1,
-      },
+      }
+   
     },
     
   });

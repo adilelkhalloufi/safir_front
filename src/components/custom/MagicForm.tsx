@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "../ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "../ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { IconTrash } from "@tabler/icons-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
-import { DatePicker } from "../ui/date-picker";
 import { Combobox } from "../ui/combobox";
+import { Loader2 } from "lucide-react";
 
 export interface MagicFormOptionProps {
   value: any;
@@ -21,6 +21,7 @@ export interface MagicFormFieldProps {
   label?: string;
   error?: string;
   value?: any;
+  defaultValue?: any;
   type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "table" | "label";
   required?: boolean;
   order?: number;
@@ -59,34 +60,47 @@ export interface MagicFormProps {
   loading?: boolean;
   modal?: boolean;
   onClose?: () => void;
+  returnType?: "json" | "formdata" | "object"; // Add return type option
 }
 
-const MagicForm = ({
+const MagicForm = memo(({
   fields,
   onSubmit,
   title = "Form",
   button = "Submit",
   initialValues,
+  loading = false,
   modal = false,
-  onClose
+  onClose,
+  returnType = "object"
 }: MagicFormProps) => {
-  const [formData, setFormData] = useState<any>(
-    initialValues || fields.reduce((acc: Record<string, any>, group) => {
+  const defaultFormData = useMemo(() =>
+    fields.reduce((acc: Record<string, any>, group) => {
       group.fields.forEach(field => {
-        acc[field.name] = field.type === "image"
-          ? null
-          : field.type === "table"
-            ? []
-            : "";
+        acc[field.name] = field.defaultValue !== undefined
+          ? field.defaultValue
+          : field.type === "image"
+            ? null
+            : field.type === "table"
+              ? []
+              : field.type === "checkbox"
+                ? 0
+                : "";
       });
       return acc;
-    }, {})
+    }, {}),
+    [fields]
   );
+
+  const [formData, setFormData] = useState<any>(initialValues || defaultFormData);
   const [imagePreviews, setImagePreviews] = useState<any>({});
   const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
-    if (initialValues) {
+    if (initialValues && JSON.stringify(initialValues) !== JSON.stringify(formData)) {
+      setFormData(initialValues);
+
+      // Set image previews
       const previews: any = {};
       fields.forEach(group => {
         group.fields.forEach(field => {
@@ -97,38 +111,9 @@ const MagicForm = ({
       });
       setImagePreviews(previews);
     }
-  }, [initialValues, fields]);
-
-  // Update this useEffect to prevent unnecessary updates
-  useEffect(() => {
-    if (initialValues) {
-      // Compare with current formData to avoid unnecessary updates
-      const needsUpdate = Object.keys(initialValues).some(key => {
-        // Skip deep comparison for table/array data to prevent unnecessary re-renders
-        if (Array.isArray(initialValues[key]) && Array.isArray(formData[key])) {
-          return false; // We'll handle table updates separately
-        }
-        return JSON.stringify(initialValues[key]) !== JSON.stringify(formData[key]);
-      });
-      
-      if (needsUpdate) {
-        // Create a new object with table data preserved from current state
-        const newFormData = { ...initialValues };
-        
-        // Preserve table data structure to prevent unnecessary re-renders
-        Object.keys(formData).forEach(key => {
-          if (Array.isArray(formData[key]) && initialValues[key]) {
-            // Keep table data structure but update with new values if provided
-            newFormData[key] = initialValues[key];
-          }
-        });
-        
-        setFormData(newFormData);
-      }
-    }
   }, [initialValues]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     if (e.target.type === "file") {
       const file = e.target.files?.[0];
       if (file) {
@@ -140,43 +125,42 @@ const MagicForm = ({
     } else {
       setFormData((prev: any) => ({ ...prev, [field]: e.target.value || null }));
     }
-  };
+  }, []);
 
-  // Create a memoized table change handler to prevent recreating it on each render
   const handleTableChange = useCallback((field: string, rowIndex: number, column: string, value: any) => {
     setFormData((prev: any) => {
       const updatedTable = [...(prev[field] || [])];
       if (!updatedTable[rowIndex]) {
         updatedTable[rowIndex] = {};
       }
-      updatedTable[rowIndex][column] = value;
+      updatedTable[rowIndex] = { ...updatedTable[rowIndex], [column]: value };
       return { ...prev, [field]: updatedTable };
     });
   }, []);
 
-  const addTableRow = (field: string, columns: MagicFormFieldProps[]) => {
+  const addTableRow = useCallback((field: string, columns: MagicFormFieldProps[]) => {
     setFormData((prev: any) => {
       const currentTable = Array.isArray(prev[field]) ? prev[field] : [];
       const newRow = columns.reduce((acc: Record<string, any>, col) => {
-        acc[col.name] = "";
+        acc[col.name] = col.type === "checkbox" ? 0 : "";
         return acc;
       }, {});
       return { ...prev, [field]: [...currentTable, newRow] };
     });
-  };
+  }, []);
 
-  const removeTableRow = (field: string, rowIndex: number) => {
+  const removeTableRow = useCallback((field: string, rowIndex: number) => {
     setFormData((prev: any) => {
       const updatedTable = [...prev[field]];
       updatedTable.splice(rowIndex, 1);
       return { ...prev, [field]: updatedTable };
     });
-  };
+  }, []);
 
-  const validate = () => {
+  const validate = useCallback(() => {
     let newErrors: any = {};
     fields.forEach(group => {
-      group.fields.forEach(({ name, required, type }) => {
+      group.fields.forEach(({ name, required, type, columns }) => {
         if (required) {
           // Special handling for select/combobox
           if (type === 'select') {
@@ -187,13 +171,35 @@ const MagicForm = ({
             newErrors[name] = "This field is required";
           }
         }
+
+        // Validate table columns
+        if (type === 'table' && columns && Array.isArray(formData[name])) {
+          formData[name].forEach((row: any, rowIndex: number) => {
+            columns.forEach(column => {
+              if (column.required) {
+                const cellValue = row[column.name];
+                const isEmpty = cellValue === undefined || cellValue === null || cellValue === '';
+
+                if (isEmpty) {
+                  if (!newErrors[name]) {
+                    newErrors[name] = {};
+                  }
+                  if (!newErrors[name][rowIndex]) {
+                    newErrors[name][rowIndex] = {};
+                  }
+                  newErrors[name][rowIndex][column.name] = `${column.label || column.name} is required`;
+                }
+              }
+            });
+          });
+        }
       });
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [fields, formData]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     // Create a complete form data object with all fields from the schema
     const completeFormData = fields.reduce((acc, group) => {
       group.fields.forEach(field => {
@@ -213,48 +219,76 @@ const MagicForm = ({
       });
       return acc;
     }, { ...formData });
-    
-    if (validate()) {
-      onSubmit(completeFormData);
-    }
-  };
 
-  // Optimize renderTableCell to properly handle selection changes
-  const renderTableCell = (col: MagicFormFieldProps, rowIndex: number, name: string, row: any) => {
+    if (validate()) {
+      let dataToSubmit: any;
+
+      if (returnType === "formdata") {
+        // Convert to FormData
+        const formDataObj = new FormData();
+        Object.entries(completeFormData).forEach(([key, value]) => {
+          if (value instanceof File) {
+            formDataObj.append(key, value);
+          } else if (Array.isArray(value)) {
+            formDataObj.append(key, JSON.stringify(value));
+          } else if (value !== null && value !== undefined) {
+            formDataObj.append(key, String(value));
+          }
+        });
+        dataToSubmit = formDataObj;
+      } else if (returnType === "json") {
+        // Convert to JSON string
+        dataToSubmit = JSON.stringify(completeFormData);
+      } else {
+        // Return as object (default)
+        dataToSubmit = completeFormData;
+      }
+
+      onSubmit(dataToSubmit);
+    }
+  }, [fields, formData, validate, onSubmit, returnType]);
+
+  const renderTableCell = useCallback((col: MagicFormFieldProps, rowIndex: number, name: string, row: any, cellError?: string) => {
     const cellKey = `${name}-${rowIndex}-${col.name}`;
-    
+    const hasError = !!cellError;
+
     if (col.type === "select") {
       return (
-        <Combobox
-          key={cellKey}
-          disabled={col.disabled}
-          data={col.options || []}
-          returnFullObject={false}
-          defaultValue={row[col.name]}
-          placeholder={col.placeholder || "Select"}
-          autocomplete={col.autocomplete}
-          onSelectionChange={(value) => {
-            // Pass the value directly to handleTableChange
-            handleTableChange(name, rowIndex, col.name, value);
-          }}
-        />
+        <div className="flex flex-col gap-1">
+          <Combobox
+            key={cellKey}
+            disabled={col.disabled}
+            data={col.options || []}
+            returnFullObject={false}
+            defaultValue={row[col.name]}
+            placeholder={col.placeholder || "Select"}
+            autocomplete={col.autocomplete}
+            onSelectionChange={(value) => {
+              // Pass the value directly to handleTableChange
+              handleTableChange(name, rowIndex, col.name, value);
+            }}
+          />
+          {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+        </div>
       );
     }
 
     return (
-      <Input
-        key={cellKey}
-        disabled={col.disabled}
-        type={col.type}
-        value={row[col.name] || ""}
-        onChange={(e) => handleTableChange(name, rowIndex, col.name, e.target.value)}
-      />
+      <div className="flex flex-col gap-1">
+        <Input
+          key={cellKey}
+          disabled={col.disabled}
+          type={col.type}
+          value={row[col.name] || ""}
+          onChange={(e) => handleTableChange(name, rowIndex, col.name, e.target.value)}
+          className={hasError ? "border-red-500" : ""}
+        />
+        {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+      </div>
     );
-  };
-
-  const renderField = ({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false }: MagicFormFieldProps) => {
+  }, [handleTableChange]);
+  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false }: MagicFormFieldProps) => {
     const widthClass = width === "full" ? "w-full" : width === "half" ? "w-1/2" : width === "third" ? "w-1/3" : "";
-
     return (
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
         <Label className="w-full">{label}</Label>
@@ -266,7 +300,7 @@ const MagicForm = ({
           <Textarea
             disabled={disabled}
             value={formData[name] ?? ""}
-            onChange={(e : any) => handleChange(e, name)}
+            onChange={(e: any) => handleChange(e, name)}
             placeholder={placeholder || `Enter ${label || name}`}
             className={`min-h-[100px] ${errors[name] ? "border-red-500" : ""}`}
           />
@@ -309,18 +343,18 @@ const MagicForm = ({
             onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""} />
         ) : type === "checkbox" ? (
-          <Checkbox
+          <Switch
             disabled={disabled}
             checked={formData[name] === 1}
             onCheckedChange={(checked) => handleChange({ target: { checked, type: 'checkbox' } } as any, name)}
             className={errors[name] ? "border-red-500" : ""} />
         ) : type === "date" ? (
-          <DatePicker
+          <Input
             disabled={disabled}
-            defaultValue={formData[name] ?? ""}
-            label=""
-           
-            onChange={(value) => handleChange({ target: { value } } as any, name)}
+            type="date"
+            value={formData[name] ?? ""}
+            onChange={(e) => handleChange(e, name)}
+            className={errors[name] ? "border-red-500" : ""}
           />
         ) : type === "table" ? (
           <div className="w-full">
@@ -336,11 +370,14 @@ const MagicForm = ({
               <TableBody>
                 {formData[name]?.map((row: any, rowIndex: number) => (
                   <TableRow key={rowIndex}>
-                    {columns?.map(col => (
-                      <TableCell key={col.name}>
-                        {renderTableCell({ ...col, disabled }, rowIndex, name, row)}
-                      </TableCell>
-                    ))}
+                    {columns?.map(col => {
+                      const cellError = errors[name]?.[rowIndex]?.[col.name];
+                      return (
+                        <TableCell key={col.name}>
+                          {renderTableCell({ ...col, disabled }, rowIndex, name, row, cellError)}
+                        </TableCell>
+                      );
+                    })}
                     <TableCell>
                       <Button disabled={disabled} variant="ghost" onClick={() => removeTableRow(name, rowIndex)}>
                         <IconTrash className="text-red-400" />
@@ -361,11 +398,13 @@ const MagicForm = ({
             onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""} />
         )}
-        {(errors[name] || error) && <p className="text-red-500 text-sm">{errors[name] || error}</p>}
+        {(errors[name] || error) && typeof errors[name] === 'string' && <p className="text-red-500 text-sm">{errors[name]}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
     );
-  };
-  const renderFormContent = () => {
+  }, [formData, errors, imagePreviews, handleChange, handleTableChange, addTableRow, removeTableRow, renderTableCell]);
+
+  const formContent = useMemo(() => {
     const groupedByRow = fields.reduce((acc: { [key: number]: MagicFormGroupProps[] }, group) => {
       const row = group.position?.row || 0;
       if (!acc[row]) acc[row] = [];
@@ -421,36 +460,41 @@ const MagicForm = ({
         ))}
       </div>
     );
-  };
+  }, [fields, renderField]);
 
   return (
     <div className="w-full">
       {modal ? (
         <Dialog open={true} onOpenChange={onClose}>
-          <DialogTrigger asChild>
-            <Button>{button}</Button>
-          </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
             </DialogHeader>
-            {renderFormContent()}
+            {formContent}
             <div className="mb-4 flex justify-end">
-              <Button onClick={handleSubmit}>{button}</Button>
+              <Button onClick={handleSubmit} disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? "Loading..." : button}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       ) : (
         <>
           <h1 className='m-2 text-3xl font-bold'>{title}</h1>
-          {renderFormContent()}
+          {formContent}
           <div className="mb-4 flex justify-end mt-5">
-            <Button onClick={handleSubmit}>{button}</Button>
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? "Loading..." : button}
+            </Button>
           </div>
         </>
       )}
     </div>
   );
-};
+});
+
+MagicForm.displayName = 'MagicForm';
 
 export default MagicForm;

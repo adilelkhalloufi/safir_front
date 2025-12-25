@@ -3,16 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
 import { cn } from '@/lib/utils'
 import { Clock, ChevronRight, Loader2, CheckCircle2, Droplets, Hand, Waves, Sparkles } from 'lucide-react'
-import type { AvailabilityScenario, Service } from '@/interfaces/models/booking'
+import type { AvailabilityScenario, AvailabilitySlot, Service } from '@/interfaces/models/booking'
 import { format } from 'date-fns'
 
 interface SelectDateTimeProps {
     selectedDate: Date | undefined
     onSelectDate: (date: Date | undefined) => void
-    availability: Record<number, AvailabilityScenario[]> | AvailabilityScenario[] | null
+    availability: AvailabilitySlot[] | null
     isLoading: boolean
     selectedScenario: AvailabilityScenario | null
-    onSelectScenario: (scenario: AvailabilityScenario) => void
+    onSelectScenario: (slot: AvailabilitySlot | null) => void
     selectedTimeSlots?: Record<number, AvailabilityScenario>
     onSelectTimeSlot?: (serviceId: number, scenario: AvailabilityScenario) => void
     selectedServices?: Service[]
@@ -42,20 +42,30 @@ export function SelectDateTime({
     onNext,
     onPrev
 }: SelectDateTimeProps) {
-    // Check if availability is service-specific (Record) or combined (Array)
-    const isServiceSpecific = availability && !Array.isArray(availability)
-    const hasAllTimeSlots = isServiceSpecific
-        ? Object.keys(availability || {}).every(serviceId => selectedTimeSlots[Number(serviceId)])
-        : !!selectedScenario
+    // Check if date is valid
+    const isValidDate = selectedDate instanceof Date && !isNaN(selectedDate.getTime())
+    const formattedSelectedDate = isValidDate ? format(selectedDate, 'yyyy-MM-dd') : ''
+
+    // Filter slots for the selected date
+    const slotsForDate = availability?.filter(slot => 
+        slot.date === formattedSelectedDate
+    ) || []
+
+    // Group slots by date for display
+    const slotsByDate = availability?.reduce((acc, slot) => {
+        if (!acc[slot.date]) acc[slot.date] = []
+        acc[slot.date].push(slot)
+        return acc
+    }, {} as Record<string, AvailabilitySlot[]>) || {}
+
+    const hasSelection = !!selectedScenario
 
     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
                 <CardTitle className="text-2xl">Date et horaire</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                    {isServiceSpecific
-                        ? 'Sélectionnez un créneau pour chaque service'
-                        : 'Sélectionnez votre date et votre créneau horaire'}
+                    Sélectionnez votre date et votre créneau horaire
                 </p>
             </CardHeader>
             <CardContent>
@@ -77,110 +87,72 @@ export function SelectDateTime({
                                 <div className="flex items-center justify-center py-12">
                                     <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
                                 </div>
-                            ) : !availability || (isServiceSpecific && Object.keys(availability).length === 0) || (!isServiceSpecific && (availability as any).length === 0) ? (
+                            ) : !slotsForDate || slotsForDate.length === 0 ? (
                                 <div className="rounded-lg border-2 border-gray-200 bg-gray-50 p-6 text-center">
                                     <p className="text-muted-foreground">Aucun créneau disponible pour cette date.</p>
                                     <p className="text-sm text-muted-foreground mt-2">Veuillez sélectionner une autre date.</p>
                                 </div>
-                            ) : isServiceSpecific ? (
-                                // Service-specific time slots
-                                <div className="space-y-6">
-                                    {Object.entries(availability as Record<number, AvailabilityScenario[]>).map(([serviceIdStr, scenarios]) => {
-                                        const serviceId = Number(serviceIdStr)
-                                        const service = selectedServices.find(s => s.id === serviceId)
-                                        const Icon = SERVICE_ICONS[service?.type_service || 'other'] || Clock
-                                        const selectedSlot = selectedTimeSlots[serviceId]
-
-                                        return (
-                                            <div key={serviceId} className="space-y-3">
-                                                <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
-                                                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[#020F44] to-[#E09900]">
-                                                        <Icon className="h-5 w-5 text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-lg">{service?.name}</h3>
-                                                        <p className="text-xs text-muted-foreground">{service?.duration || service?.duration_minutes} min • {service?.price} MAD</p>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                    {scenarios.map((scenario: any) => {
-                                                        const isSelected = selectedSlot?.scenario_id === scenario.scenario_id
-                                                        const startTime = format(new Date(scenario.start_datetime), 'HH:mm')
-
-                                                        return (
-                                                            <button
-                                                                key={scenario.scenario_id}
-                                                                onClick={() => onSelectTimeSlot?.(serviceId, scenario)}
-                                                                className={cn(
-                                                                    'relative rounded-lg border-2 p-3 text-center transition-all duration-300',
-                                                                    isSelected
-                                                                        ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-rose-50 shadow-md'
-                                                                        : 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-sm'
-                                                                )}
-                                                            >
-                                                                {isSelected && (
-                                                                    <CheckCircle2 className="absolute top-1 right-1 h-5 w-5 text-amber-600" />
-                                                                )}
-                                                                <Clock className={cn('h-4 w-4 mx-auto mb-1', isSelected ? 'text-amber-600' : 'text-gray-600')} />
-                                                                <div className={cn('font-semibold text-sm', isSelected && 'text-amber-600')}>
-                                                                    {startTime}
-                                                                </div>
-                                                                {scenario.available_capacity && (
-                                                                    <div className="text-xs text-muted-foreground mt-1">
-                                                                        {scenario.available_capacity} places
-                                                                    </div>
-                                                                )}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
                             ) : (
-                                // Combined time slots (original functionality)
-                                <div className="space-y-3">
-                                    {(availability as AvailabilityScenario[]).map((scenario: any) => {
-                                        const isSelected = selectedScenario?.scenario_id === scenario.scenario_id
-                                        const startTime = format(new Date(scenario.start_datetime), 'HH:mm')
-                                        const endTime = format(new Date(scenario.end_datetime), 'HH:mm')
-
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {slotsForDate.map((slot, index) => {
+                                        const isSelected = selectedScenario?.start_datetime === slot.datetime
+                                        
                                         return (
                                             <button
-                                                key={scenario.scenario_id}
-                                                onClick={() => onSelectScenario(scenario)}
+                                                key={`${slot.datetime}-${index}`}
+                                                onClick={() => onSelectScenario(slot)}
+                                                disabled={!slot.available}
                                                 className={cn(
-                                                    'w-full rounded-xl border-2 p-4 text-left transition-all duration-300',
+                                                    'relative rounded-lg border-2 p-4 text-center transition-all duration-300',
+                                                    !slot.available && 'opacity-50 cursor-not-allowed',
                                                     isSelected
-                                                        ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-rose-50 shadow-lg'
-                                                        : 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-md'
+                                                        ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-rose-50 shadow-md'
+                                                        : 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-sm'
                                                 )}
                                             >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className={cn('h-5 w-5', isSelected ? 'text-amber-600' : 'text-gray-600')} />
-                                                        <span className={cn('font-semibold text-lg', isSelected && 'text-amber-600')}>
-                                                            {startTime} - {endTime}
-                                                        </span>
+                                                {isSelected && (
+                                                    <CheckCircle2 className="absolute top-1 right-1 h-5 w-5 text-amber-600" />
+                                                )}
+                                                <Clock className={cn('h-5 w-5 mx-auto mb-2', isSelected ? 'text-amber-600' : 'text-gray-600')} />
+                                                <div className={cn('font-semibold text-lg', isSelected && 'text-amber-600')}>
+                                                    {slot.time}
+                                                </div>
+                                                {slot.staff_name && (
+                                                    <div className="text-xs text-muted-foreground mt-1">
+                                                        {slot.staff_name}
                                                     </div>
-                                                    <span className="font-semibold text-amber-600">{scenario.total_price} MAD</span>
-                                                </div>
-                                                <div className="space-y-1 text-sm text-muted-foreground">
-                                                    {scenario.services.map((svc: any, idx: any) => (
-                                                        <div key={idx}>
-                                                            • {svc.service_name}
-                                                            {svc.staff_name && ` avec ${svc.staff_name}`}
-                                                            {svc.room_name && ` (${svc.room_name})`}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <div className="mt-2 text-xs text-muted-foreground">
-                                                    Durée totale: {scenario.total_duration_minutes || scenario.total_duration} min
-                                                </div>
+                                                )}
+                                                {slot.available_capacity && (
+                                                    <div className="text-xs text-muted-foreground mt-1">
+                                                        {slot.available_capacity} places
+                                                    </div>
+                                                )}
+                                                {slot.session_type && (
+                                                    <div className="text-xs text-amber-600 mt-1 font-medium">
+                                                        {slot.session_type === 'female' ? 'Femmes' : slot.session_type === 'male' ? 'Hommes' : 'Mixte'}
+                                                    </div>
+                                                )}
                                             </button>
                                         )
                                     })}
+                                </div>
+                            )}
+
+                            {/* Show available dates */}
+                            {Object.keys(slotsByDate).length > 1 && (
+                                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                                    <p className="text-sm text-blue-900 font-medium mb-2">Autres dates disponibles:</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {Object.keys(slotsByDate).slice(0, 5).map(date => (
+                                            <button
+                                                key={date}
+                                                onClick={() => onSelectDate(new Date(date))}
+                                                className="text-xs px-3 py-1 rounded-full bg-white border border-blue-200 hover:border-blue-400 transition-colors"
+                                            >
+                                                {format(new Date(date), 'dd/MM/yyyy')}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -189,7 +161,7 @@ export function SelectDateTime({
                 <div className="mt-6 flex justify-between">
                     <Button variant="outline" onClick={onPrev} size="lg">Retour</Button>
                     <Button
-                        disabled={!selectedDate || !hasAllTimeSlots}
+                        disabled={!selectedDate || !hasSelection}
                         onClick={() => onNext() as any}
                         size="lg"
                         className="bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-700 hover:to-rose-700"

@@ -6,7 +6,7 @@ import BookingWizard from "./booking";
 
 const Index = () => {
   useEffect(() => {
-    setPageTitle("Optique")
+    setPageTitle("SAFIRI - Booking")
   }, [])
   return (
     <>

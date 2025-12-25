@@ -4,7 +4,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, Calendar, Clock, Users, Sparkles, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 import type { Service, Staff, AvailabilityScenario } from '@/interfaces/models/booking'
+import { getLocalizedValue } from '@/interfaces/models/booking'
 import type { CustomerInfo } from './types'
 
 interface ReviewProps {
@@ -38,6 +40,8 @@ export function Review({
     onConfirm,
     onPrev
 }: ReviewProps) {
+    const { i18n } = useTranslation()
+    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
     const totalPrice = selectedScenario?.total_price || 0
 
     return (
@@ -61,7 +65,7 @@ export function Review({
                             {selectedServices.map((service: any) => (
                                 <div key={service.id} className="flex justify-between items-center">
                                     <div>
-                                        <p className="font-medium">{service.name}</p>
+                                        <p className="font-medium">{getLocalizedValue(service.name, currentLang)}</p>
                                         {selectedStaff[service.id] && (
                                             <p className="text-sm text-muted-foreground">
                                                 Avec {selectedStaff[service.id].name}

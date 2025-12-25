@@ -23,10 +23,14 @@ export function DatePicker({ defaultValue, onChange, label = "Pick a date", disa
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate)
-    if (onChange && selectedDate) {
-      const formattedDate = format(selectedDate, "yyyy-MM-dd")
-      onChange(formattedDate as any)
+    if (onChange) {
+      onChange(selectedDate)
     }
+  }
+
+  // Check if date is valid before formatting
+  const isValidDate = (d: Date | undefined): d is Date => {
+    return d instanceof Date && !isNaN(d.getTime())
   }
 
   return (
@@ -40,7 +44,7 @@ export function DatePicker({ defaultValue, onChange, label = "Pick a date", disa
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "dd/MM/yyyy") : <span>{label}</span>}
+          {isValidDate(date) ? format(date, "dd/MM/yyyy") : <span>{label}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

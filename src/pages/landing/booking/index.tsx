@@ -2,14 +2,21 @@ import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 
 import { showNotification, NotificationType } from '../../../utils'
+import { defaultHttp } from '../../../utils/http'
+import { apiRoutes } from '../../../routes/api'
 import type {
     Service,
     Staff,
     AvailabilityScenario,
     Gender as APIGender,
-    CreateBookingRequest
+    CreateGuestBookingRequest,
+    ConfirmBookingRequest,
+    GuestBookingResponse,
+    AvailabilitySlotsRequest,
+    AvailabilitySlot
 } from '../../../interfaces/models/booking'
 import type { Step, CustomerInfo } from './types'
 import { Progress } from './Progress'
@@ -22,6 +29,9 @@ import { Guarantee } from './Guarantee'
 import { Review } from './Review'
 
 export default function BookingWizard() {
+    const { i18n } = useTranslation()
+    const currentLang = (i18n.language || 'fr') as 'en' | 'fr'
+
     // State management
     const [step, setStep] = useState<Step>(0)
     const [selectedServices, setSelectedServices] = useState<number[]>([])
@@ -40,174 +50,80 @@ export default function BookingWizard() {
         notes: ''
     })
 
-    // Fetch services - FAKE DATA for testing
+    // Fetch services from API
     const { data: servicesData, isLoading: servicesLoading } = useQuery({
         queryKey: ['services'],
         queryFn: async () => {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500))
-            return [
-                {
-                    id: 1,
-                    name: 'Hammam Traditionnel',
-                    description: 'Expérience authentique du hammam marocain',
-                    type_service: 'hammam',
-                    price: 150,
-                    duration: 60,
-                    is_active: true
-                },
-                {
-                    id: 2,
-                    name: 'Massage Relaxant',
-                    description: 'Massage aux huiles essentielles',
-                    type_service: 'massage',
-                    price: 250,
-                    duration: 45,
-                    is_active: true
-                },
-                {
-                    id: 3,
-                    name: 'Gommage Oriental',
-                    description: 'Gommage complet du corps',
-                    type_service: 'gommage',
-                    price: 100,
-                    duration: 30,
-                    is_active: true
-                },
-                {
-                    id: 4,
-                    name: 'Massage Thérapeutique',
-                    description: 'Massage profond pour soulager les tensions',
-                    type_service: 'massage',
-                    price: 300,
-                    duration: 60,
-                    is_active: true
-                }
-            ] as any[]
+            const response = await defaultHttp.get(apiRoutes.services)
+            return response.data.data as Service[]
         }
     })
 
-    // Fetch staff - FAKE DATA for testing
-    const { data: staffData, isLoading: staffLoading } = useQuery({
-        queryKey: ['staff'],
-        queryFn: async () => {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500))
-            return [
-                {
-                    id: 1,
-                    name: 'Fatima',
-                    speciality: 'Massage & Gommage',
-                    gender: 'F',
-                    is_active: true
-                },
-                {
-                    id: 2,
-                    name: 'Mohammed',
-                    speciality: 'Massage Thérapeutique',
-                    gender: 'M',
-                    is_active: true
-                },
-                {
-                    id: 3,
-                    name: 'Amina',
-                    speciality: 'Spa & Relaxation',
-                    gender: 'F',
-                    is_active: true
-                },
-                {
-                    id: 4,
-                    name: 'Hassan',
-                    speciality: 'Hammam & Massage',
-                    gender: 'M',
-                    is_active: true
-                }
-            ] as any[]
-        }
-    })
+    // Staff is auto-assigned by the API, no need to fetch
 
-    // Fetch availability when date and services are selected - FAKE DATA for testing
-    // This generates service-specific availability for each selected service
+    // Fetch availability slots from API
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
         queryKey: ['availability', selectedServices, selectedDate, personCount, selectedGender],
         queryFn: async () => {
             if (!selectedDate || selectedServices.length === 0) return null
 
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            const endDate = new Date(selectedDate)
+            endDate.setDate(endDate.getDate() + 7) // Check next 7 days
 
-            // Generate availability per service type
-            // This allows each service (hammam, massage, etc.) to have its own time slots
-            const availabilityByService: Record<number, any[]> = {}
+            const requestData: AvailabilitySlotsRequest = {
+                service_ids: selectedServices,
+                start_date: format(selectedDate, 'yyyy-MM-dd'),
+                end_date: format(endDate, 'yyyy-MM-dd'),
+                group_size: personCount,
+                ...(selectedGender && { gender_preference: selectedGender as 'female' | 'male' | 'mixed' })
+            }
 
-            selectedServiceDetails.forEach((service: any) => {
-                const serviceId = service.id
-                const duration = service.duration || service.duration_minutes || 60
-                const price = typeof service.price === 'string' ? parseFloat(service.price) : (service.price || 0)
-                const totalPrice = price * personCount
-
-                // Generate different time slots based on service type
-                const timeSlots = service.type_service === 'hammam'
-                    ? ['09:00', '11:00', '14:00', '16:00', '18:00'] // Hammam sessions
-                    : service.type_service === 'massage'
-                        ? ['09:30', '11:00', '13:30', '15:00', '16:30', '18:00'] // Massage slots
-                        : ['10:00', '12:00', '14:30', '16:00', '17:30'] // Other services
-
-                // Generate scenarios for this service
-                availabilityByService[serviceId] = timeSlots.map((startTime, index) => {
-                    const [hours, minutes] = startTime.split(':').map(Number)
-                    const endHours = hours + Math.floor(duration / 60)
-                    const endMinutes = minutes + (duration % 60)
-
-                    return {
-                        scenario_id: `${serviceId}-${index + 1}`,
-                        service_id: serviceId,
-                        service_type: service.type_service,
-                        service_name: service.name,
-                        start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${startTime}:00`,
-                        end_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00`,
-                        total_duration: duration,
-                        total_price: totalPrice,
-                        available_capacity: Math.floor(Math.random() * 3) + 1, // Random capacity 1-3
-                        services: [{
-                            service_id: serviceId,
-                            service_name: service.name,
-                            order_index: 0,
-                            start_datetime: `${format(selectedDate, 'yyyy-MM-dd')}T${startTime}:00`,
-                            staff_id: Object.keys(selectedStaff).length > 0 ? selectedStaff[serviceId]?.id : undefined,
-                            room_id: (index % 3) + 1,
-                            hammam_session_id: service.type_service === 'hammam' ? (index + 1) : undefined
-                        }]
-                    }
-                })
-            })
-
-            // Return the availability grouped by service
-            return availabilityByService
+            const response = await defaultHttp.post(apiRoutes.availabilitySlots, requestData)
+            return response.data.data.slots as AvailabilitySlot[]
         },
         enabled: selectedDate !== undefined && selectedServices.length > 0
     })
 
-    // Create booking mutation - FAKE DATA for testing
+    // Create guest booking mutation
     const createBookingMutation = useMutation({
-        mutationFn: async (bookingData: CreateBookingRequest) => {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500))
-
-            // Simulate successful booking creation
-            console.log('Fake booking data:', bookingData)
-            return {
-                success: true,
-                data: {
-                    booking_id: Math.floor(Math.random() * 10000),
-                    confirmation_code: `SAFIR${Math.floor(Math.random() * 100000)}`,
-                    ...bookingData
-                }
-            }
+        mutationFn: async (bookingData: CreateGuestBookingRequest) => {
+            const response = await defaultHttp.post(apiRoutes.guestBookings, bookingData)
+            return response.data as GuestBookingResponse
         },
         onSuccess: (data) => {
-            showNotification('✅ Réservation confirmée avec succès! (Fake Data)', NotificationType.SUCCESS)
-            console.log('Booking created:', data)
+            // Store booking ID for confirmation
+            const bookingId = data.data.id
+            showNotification('Réservation créée! Confirmation du paiement...', NotificationType.SUCCESS)
+            
+            // Automatically confirm booking (in real app, this would happen after payment)
+            confirmBookingMutation.mutate({
+                bookingId,
+                confirmData: {
+                    payment_method: 'card',
+                    cardholder_name: customerInfo.name,
+                    card_last4: '4242' // TODO: Get from actual payment form
+                }
+            })
+        },
+        onError: (error: any) => {
+            showNotification(
+                error?.response?.data?.message || 'Erreur lors de la création de la réservation',
+                NotificationType.ERROR
+            )
+        }
+    })
+
+    // Confirm booking mutation
+    const confirmBookingMutation = useMutation({
+        mutationFn: async ({ bookingId, confirmData }: { bookingId: number, confirmData: ConfirmBookingRequest }) => {
+            const response = await defaultHttp.post(apiRoutes.confirmGuestBooking(bookingId), confirmData)
+            return response.data as GuestBookingResponse
+        },
+        onSuccess: (data) => {
+            showNotification(
+                `✅ Réservation confirmée! Référence: ${data.data.booking_reference}`,
+                NotificationType.SUCCESS
+            )
             // Reset wizard after a delay to show success
             setTimeout(() => {
                 setStep(0)
@@ -220,11 +136,11 @@ export default function BookingWizard() {
                 setSelectedScenario(null)
                 setSelectedTimeSlots({})
                 setCustomerInfo({ name: '', email: '', phone: '', notes: '' })
-            }, 2000)
+            }, 3000)
         },
         onError: (error: any) => {
             showNotification(
-                error?.response?.data?.message || 'Erreur lors de la création de la réservation',
+                error?.response?.data?.message || 'Erreur lors de la confirmation de la réservation',
                 NotificationType.ERROR
             )
         }
@@ -242,7 +158,7 @@ export default function BookingWizard() {
     }, [selectedDate, selectedServices, personCount, selectedGender, refetchAvailability])
 
     // Loading state
-    if (servicesLoading || staffLoading) {
+    if (servicesLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-blue-50">
                 <Loader2 className="h-8 w-8 animate-spin text-[#E09900]" />
@@ -251,7 +167,6 @@ export default function BookingWizard() {
     }
 
     const services = servicesData || []
-    const staff = staffData || []
     const availability = availabilityData || []
 
     return (
@@ -300,24 +215,13 @@ export default function BookingWizard() {
                     />
                 )}
 
-                {/* Step 2: Select Options (Staff & Gender for Hammam) */}
+                {/* Step 2: Select Gender Preference (for Hammam services) */}
                 {step === 2 && (
                     <SelectOptions
                         selectedServices={selectedServiceDetails}
-                        staff={staff}
-                        staffSelections={Object.fromEntries(
-                            Object.entries(selectedStaff).map(([serviceId, staff]) => [serviceId, staff.id])
-                        )}
-                        onSelectStaff={(selections) => {
-                            const newStaff: Record<number, Staff> = {}
-                            Object.entries(selections).forEach(([serviceId, staffId]) => {
-                                const foundStaff = staff.find(s => s.id === staffId)
-                                if (foundStaff) {
-                                    newStaff[Number(serviceId)] = foundStaff
-                                }
-                            })
-                            setSelectedStaff(newStaff)
-                        }}
+                        staff={[]} // Empty - staff is auto-assigned by API
+                        staffSelections={{}} // Empty - no manual staff selection
+                        onSelectStaff={() => {}} // No-op - staff auto-assigned
                         gender={selectedGender || ''}
                         onSelectGender={setSelectedGender as any}
                         onNext={next}
@@ -333,7 +237,30 @@ export default function BookingWizard() {
                         availability={availability}
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
-                        onSelectScenario={setSelectedScenario}
+                        onSelectScenario={(slot: any) => {
+                            // Convert AvailabilitySlot to AvailabilityScenario format
+                            if (slot) {
+                                const service = selectedServiceDetails[0] // For now, single service
+                                const price = typeof service?.price === 'string' ? parseFloat(service.price) : (service?.price || 0)
+                                setSelectedScenario({
+                                    scenario_id: `slot-${slot.datetime}`,
+                                    start_datetime: slot.datetime,
+                                    end_datetime: slot.datetime, // Will be calculated by backend
+                                    total_duration: service?.duration_minutes || service?.duration || 60,
+                                    total_price: price * personCount,
+                                    services: [{
+                                        service_id: service?.id,
+                                        service_name: service?.name,
+                                        order_index: 0,
+                                        start_datetime: slot.datetime,
+                                        staff_id: slot.staff_id,
+                                        staff_name: slot.staff_name
+                                    }]
+                                })
+                            } else {
+                                setSelectedScenario(null)
+                            }
+                        }}
                         selectedTimeSlots={selectedTimeSlots}
                         onSelectTimeSlot={(serviceId, scenario) => {
                             setSelectedTimeSlots(prev => ({
@@ -343,42 +270,8 @@ export default function BookingWizard() {
                         }}
                         selectedServices={selectedServiceDetails}
                         onNext={() => {
-                            // Check if we have service-specific availability
-                            const isServiceSpecific = availability && !Array.isArray(availability)
-                            if (isServiceSpecific) {
-                                // Check all services have selected time slots
-                                const allSelected = Object.keys(availability || {}).every(
-                                    serviceId => selectedTimeSlots[Number(serviceId)]
-                                )
-                                if (allSelected && selectedDate) {
-                                    // Merge all selected time slots into one scenario for compatibility
-                                    const mergedServices = Object.values(selectedTimeSlots).flatMap(
-                                        (slot, index) => slot.services?.map((svc: any) => ({
-                                            ...svc,
-                                            order_index: index
-                                        })) || []
-                                    )
-                                    const totalPrice = Object.values(selectedTimeSlots).reduce(
-                                        (sum, slot) => sum + (Number(slot.total_price) || 0), 0
-                                    )
-                                    const totalDuration = Object.values(selectedTimeSlots).reduce(
-                                        (sum, slot) => sum + (slot.total_duration || 0), 0
-                                    )
-                                    setSelectedScenario({
-                                        scenario_id: 'merged',
-                                        start_datetime: Object.values(selectedTimeSlots)[0]?.start_datetime,
-                                        end_datetime: Object.values(selectedTimeSlots)[Object.values(selectedTimeSlots).length - 1]?.end_datetime,
-                                        total_duration: totalDuration,
-                                        total_price: totalPrice,
-                                        services: mergedServices
-                                    })
-                                    next()
-                                }
-                            } else {
-                                // Original flow for combined scenarios
-                                if (selectedDate && selectedScenario) {
-                                    next()
-                                }
+                            if (selectedDate && selectedScenario) {
+                                next()
                             }
                         }}
                         onPrev={prev}
@@ -420,21 +313,29 @@ export default function BookingWizard() {
                         selectedDate={selectedDate}
                         customerInfo={customerInfo}
                         selectedGender={selectedGender}
-                        isSubmitting={createBookingMutation.isPending}
+                        isSubmitting={createBookingMutation.isPending || confirmBookingMutation.isPending}
                         onConfirm={() => {
-                            // Build booking request
-                            const bookingData: CreateBookingRequest = {
-                                language: 'fr',
+                            // Parse customer name into first and last name
+                            const nameParts = customerInfo.name.trim().split(' ')
+                            const firstName = nameParts[0] || customerInfo.name
+                            const lastName = nameParts.slice(1).join(' ') || firstName
+
+                            // Build guest booking request
+                            const bookingData: CreateGuestBookingRequest = {
+                                guest_info: {
+                                    first_name: firstName,
+                                    last_name: lastName,
+                                    email: customerInfo.email,
+                                    phone: customerInfo.phone
+                                },
+                                service_ids: selectedServices,
+                                start_datetime: selectedScenario.start_datetime || '',
                                 group_size: personCount,
-                                notes: customerInfo.notes || `Réservation pour ${customerInfo.name}`,
-                                services: selectedScenario.services.map((svc: any) => ({
-                                    service_id: svc.service_id,
-                                    order_index: svc.order_index,
-                                    start_datetime: svc.start_datetime,
-                                    ...(svc.staff_id && { staff_id: svc.staff_id }),
-                                    ...(svc.room_id && { room_id: svc.room_id }),
-                                    ...(svc.hammam_session_id && { hammam_session_id: svc.hammam_session_id })
-                                }))
+                                ...(selectedGender && { 
+                                    gender_preference: selectedGender as 'female' | 'male' | 'mixed' 
+                                }),
+                                ...(customerInfo.notes && { notes: customerInfo.notes }),
+                                language: currentLang
                             }
                             createBookingMutation.mutate(bookingData)
                         }}

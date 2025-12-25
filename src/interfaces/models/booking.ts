@@ -8,8 +8,8 @@ export type StaffType = 'masso' | 'coiffure' | 'hammam'
 export interface Service {
   id?: number
   type_service?: ServiceType
-  name?: string
-  description?: string
+  name?: string | { fr: string; en: string; ar?: string }  // Support both string and multilingual object
+  description?: string | { fr: string; en: string; ar?: string }  // Support both string and multilingual object
   duration_minutes?: number
   duration?: number  // Alias for compatibility
   price?: string | number  // Support both string and number
@@ -20,6 +20,13 @@ export interface Service {
   requires_hammam_session?: boolean
   is_active?: boolean
   
+}
+
+// Helper function to get localized value
+export function getLocalizedValue(value: string | { fr: string; en: string; ar?: string } | undefined, language: 'fr' | 'en' | 'ar' = 'fr'): string {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  return value[language] || value.fr || value.en || ''
 }
 
 export interface Staff {
@@ -160,4 +167,91 @@ export interface Booking {
   }
   can_cancel?: boolean
   can_modify?: boolean
+}
+
+// Guest Booking API types
+export interface GuestInfo {
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+}
+
+export interface CreateGuestBookingRequest {
+  guest_info: GuestInfo
+  service_ids: number[]
+  start_datetime: string
+  group_size?: number
+  gender_preference?: 'female' | 'male' | 'mixed'
+  notes?: string
+  language?: 'en' | 'fr'
+}
+
+export interface ConfirmBookingRequest {
+  payment_method: 'card' | 'cash' | 'other'
+  cardholder_name?: string
+  card_last4?: string
+}
+
+export interface AvailabilitySlot {
+  date: string
+  time: string
+  datetime: string
+  available: boolean
+  staff_id?: number
+  staff_name?: string
+  resource_id?: number
+  resource_type?: string
+  hammam_session_id?: number
+  session_type?: string
+  available_capacity?: number
+}
+
+export interface AvailabilitySlotsRequest {
+  service_ids: number[]
+  start_date: string
+  end_date: string
+  group_size?: number
+  gender_preference?: 'female' | 'male' | 'mixed'
+}
+
+export interface AvailabilitySlotsResponse {
+  success: boolean
+  message: string
+  data: {
+    slots: AvailabilitySlot[]
+    total_slots: number
+  }
+}
+
+export interface GuestBookingResponse {
+  success: boolean
+  message: string
+  data: {
+    id: number
+    booking_reference: string
+    status: string
+    guest: GuestInfo
+    start_datetime: string
+    end_datetime: string
+    group_size: number
+    language: string
+    items: {
+      service_id: number
+      service_name: string
+      start_datetime: string
+      end_datetime: string
+      duration_minutes: number
+      price: string
+    }[]
+    total_amount: string
+    expires_at?: string
+    confirmation_required?: boolean
+    confirmed_at?: string
+    can_cancel?: boolean
+    cancellation_policy?: {
+      can_cancel_until: string
+      hours_before: number
+    }
+  }
 }

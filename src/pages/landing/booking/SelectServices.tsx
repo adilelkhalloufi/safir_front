@@ -2,7 +2,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Clock, ChevronRight, Sparkles, Scissors, Droplets, Hand, Waves } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Service } from '@/interfaces/models/booking'
+import { getLocalizedValue } from '@/interfaces/models/booking'
 
 interface SelectServicesProps {
     services: Service[]
@@ -32,6 +34,9 @@ const SERVICE_TYPE_LABELS: Record<string, string> = {
 }
 
 export function SelectServices({ services, selected, onToggle, onNext }: SelectServicesProps) {
+    const { i18n } = useTranslation()
+    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
+
     // Group services by type
     const groupedServices = services.reduce((acc, service: any) => {
         const type = service.type_service || 'other'
@@ -86,8 +91,8 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                             )}>
                                                 <Icon className={cn('h-6 w-6', isSelected ? 'text-white' : 'text-gray-600 group-hover:text-[#E09900]')} />
                                             </div>
-                                            <div className="font-semibold text-lg mb-1">{svc.name}</div>
-                                            <div className="text-sm text-muted-foreground mb-3">{svc.description}</div>
+                                            <div className="font-semibold text-lg mb-1">{getLocalizedValue(svc.name, currentLang)}</div>
+                                            <div className="text-sm text-muted-foreground mb-3">{getLocalizedValue(svc.description, currentLang)}</div>
                                             <div className="flex items-center gap-2 text-xs">
                                                 <Clock className="h-3 w-3 text-green-600" />
                                                 <span className="text-green-600 font-medium">{svc.duration_minutes || svc.duration} min</span>
