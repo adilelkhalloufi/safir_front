@@ -73,7 +73,7 @@ export function Review({
                                         )}
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-semibold">{service.price} MAD</p>
+                                        <p className="font-semibold">{service.price} $</p>
                                         <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
                                     </div>
                                 </div>
@@ -132,10 +132,10 @@ export function Review({
                     <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
                         <div className="flex justify-between items-center">
                             <span className="text-lg font-semibold">Total</span>
-                            <span className="text-2xl font-bold text-amber-600">{totalPrice} MAD</span>
+                            <span className="text-2xl font-bold text-amber-600">{totalPrice} $</span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            50 MAD de garantie payés • Solde à régler sur place
+                            50 $ de garantie payés • Solde à régler sur place
                         </p>
                     </div>
 

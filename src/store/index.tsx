@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import adminSlice, { AdminState } from './slices/adminSlice';
+import bookingSlice, { BookingState } from './slices/bookingSlice';
 
 
 
@@ -22,6 +23,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   admin: adminSlice,
+  booking: bookingSlice,
 
 
 });
@@ -40,6 +42,7 @@ export const store = configureStore({
 
 export type RootState = {
   admin: AdminState;
+  booking: BookingState;
 
 
 };

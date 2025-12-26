@@ -89,7 +89,7 @@ export function SelectOptions({
                                     </div>
                                     <div>
                                         <div className="font-semibold text-lg">{getLocalizedValue(service.name, currentLang)}</div>
-                                        <div className="text-sm text-muted-foreground">{service.duration_minutes} min • {service.price} MAD</div>
+                                        <div className="text-sm text-muted-foreground">{service.duration_minutes} min • {service.price} $</div>
                                     </div>
                                 </div>
 

@@ -94,7 +94,7 @@ export default function details() {
     if (!price) return '0.00'
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'MAD',
+      currency: 'USD',
     }).format(price)
   }
 

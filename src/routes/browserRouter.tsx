@@ -122,15 +122,10 @@ const Login = loadable(() => import('../pages/auth/sign-in'), {
 export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.home,
-    element: <Login />,
+    element: <LandingPage />,
     errorElement: errorElement,
   },
-  {
-    path: webRoutes.booking,
-    element: <BookingWizard />,
-    errorElement: errorElement,
-  },
-
+ 
 
   {
     path: webRoutes.login,

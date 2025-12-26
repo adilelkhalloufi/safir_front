@@ -2,7 +2,7 @@ export const CONFIG = {
     CURENCY : "DIRHAM",
     COUNTRY : "UNITED ARAB EMIRATES",
     LANGUAGE_CODE : "FR",
-    CURRENCY_SYMBOL : "MAD",
+    CURRENCY_SYMBOL : "$",
     APP_NAME : "ADOP",
     APP_VERSION : "2.0.0",
     API_URL:"https://oapi.adev.ma/api/Dashbord/",

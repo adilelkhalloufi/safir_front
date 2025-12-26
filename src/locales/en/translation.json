@@ -1,5 +1,5 @@
 {
-  "website": "OpticFlow",
+  "website": "SAFIR Hammam & Spa",
   "website.description": "is the ultimate SaaS solution for managing optician stores efficiently and effectively.",
   "common": {
     "loading": "Loading...",
@@ -374,5 +374,13 @@
     "saveSettings": "Save Settings",
     "saveSuccess": "Settings saved successfully",
     "saveError": "Failed to save settings"
+  },
+  "bookingWizard": {
+    "title": "SAFIR Hammam & Spa",
+    "subtitle": "Book your moment of relaxation",
+    "bookingCreated": "Booking created! Payment confirmation...",
+    "bookingConfirmed": "✅ Booking confirmed! Reference:",
+    "bookingCreateError": "Error creating booking",
+    "bookingConfirmError": "Error confirming booking"
   }
 }

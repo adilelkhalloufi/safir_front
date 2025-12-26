@@ -19,7 +19,7 @@ export function Progress({ step }: ProgressProps) {
                                 className={cn(
                                     'h-10 w-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300',
                                     i < step && 'bg-green-500 text-white',
-                                    i === step && 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-lg scale-110',
+                                    i === step && ' bg-secondary text-white shadow-lg scale-110',
                                     i > step && 'bg-gray-200 text-gray-400'
                                 )}
                             >

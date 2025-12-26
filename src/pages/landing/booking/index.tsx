@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
@@ -7,6 +8,19 @@ import { useTranslation } from 'react-i18next'
 import { showNotification, NotificationType } from '../../../utils'
 import { defaultHttp } from '../../../utils/http'
 import { apiRoutes } from '../../../routes/api'
+import type { RootState, AppDispatch } from '../../../store'
+import {
+    nextStep,
+    prevStep,
+    toggleService,
+    setPersonCount,
+    setSelectedGender,
+    setSelectedDate,
+    setSelectedScenario,
+    setSelectedTimeSlot,
+    updateCustomerInfo,
+    resetBooking
+} from '../../../store/slices/bookingSlice'
 import type {
     Service,
     Staff,
@@ -29,26 +43,22 @@ import { Guarantee } from './Guarantee'
 import { Review } from './Review'
 
 export default function BookingWizard() {
-    const { i18n } = useTranslation()
+    const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'en' | 'fr'
-
-    // State management
-    const [step, setStep] = useState<Step>(0)
-    const [selectedServices, setSelectedServices] = useState<number[]>([])
-    const [selectedServiceDetails, setSelectedServiceDetails] = useState<Service[]>([])
-    const [selectedStaff, setSelectedStaff] = useState<Record<number, Staff>>({})
-    const [personCount, setPersonCount] = useState<number>(1)
-    const [selectedGender, setSelectedGender] = useState<APIGender | undefined>(undefined)
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-    const [selectedScenario, setSelectedScenario] = useState<AvailabilityScenario | any>(null)
-    // New: Track selected time slots per service
-    const [selectedTimeSlots, setSelectedTimeSlots] = useState<Record<number, AvailabilityScenario>>({})
-    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-        name: '',
-        email: '',
-        phone: '',
-        notes: ''
-    })
+    
+    const dispatch = useDispatch<AppDispatch>()
+    const {
+        step,
+        selectedServices,
+        selectedServiceDetails,
+        selectedStaff,
+        personCount,
+        selectedGender,
+        selectedDate,
+        selectedScenario,
+        selectedTimeSlots,
+        customerInfo
+    } = useSelector((state: RootState) => state.booking)
 
     // Fetch services from API
     const { data: servicesData, isLoading: servicesLoading } = useQuery({
@@ -93,7 +103,7 @@ export default function BookingWizard() {
         onSuccess: (data) => {
             // Store booking ID for confirmation
             const bookingId = data.data.id
-            showNotification('Réservation créée! Confirmation du paiement...', NotificationType.SUCCESS)
+            showNotification(t('bookingWizard.bookingCreated'), NotificationType.SUCCESS)
             
             // Automatically confirm booking (in real app, this would happen after payment)
             confirmBookingMutation.mutate({
@@ -107,7 +117,7 @@ export default function BookingWizard() {
         },
         onError: (error: any) => {
             showNotification(
-                error?.response?.data?.message || 'Erreur lors de la création de la réservation',
+                error?.response?.data?.message || t('bookingWizard.bookingCreateError'),
                 NotificationType.ERROR
             )
         }
@@ -121,34 +131,25 @@ export default function BookingWizard() {
         },
         onSuccess: (data) => {
             showNotification(
-                `✅ Réservation confirmée! Référence: ${data.data.booking_reference}`,
+                `${t('bookingWizard.bookingConfirmed')} ${data.data.booking_reference}`,
                 NotificationType.SUCCESS
             )
             // Reset wizard after a delay to show success
             setTimeout(() => {
-                setStep(0)
-                setSelectedServices([])
-                setSelectedServiceDetails([])
-                setSelectedStaff({})
-                setPersonCount(1)
-                setSelectedGender(undefined)
-                setSelectedDate(undefined)
-                setSelectedScenario(null)
-                setSelectedTimeSlots({})
-                setCustomerInfo({ name: '', email: '', phone: '', notes: '' })
+                dispatch(resetBooking())
             }, 3000)
         },
         onError: (error: any) => {
             showNotification(
-                error?.response?.data?.message || 'Erreur lors de la confirmation de la réservation',
+                error?.response?.data?.message || t('bookingWizard.bookingConfirmError'),
                 NotificationType.ERROR
             )
         }
     })
 
-    // Navigation
-    const next = () => setStep((s) => (s < 6 ? ((s + 1) as Step) : s))
-    const prev = () => setStep((s) => (s > 0 ? ((s - 1) as Step) : s))
+    // Navigation handlers
+    const handleNext = () => dispatch(nextStep())
+    const handlePrev = () => dispatch(prevStep())
 
     // Refetch availability when params change
     useEffect(() => {
@@ -175,9 +176,9 @@ export default function BookingWizard() {
                 {/* Header */}
                 <div className="mb-8 text-center">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-[#020F44] to-[#E09900] bg-clip-text text-transparent mb-2">
-                        SAFIR Hammam & Spa
+                        {t('bookingWizard.title')}
                     </h1>
-                    <p className="text-muted-foreground">Réservez votre moment de détente</p>
+                    <p className="text-muted-foreground">{t('bookingWizard.subtitle')}</p>
                 </div>
 
                 {/* Progress Indicator */}
@@ -189,19 +190,13 @@ export default function BookingWizard() {
                         services={services}
                         selected={selectedServices}
                         onToggle={(serviceId, service) => {
-                            if (selectedServices.includes(serviceId)) {
-                                setSelectedServices(selectedServices.filter(id => id !== serviceId))
-                                setSelectedServiceDetails(selectedServiceDetails.filter(s => s.id !== serviceId))
-                                // Remove staff selection for this service
-                                const newStaffSelections = { ...selectedStaff }
-                                delete newStaffSelections[serviceId]
-                                setSelectedStaff(newStaffSelections)
-                            } else {
-                                setSelectedServices([...selectedServices, serviceId])
-                                setSelectedServiceDetails([...selectedServiceDetails, service])
+                            dispatch(toggleService({ serviceId, service }))
+                        }}
+                        onNext={() => {
+                            if (selectedServices.length > 0) {
+                                handleNext()
                             }
                         }}
-                        onNext={() => selectedServices.length > 0 ? next() : null}
                     />
                 )}
 
@@ -209,9 +204,9 @@ export default function BookingWizard() {
                 {step === 1 && (
                     <SelectPersonCount
                         count={personCount}
-                        onSelect={setPersonCount}
-                        onNext={next}
-                        onPrev={prev}
+                        onSelect={(count) => dispatch(setPersonCount(count))}
+                        onNext={handleNext}
+                        onPrev={handlePrev}
                     />
                 )}
 
@@ -223,9 +218,9 @@ export default function BookingWizard() {
                         staffSelections={{}} // Empty - no manual staff selection
                         onSelectStaff={() => {}} // No-op - staff auto-assigned
                         gender={selectedGender || ''}
-                        onSelectGender={setSelectedGender as any}
-                        onNext={next}
-                        onPrev={prev}
+                        onSelectGender={(gender) => dispatch(setSelectedGender(gender as APIGender))}
+                        onNext={handleNext}
+                        onPrev={handlePrev}
                     />
                 )}
 
@@ -233,7 +228,7 @@ export default function BookingWizard() {
                 {step === 3 && (
                     <SelectDateTime
                         selectedDate={selectedDate}
-                        onSelectDate={setSelectedDate}
+                        onSelectDate={(date) => dispatch(setSelectedDate(date))}
                         availability={availability}
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
@@ -242,7 +237,7 @@ export default function BookingWizard() {
                             if (slot) {
                                 const service = selectedServiceDetails[0] // For now, single service
                                 const price = typeof service?.price === 'string' ? parseFloat(service.price) : (service?.price || 0)
-                                setSelectedScenario({
+                                dispatch(setSelectedScenario({
                                     scenario_id: `slot-${slot.datetime}`,
                                     start_datetime: slot.datetime,
                                     end_datetime: slot.datetime, // Will be calculated by backend
@@ -250,31 +245,28 @@ export default function BookingWizard() {
                                     total_price: price * personCount,
                                     services: [{
                                         service_id: service?.id,
-                                        service_name: service?.name,
+                                        service_name: typeof service?.name === 'string' ? service.name : service?.name?.[currentLang] || service?.name?.fr || '',
                                         order_index: 0,
                                         start_datetime: slot.datetime,
                                         staff_id: slot.staff_id,
                                         staff_name: slot.staff_name
                                     }]
-                                })
+                                }))
                             } else {
-                                setSelectedScenario(null)
+                                dispatch(setSelectedScenario(null))
                             }
                         }}
                         selectedTimeSlots={selectedTimeSlots}
                         onSelectTimeSlot={(serviceId, scenario) => {
-                            setSelectedTimeSlots(prev => ({
-                                ...prev,
-                                [serviceId]: scenario
-                            }))
+                            dispatch(setSelectedTimeSlot({ serviceId, scenario }))
                         }}
                         selectedServices={selectedServiceDetails}
                         onNext={() => {
                             if (selectedDate && selectedScenario) {
-                                next()
+                                handleNext()
                             }
                         }}
-                        onPrev={prev}
+                        onPrev={handlePrev}
                     />
                 )}
 
@@ -283,14 +275,14 @@ export default function BookingWizard() {
                     <CustomerDetails
                         customerInfo={customerInfo}
                         onUpdateCustomer={(field, value) => {
-                            setCustomerInfo({ ...customerInfo, [field]: value })
+                            dispatch(updateCustomerInfo({ field, value }))
                         }}
                         onNext={() => {
                             if (customerInfo.name && customerInfo.email && customerInfo.phone) {
-                                next()
+                                handleNext()
                             }
                         }}
-                        onPrev={prev}
+                        onPrev={handlePrev}
                     />
                 )}
 
@@ -298,8 +290,8 @@ export default function BookingWizard() {
                 {step === 5 && selectedScenario && (
                     <Guarantee
                         totalPrice={selectedScenario.total_price}
-                        onNext={next}
-                        onPrev={prev}
+                        onNext={handleNext}
+                        onPrev={handlePrev}
                     />
                 )}
 
@@ -339,7 +331,7 @@ export default function BookingWizard() {
                             }
                             createBookingMutation.mutate(bookingData)
                         }}
-                        onPrev={prev}
+                        onPrev={handlePrev}
                     />
                 )}
             </div>

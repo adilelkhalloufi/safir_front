@@ -97,7 +97,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                 <Clock className="h-3 w-3 text-green-600" />
                                                 <span className="text-green-600 font-medium">{svc.duration_minutes || svc.duration} min</span>
                                             </div>
-                                            <div className="mt-2 text-sm font-semibold text-[#E09900]">{svc.price} MAD</div>
+                                            <div className="mt-2 text-sm font-semibold text-[#E09900]">{svc.price} $</div>
                                         </button>
                                     )
                                 })}

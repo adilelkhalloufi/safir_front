@@ -2,6 +2,7 @@
 import { useEffect } from "react"
 import { setPageTitle } from "@/utils"
 import BookingWizard from "./booking";
+import HeaderBooking from "./booking/HeaderBooking";
 
 
 const Index = () => {
@@ -10,7 +11,7 @@ const Index = () => {
   }, [])
   return (
     <>
-
+      <HeaderBooking />
       <BookingWizard />
     </>
 

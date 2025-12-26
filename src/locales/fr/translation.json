@@ -1,6 +1,6 @@
 {
-  "website": "OpticFlow",
-  "website.description": "est la solution SaaS ultime pour gérer les magasins d'optique de manière efficace et efficiente.",
+  "website": "SAFIR Hammam & Spa",
+  "website.description": "est la solution SaaS ultime pour gérer votre Hammam & Spa de manière efficace et efficiente.",
   "common": {
     "loading": "Chargement...",
     "all": "Tous",
@@ -108,5 +108,13 @@
       "coiffure": "Coiffeur",
       "hammam": "Préposé au hammam"
     }
+  },
+  "bookingWizard": {
+    "title": "SAFIR Hammam & Spa",
+    "subtitle": "Réservez votre moment de détente",
+    "bookingCreated": "Réservation créée! Confirmation du paiement...",
+    "bookingConfirmed": "✅ Réservation confirmée! Référence:",
+    "bookingCreateError": "Erreur lors de la création de la réservation",
+    "bookingConfirmError": "Erreur lors de la confirmation de la réservation"
   }
 }

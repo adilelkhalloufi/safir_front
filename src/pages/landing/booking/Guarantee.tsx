@@ -41,8 +41,8 @@ export function Guarantee({ totalPrice, onNext, onPrev }: GuaranteeProps) {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-amber-900">Garantie requise</h3>
                                 <p className="text-sm text-amber-700 mt-1">
-                                    Une garantie de <strong>{guaranteeAmount} MAD</strong> est requise pour confirmer votre réservation.
-                                    Le montant total de <strong>{totalPrice} MAD</strong> sera à régler sur place.
+                                    Une garantie de <strong>{guaranteeAmount} $</strong> est requise pour confirmer votre réservation.
+                                    Le montant total de <strong>{totalPrice} $</strong> sera à régler sur place.
                                 </p>
                             </div>
                         </div>
@@ -81,7 +81,7 @@ export function Guarantee({ totalPrice, onNext, onPrev }: GuaranteeProps) {
                             className="w-full bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-700 hover:to-rose-700"
                             size="lg"
                         >
-                            {isPaymentReady ? 'Traitement...' : `Payer ${guaranteeAmount} MAD`}
+                            {isPaymentReady ? 'Traitement...' : `Payer ${guaranteeAmount} $`}
                         </Button>
                     </div>
 
