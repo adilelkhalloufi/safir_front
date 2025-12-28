@@ -21,7 +21,27 @@ const BookingsIndex = loadable(() => import('../pages/dashboard/bookings'), {
   fallback: fallbackElement,
 });
 
+const BookingsAdd = loadable(() => import('../pages/dashboard/bookings/add'), {
+  fallback: fallbackElement,
+});
+
+const BookingsView = loadable(() => import('../pages/dashboard/bookings/view'), {
+  fallback: fallbackElement,
+});
+
 const ClientsIndex = loadable(() => import('../pages/dashboard/clients'), {
+  fallback: fallbackElement,
+});
+
+const ClientsAdd = loadable(() => import('../pages/dashboard/clients/add'), {
+  fallback: fallbackElement,
+});
+
+const ClientsEdit = loadable(() => import('../pages/dashboard/clients/edit'), {
+  fallback: fallbackElement,
+});
+
+const ClientsView = loadable(() => import('../pages/dashboard/clients/view'), {
   fallback: fallbackElement,
 });
 
@@ -30,6 +50,18 @@ const StaffIndex = loadable(() => import('../pages/dashboard/staff'), {
 });
 
 const SubscriptionsIndex = loadable(() => import('../pages/dashboard/subscriptions'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionsAdd = loadable(() => import('../pages/dashboard/subscriptions/add'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionsEdit = loadable(() => import('../pages/dashboard/subscriptions/edit'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionsView = loadable(() => import('../pages/dashboard/subscriptions/view'), {
   fallback: fallbackElement,
 });
 
@@ -81,6 +113,10 @@ const StaffView = loadable(() => import('../pages/dashboard/staff/view'), {
 });
 
 const PaymentsIndex = loadable(() => import('../pages/dashboard/payments'), {
+  fallback: fallbackElement,
+});
+
+const PaymentsView = loadable(() => import('../pages/dashboard/payments/view'), {
   fallback: fallbackElement,
 });
 
@@ -149,8 +185,28 @@ export const browserRouter = createBrowserRouter([
         element: <BookingsIndex />,
       },
       {
+        path: webRoutes.bookings.add,
+        element: <BookingsAdd />,
+      },
+      {
+        path: webRoutes.bookings.view,
+        element: <BookingsView />,
+      },
+      {
         path: webRoutes.clients.index,
         element: <ClientsIndex />,
+      },
+      {
+        path: webRoutes.clients.add,
+        element: <ClientsAdd />,
+      },
+      {
+        path: webRoutes.clients.edit,
+        element: <ClientsEdit />,
+      },
+      {
+        path: webRoutes.clients.view,
+        element: <ClientsView />,
       },
       {
         path: webRoutes.staff.index,
@@ -159,6 +215,18 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.subscriptions.index,
         element: <SubscriptionsIndex />,
+      },
+      {
+        path: webRoutes.subscriptions.add,
+        element: <SubscriptionsAdd />,
+      },
+      {
+        path: webRoutes.subscriptions.edit,
+        element: <SubscriptionsEdit />,
+      },
+      {
+        path: webRoutes.subscriptions.view,
+        element: <SubscriptionsView />,
       },
 
       {
@@ -209,6 +277,10 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.payments.index,
         element: <PaymentsIndex />,
+      },
+      {
+        path: webRoutes.payments.view,
+        element: <PaymentsView />,
       },
       {
         path: webRoutes.reports.index,

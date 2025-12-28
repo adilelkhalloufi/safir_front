@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { ServiceType } from '@/interfaces/models';
 import { LayoutSh as Layout } from '@/components/custom/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
@@ -20,14 +22,18 @@ export default function EditService() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { id } = useParams();
-  
+
   const [formData, setFormData] = useState({
     name: '',
-    type: 'massage',
-    duration: '',
+    type_service: 'massage' as ServiceType,
+    duration_minutes: '',
     price: '',
     description: '',
-    status: 'active'
+    requires_room: false,
+    requires_chair: false,
+    requires_wash_station: false,
+    requires_hammam_session: false,
+    is_active: true
   });
 
   const { data: service, isLoading } = useQuery({
@@ -40,11 +46,15 @@ export default function EditService() {
     if (service?.data) {
       setFormData({
         name: service.data.name || '',
-        type: service.data.type || 'massage',
-        duration: service.data.duration?.toString() || '',
+        type_service: service.data.type_service || 'massage',
+        duration_minutes: service.data.duration_minutes?.toString() || '',
         price: service.data.price?.toString() || '',
         description: service.data.description || '',
-        status: service.data.status || 'active'
+        requires_room: service.data.requires_room || false,
+        requires_chair: service.data.requires_chair || false,
+        requires_wash_station: service.data.requires_wash_station || false,
+        requires_hammam_session: service.data.requires_hammam_session || false,
+        is_active: service.data.is_active ?? true
       });
     }
   }, [service]);
@@ -71,7 +81,7 @@ export default function EditService() {
     e.preventDefault();
     updateMutation.mutate({
       ...formData,
-      duration: parseInt(formData.duration) || 30,
+      duration_minutes: parseInt(formData.duration_minutes) || 30,
       price: parseFloat(formData.price) || 0
     });
   };
@@ -131,31 +141,34 @@ export default function EditService() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="type">{t('services.serviceType')}</Label>
+                  <Label htmlFor="type_service">{t('services.serviceType')}</Label>
                   <Select
-                    value={formData.type}
-                    onValueChange={(value) => handleChange('type', value)}
+                    value={formData.type_service}
+                    onValueChange={(value) => handleChange('type_service', value)}
                   >
-                    <SelectTrigger id="type">
+                    <SelectTrigger id="type_service">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="massage">{t('services.typeMassage')}</SelectItem>
+                      <SelectItem value="masso">{t('services.typeMasso')}</SelectItem>
                       <SelectItem value="hammam">{t('services.typeHammam')}</SelectItem>
                       <SelectItem value="coiffure">{t('services.typeCoiffure')}</SelectItem>
+                      <SelectItem value="gommage">{t('services.typeGommage')}</SelectItem>
+                      <SelectItem value="spa">{t('services.typeSpa')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duration">{t('services.duration')}</Label>
+                  <Label htmlFor="duration_minutes">{t('services.duration')}</Label>
                   <Input
-                    id="duration"
+                    id="duration_minutes"
                     type="number"
                     min="15"
                     step="15"
-                    value={formData.duration}
-                    onChange={(e) => handleChange('duration', e.target.value)}
+                    value={formData.duration_minutes}
+                    onChange={(e) => handleChange('duration_minutes', e.target.value)}
                     required
                   />
                 </div>
@@ -184,20 +197,79 @@ export default function EditService() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">{t('services.status')}</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleChange('status', value)}
+                <div className="space-y-4 md:col-span-2">
+                  <Label>{t('services.resourceRequirements', 'Resource Requirements')}</Label>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="requires_room"
+                        checked={formData.requires_room}
+                        onCheckedChange={(checked) => handleChange('requires_room', checked)}
+                      />
+                      <label
+                        htmlFor="requires_room"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {t('services.requiresRoom', 'Requires Room')}
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="requires_chair"
+                        checked={formData.requires_chair}
+                        onCheckedChange={(checked) => handleChange('requires_chair', checked)}
+                      />
+                      <label
+                        htmlFor="requires_chair"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {t('services.requiresChair', 'Requires Chair')}
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="requires_wash_station"
+                        checked={formData.requires_wash_station}
+                        onCheckedChange={(checked) => handleChange('requires_wash_station', checked)}
+                      />
+                      <label
+                        htmlFor="requires_wash_station"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {t('services.requiresWashStation', 'Requires Wash Station')}
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="requires_hammam_session"
+                        checked={formData.requires_hammam_session}
+                        onCheckedChange={(checked) => handleChange('requires_hammam_session', checked)}
+                      />
+                      <label
+                        htmlFor="requires_hammam_session"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {t('services.requiresHammamSession', 'Requires Hammam Session')}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => handleChange('is_active', checked)}
+                  />
+                  <label
+                    htmlFor="is_active"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">{t('services.statusActive')}</SelectItem>
-                      <SelectItem value="inactive">{t('services.statusInactive')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {t('services.isActive', 'Active Service')}
+                  </label>
                 </div>
               </div>
 
