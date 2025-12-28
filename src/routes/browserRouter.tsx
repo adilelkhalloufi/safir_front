@@ -12,9 +12,6 @@ import LandingPage from '@/pages/landing';
 const errorElement = <ErrorPage />;
 const fallbackElement = <ProgressBar />;
 
-const BookingWizard = loadable(() => import('../pages/landing/booking'), {
-  fallback: fallbackElement,
-});
 
 const Dashboard = loadable(() => import('../pages/dashboard'), {
   fallback: fallbackElement,
@@ -36,9 +33,7 @@ const SubscriptionsIndex = loadable(() => import('../pages/dashboard/subscriptio
   fallback: fallbackElement,
 });
 
-const HealthFormsIndex = loadable(() => import('../pages/dashboard/health-forms'), {
-  fallback: fallbackElement,
-});
+
 
 const ServicesIndex = loadable(() => import('../pages/dashboard/services'), {
   fallback: fallbackElement,
@@ -48,13 +43,6 @@ const ResourcesIndex = loadable(() => import('../pages/dashboard/resources'), {
   fallback: fallbackElement,
 });
 
-const HammamSessionsIndex = loadable(() => import('../pages/dashboard/hammam-sessions'), {
-  fallback: fallbackElement,
-});
-
-const HammamSessionsAdd = loadable(() => import('../pages/dashboard/hammam-sessions/add'), {
-  fallback: fallbackElement,
-});
 
 const ResourcesAdd = loadable(() => import('../pages/dashboard/resources/add'), {
   fallback: fallbackElement,
@@ -172,10 +160,7 @@ export const browserRouter = createBrowserRouter([
         path: webRoutes.subscriptions.index,
         element: <SubscriptionsIndex />,
       },
-      {
-        path: webRoutes.healthForms.index,
-        element: <HealthFormsIndex />,
-      },
+
       {
         path: webRoutes.services.index,
         element: <ServicesIndex />,
@@ -220,14 +205,7 @@ export const browserRouter = createBrowserRouter([
         path: webRoutes.staff.view,
         element: <StaffView />,
       },
-      {
-        path: webRoutes.hammamSessions.index,
-        element: <HammamSessionsIndex />,
-      },
-      {
-        path: webRoutes.hammamSessions.add,
-        element: <HammamSessionsAdd />,
-      },
+
       {
         path: webRoutes.payments.index,
         element: <PaymentsIndex />,
@@ -242,8 +220,6 @@ export const browserRouter = createBrowserRouter([
       },
     ],
   },
-
-  // 404
   {
     path: '*',
     element: <ErrorPage />,
