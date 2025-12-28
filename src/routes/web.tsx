@@ -8,7 +8,7 @@ export const webRoutes = {
   logout: '/logout',
   Dashboard: '/Dashbord',
   booking: '/booking',
-  
+
   // Admin routes
   bookings: {
     index: '/dashboard/bookings',
@@ -44,6 +44,12 @@ export const webRoutes = {
     view: '/dashboard/services/:id',
     add: '/dashboard/services/add',
     edit: '/dashboard/services/:id/edit',
+  },
+  typeServices: {
+    index: '/dashboard/type-services',
+    view: '/dashboard/type-services/:id',
+    add: '/dashboard/type-services/add',
+    edit: '/dashboard/type-services/:id/edit',
   },
   resources: {
     index: '/dashboard/resources',

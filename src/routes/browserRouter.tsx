@@ -71,6 +71,22 @@ const ServicesIndex = loadable(() => import('../pages/dashboard/services'), {
   fallback: fallbackElement,
 });
 
+const TypeServices = loadable(() => import('../pages/dashboard/type_services'), {
+  fallback: fallbackElement,
+});
+
+const TypeServicesAdd = loadable(() => import('../pages/dashboard/type_services/add'), {
+  fallback: fallbackElement,
+});
+
+const TypeServicesEdit = loadable(() => import('../pages/dashboard/type_services/edit'), {
+  fallback: fallbackElement,
+});
+
+const TypeServicesView = loadable(() => import('../pages/dashboard/type_services/view'), {
+  fallback: fallbackElement,
+});
+
 const ResourcesIndex = loadable(() => import('../pages/dashboard/resources'), {
   fallback: fallbackElement,
 });
@@ -244,6 +260,22 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.services.view,
         element: <ServicesView />,
+      },
+      {
+        path: webRoutes.typeServices.index,
+        element: <TypeServices />,
+      },
+      {
+        path: webRoutes.typeServices.add,
+        element: <TypeServicesAdd />,
+      },
+      {
+        path: webRoutes.typeServices.edit,
+        element: <TypeServicesEdit />,
+      },
+      {
+        path: webRoutes.typeServices.view,
+        element: <TypeServicesView />,
       },
       {
         path: webRoutes.resources.index,

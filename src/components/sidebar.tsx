@@ -49,13 +49,13 @@ export default function Sidebar({
           className='z-50 flex justify-between px-4 py-3 shadow-sm md:px-4'
         >
           <div className={`flex items-center ${!isCollapsed ? 'gap-2' : ''}`}>
-          <img
-            src={ViteLogo}
-             width={24}
-            height={24}
-            className='mr-2'
-            alt='Vite'
-          />
+            <img
+              src='./logo.png'
+              width={24}
+              height={24}
+              className='mr-2'
+              alt='Vite'
+            />
             <div
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'}`}
             >

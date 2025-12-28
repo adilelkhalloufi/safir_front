@@ -9,6 +9,9 @@ export * from './client';
 // Service
 export * from './service';
 
+// Service Type
+export * from './serviceType';
+
 // Staff
 export * from './staff';
 
