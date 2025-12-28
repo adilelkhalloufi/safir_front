@@ -6,12 +6,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IconLanguage } from "@tabler/icons-react";
- import i18next from "../../i18n"
- 
- export function LangToggle() {
- 
+import i18next from "../../i18n"
+
+export function LangToggle() {
+
   const changeLanguageHandler = (lng: string) => {
-    
+
     i18next.changeLanguage(lng);
 
   };
@@ -26,16 +26,14 @@ import { IconLanguage } from "@tabler/icons-react";
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-      
+
         <DropdownMenuItem onClick={() => changeLanguageHandler("fr")}>
           Francais
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => changeLanguageHandler("en")}>
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => changeLanguageHandler("ar")}>
-          عربية
-        </DropdownMenuItem>
+
       </DropdownMenuContent>
     </DropdownMenu>
   );

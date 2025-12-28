@@ -22,12 +22,6 @@ interface ReviewProps {
     onPrev: () => void
 }
 
-const GENDER_LABELS = {
-    femme: 'Femmes',
-    homme: 'Hommes',
-    mixte: 'Mixte'
-}
-
 export function Review({
     selectedServices,
     selectedStaff,
@@ -49,9 +43,9 @@ export function Review({
             <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
                     <CheckCircle2 className="h-6 w-6 text-green-600" />
-                    Récapitulatif de votre réservation
+                    {t('bookingWizard.review.title')}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">Vérifiez les détails avant de confirmer</p>
+                <p className="text-sm text-muted-foreground">{t('bookingWizard.review.subtitle')}</p>
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
@@ -59,7 +53,7 @@ export function Review({
                     <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-3">
                             <Sparkles className="h-5 w-5 text-amber-600" />
-                            <h3 className="font-semibold">Services sélectionnés</h3>
+                            <h3 className="font-semibold">{t('bookingWizard.review.servicesTitle')}</h3>
                         </div>
                         <div className="space-y-2">
                             {selectedServices.map((service: any) => (
@@ -68,7 +62,7 @@ export function Review({
                                         <p className="font-medium">{getLocalizedValue(service.name, currentLang)}</p>
                                         {selectedStaff[service.id] && (
                                             <p className="text-sm text-muted-foreground">
-                                                Avec {selectedStaff[service.id].name}
+                                                {t('bookingWizard.review.with')} {selectedStaff[service.id].name}
                                             </p>
                                         )}
                                     </div>
@@ -82,7 +76,7 @@ export function Review({
                         {selectedGender && (
                             <div className="mt-3 pt-3 border-t">
                                 <p className="text-sm text-muted-foreground">
-                                    Genre: <span className="font-medium text-foreground">{GENDER_LABELS[selectedGender]}</span>
+                                    {t('bookingWizard.review.gender')} <span className="font-medium text-foreground">{selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}</span>
                                 </p>
                             </div>
                         )}
@@ -93,7 +87,7 @@ export function Review({
                         <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
                             <div className="flex items-center gap-2 mb-3">
                                 <Calendar className="h-5 w-5 text-amber-600" />
-                                <h3 className="font-semibold">Date et horaire</h3>
+                                <h3 className="font-semibold">{t('bookingWizard.review.dateTimeTitle')}</h3>
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
@@ -109,7 +103,7 @@ export function Review({
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Users className="h-4 w-4 text-muted-foreground" />
-                                    <p>{personCount} {personCount > 1 ? 'personnes' : 'personne'}</p>
+                                    <p>{personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}</p>
                                 </div>
                             </div>
                         </div>
@@ -117,13 +111,13 @@ export function Review({
 
                     {/* Customer Info */}
                     <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-                        <h3 className="font-semibold mb-3">Vos informations</h3>
+                        <h3 className="font-semibold mb-3">{t('bookingWizard.review.customerInfoTitle')}</h3>
                         <div className="space-y-1 text-sm">
-                            <p><strong>Nom:</strong> {customerInfo.name}</p>
-                            <p><strong>Email:</strong> {customerInfo.email}</p>
-                            <p><strong>Téléphone:</strong> {customerInfo.phone}</p>
+                            <p><strong>{t('bookingWizard.review.name')}</strong> {customerInfo.name}</p>
+                            <p><strong>{t('bookingWizard.review.email')}</strong> {customerInfo.email}</p>
+                            <p><strong>{t('bookingWizard.review.phone')}</strong> {customerInfo.phone}</p>
                             {customerInfo.notes && (
-                                <p className="mt-2"><strong>Notes:</strong> {customerInfo.notes}</p>
+                                <p className="mt-2"><strong>{t('bookingWizard.review.notes')}</strong> {customerInfo.notes}</p>
                             )}
                         </div>
                     </div>
@@ -131,24 +125,24 @@ export function Review({
                     {/* Total */}
                     <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-lg font-semibold">Total</span>
+                            <span className="text-lg font-semibold">{t('bookingWizard.review.total')}</span>
                             <span className="text-2xl font-bold text-amber-600">{totalPrice} $</span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            50 $ de garantie payés • Solde à régler sur place
+                            {t('bookingWizard.review.guaranteePaid', { amount: 50 })}
                         </p>
                     </div>
 
                     <Alert>
                         <AlertDescription className="text-sm">
-                            En confirmant cette réservation, vous acceptez nos conditions générales et notre politique d'annulation.
+                            {t('bookingWizard.review.termsAccept')}
                         </AlertDescription>
                     </Alert>
                 </div>
 
                 <div className="mt-6 flex justify-between">
                     <Button variant="outline" onClick={onPrev} size="lg" disabled={isSubmitting}>
-                        Retour
+                        {t('bookingWizard.review.back')}
                     </Button>
                     <Button
                         onClick={onConfirm}
@@ -159,12 +153,12 @@ export function Review({
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Confirmation...
+                                {t('bookingWizard.review.confirming')}
                             </>
                         ) : (
                             <>
                                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Confirmer la réservation
+                                {t('bookingWizard.review.confirm')}
                             </>
                         )}
                     </Button>

@@ -5,9 +5,9 @@ import { memo } from 'react'
 import { LayoutSh } from '../custom/layout'
 import ThemeSwitch from '../theme-switch'
 import { TopNav } from '../top-nav'
-import SkipToMain from '../skip-to-main'
 import Sidebar from '../sidebar'
 import useIsCollapsed from '@/hooks/use-is-collapsed'
+import { LangToggle } from '../landing/lang-toggle'
 
 
 const Layout = () => {
@@ -39,7 +39,7 @@ const Layout = () => {
   ]
   return (
     <div className='relative h-full overflow-hidden bg-background'>
-      <SkipToMain />
+
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <main
         id='content'
@@ -52,6 +52,7 @@ const Layout = () => {
             <div className='ml-auto flex items-center space-x-4'>
               {/* <Search /> */}
               <ThemeSwitch />
+              <LangToggle />
 
             </div>
           </LayoutSh.Header>

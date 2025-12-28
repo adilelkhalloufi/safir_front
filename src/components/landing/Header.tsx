@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-  import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { webRoutes } from "@/routes/web";
 import { IconLogin, IconUser } from "@tabler/icons-react";
- import { LangToggle } from "./lang-toggle";
- import { Link, useNavigate } from "react-router-dom";
+import { LangToggle } from "./lang-toggle";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import ThemeSwitch from "../theme-switch";
@@ -20,23 +20,23 @@ export function Header() {
   const routeList: RouteProps[] = [
     {
       href: '#benefits',
-       label: t("menu2"),
+      label: t("menu2"),
     },
     {
       href: '#features',
-       label: t("menu1"),
+      label: t("menu1"),
     },
-  
+
     {
       href: '#pricing',
-       label: t("menu3"),
+      label: t("menu3"),
     },
     {
       href: "#contact",
       label: t("menu4"),
-     },
+    },
 
-   
+
   ];
   const admin = useSelector((state: RootState) => state.admin);
 
@@ -55,7 +55,7 @@ export function Header() {
             </a>
           </span> */}
           <Link to={webRoutes.home} className="text-xl font-bold flex items-center">
-            <img src={logo} alt="OpticFlow Logo" width={50}  />
+            <img src={logo} alt="OpticFlow Logo" width={50} />
             <span className="ml-2 font-bold text-xl flex text-center">
               {t("website")}
             </span>
@@ -77,26 +77,26 @@ export function Header() {
           <ThemeSwitch />
           <LangToggle />
 
-          
+
           {admin && (
             <Button
-            variant="ghost"
+              variant="ghost"
               onClick={() => {
                 navigate(webRoutes.Dashboard);
               }}
             >
-               <IconUser/>
+              <IconUser />
             </Button>
-          )} 
-          {!admin && ( <Button
+          )}
+          {!admin && (<Button
             onClick={() => {
-                navigate(webRoutes.login);
+              navigate(webRoutes.login);
             }}
           >
             <IconLogin className="mr-2 w-5 h-5" />
             {t("login")}
           </Button>)}
-         
+
         </div>
       </div>
     </header>

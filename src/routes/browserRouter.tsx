@@ -125,7 +125,7 @@ export const browserRouter = createBrowserRouter([
     element: <LandingPage />,
     errorElement: errorElement,
   },
- 
+
 
   {
     path: webRoutes.login,
@@ -144,7 +144,6 @@ export const browserRouter = createBrowserRouter([
     errorElement: errorElement,
 
   },
-
   {
     element: (
       <RequireAuth>

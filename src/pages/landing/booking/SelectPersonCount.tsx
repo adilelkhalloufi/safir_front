@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { Users, CheckCircle2, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface SelectPersonCountProps {
     count: number
@@ -11,11 +12,13 @@ interface SelectPersonCountProps {
 }
 
 export function SelectPersonCount({ count, onSelect, onNext, onPrev }: SelectPersonCountProps) {
+    const { t } = useTranslation()
+
     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
-                <CardTitle className="text-2xl">Nombre de personnes</CardTitle>
-                <p className="text-sm text-muted-foreground">Pour combien de personnes souhaitez-vous réserver ?</p>
+                <CardTitle className="text-2xl">{t('bookingWizard.selectPersonCount.title')}</CardTitle>
+                <p className="text-sm text-muted-foreground">{t('bookingWizard.selectPersonCount.subtitle')}</p>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -38,7 +41,7 @@ export function SelectPersonCount({ count, onSelect, onNext, onPrev }: SelectPer
                             </div>
                             <div className="text-3xl font-bold mb-1">{num}</div>
                             <div className="text-sm text-muted-foreground">
-                                {num === 1 ? 'Personne' : 'Personnes'}
+                                {num === 1 ? t('bookingWizard.selectPersonCount.person') : t('bookingWizard.selectPersonCount.persons')}
                             </div>
                             {count === num && (
                                 <div className="absolute top-3 right-3">
@@ -49,9 +52,9 @@ export function SelectPersonCount({ count, onSelect, onNext, onPrev }: SelectPer
                     ))}
                 </div>
                 <div className="mt-6 flex justify-between">
-                    <Button variant="outline" onClick={onPrev} size="lg">Retour</Button>
+                    <Button variant="outline" onClick={onPrev} size="lg">{t('bookingWizard.selectPersonCount.back')}</Button>
                     <Button onClick={onNext} size="lg" className="bg-gradient-to-r from-[#020F44] to-[#E09900] hover:from-[#020F44]/90 hover:to-[#E09900]/90">
-                        Continuer <ChevronRight className="ml-2 h-4 w-4" />
+                        {t('bookingWizard.selectPersonCount.continue')} <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             </CardContent>

@@ -23,18 +23,8 @@ const SERVICE_ICONS: Record<string, any> = {
     'other': Sparkles
 }
 
-const SERVICE_TYPE_LABELS: Record<string, string> = {
-    'hammam': 'Hammam',
-    'massage': 'Massage',
-    'gommage': 'Gommage',
-    'masso': 'Massage',
-    'coiffure': 'Coiffure',
-    'spa': 'Spa',
-    'other': 'Autres'
-}
-
 export function SelectServices({ services, selected, onToggle, onNext }: SelectServicesProps) {
-    const { i18n } = useTranslation()
+    const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
 
     // Group services by type
@@ -51,8 +41,8 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
         <div className="space-y-6">
             <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Sélectionnez vos services</CardTitle>
-                    <p className="text-sm text-muted-foreground">Vous pouvez sélectionner plusieurs services</p>
+                    <CardTitle className="text-2xl">{t('bookingWizard.selectServices.title')}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{t('bookingWizard.selectServices.subtitle')}</p>
                 </CardHeader>
                 <CardContent className="space-y-8">
                     {Object.entries(groupedServices).map(([type, servicesList]) => (
@@ -60,7 +50,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                             <div className="flex items-center gap-2">
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
                                 <h3 className="text-lg font-semibold text-[#020F44]">
-                                    {SERVICE_TYPE_LABELS[type] || type}
+                                    {t(`bookingWizard.selectServices.serviceTypes.${type}`) || type}
                                 </h3>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
                             </div>
@@ -106,7 +96,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                     ))}
                     <div className="mt-6 flex justify-between items-center">
                         <p className="text-sm text-muted-foreground">
-                            {selected.length} service{selected.length > 1 ? 's' : ''} sélectionné{selected.length > 1 ? 's' : ''}
+                            {t('bookingWizard.selectServices.selected', { count: selected.length })}
                         </p>
                         <Button
                             disabled={!selected.length}
@@ -114,7 +104,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                             className="bg-gradient-to-r from-[#020F44] to-[#E09900] hover:from-[#020F44]/90 hover:to-[#E09900]/90"
                             size="lg"
                         >
-                            Continuer <ChevronRight className="ml-2 h-4 w-4" />
+                            {t('bookingWizard.selectServices.continue')} <ChevronRight className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
                 </CardContent>

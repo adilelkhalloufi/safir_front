@@ -34,7 +34,7 @@ export function SelectOptions({
     onNext,
     onPrev
 }: SelectOptionsProps) {
-    const { i18n } = useTranslation()
+    const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
 
     const hasHammam = selectedServices.some(s => s.type_service === 'hammam')
@@ -46,19 +46,19 @@ export function SelectOptions({
     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
-                <CardTitle className="text-2xl">Détails de vos services</CardTitle>
-                <p className="text-sm text-muted-foreground">Personnalisez chaque service selon vos préférences</p>
+                <CardTitle className="text-2xl">{t('bookingWizard.selectOptions.title')}</CardTitle>
+                <p className="text-sm text-muted-foreground">{t('bookingWizard.selectOptions.subtitle')}</p>
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
                     {hasHammam && (
                         <div className="rounded-xl border-2 border-[#E09900]/30 bg-orange-50/50 p-4">
-                            <div className="mb-3 font-semibold text-[#020F44]">Genre pour le Hammam</div>
+                            <div className="mb-3 font-semibold text-[#020F44]">{t('bookingWizard.selectOptions.genderTitle')}</div>
                             <div className="flex gap-2">
                                 {[
-                                    { id: 'female', label: 'Femmes' },
-                                    { id: 'male', label: 'Hommes' },
-                                    { id: 'mixed', label: 'Mixte' }
+                                    { id: 'female', label: t('bookingWizard.selectOptions.genderFemale') },
+                                    { id: 'male', label: t('bookingWizard.selectOptions.genderMale') },
+                                    { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed') }
                                 ].map((g) => (
                                     <button
                                         key={g.id}
@@ -95,7 +95,7 @@ export function SelectOptions({
 
                                 {serviceStaff.length > 0 && (
                                     <div>
-                                        <div className="mb-2 text-sm font-medium text-gray-700">Praticien(ne)</div>
+                                        <div className="mb-2 text-sm font-medium text-gray-700">{t('bookingWizard.selectOptions.practitioner')}</div>
                                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                             <button
                                                 onClick={() => handleStaffSelect(service.id, 0)}
@@ -106,7 +106,7 @@ export function SelectOptions({
                                                         : 'border-gray-200 hover:border-[#E09900]/30'
                                                 )}
                                             >
-                                                Pas de préférence
+                                                {t('bookingWizard.selectOptions.noPreference')}
                                             </button>
                                             {serviceStaff.map((st: any) => (
                                                 <button
@@ -135,9 +135,9 @@ export function SelectOptions({
                     })}
                 </div>
                 <div className="mt-6 flex justify-between">
-                    <Button variant="outline" onClick={onPrev} size="lg">Retour</Button>
+                    <Button variant="outline" onClick={onPrev} size="lg">{t('bookingWizard.selectOptions.back')}</Button>
                     <Button onClick={onNext} size="lg" className="bg-gradient-to-r from-[#020F44] to-[#E09900] hover:from-[#020F44]/90 hover:to-[#E09900]/90">
-                        Continuer <ChevronRight className="ml-2 h-4 w-4" />
+                        {t('bookingWizard.selectOptions.continue')} <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             </CardContent>

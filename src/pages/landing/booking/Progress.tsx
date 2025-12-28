@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Step } from './types'
 
 interface ProgressProps {
@@ -7,7 +8,16 @@ interface ProgressProps {
 }
 
 export function Progress({ step }: ProgressProps) {
-    const labels = ['Services', 'Personnes', 'Options', 'Date & Heure', 'Coordonnées', 'Paiement', 'Résumé']
+    const { t } = useTranslation()
+    const labels = [
+        t('bookingWizard.progress.services'),
+        t('bookingWizard.progress.persons'),
+        t('bookingWizard.progress.options'),
+        t('bookingWizard.progress.dateTime'),
+        t('bookingWizard.progress.contact'),
+        t('bookingWizard.progress.payment'),
+        t('bookingWizard.progress.summary')
+    ]
 
     return (
         <div className="mb-8 overflow-x-auto">

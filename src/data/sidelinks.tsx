@@ -5,11 +5,9 @@ import {
   IconCalendar,
   IconUsers,
   IconTicket,
-  IconClipboardCheck,
   IconUserCog,
   IconMassage,
   IconHome,
-  IconSwimming,
   IconCreditCard,
   IconChartBar,
 } from '@tabler/icons-react';
@@ -50,12 +48,12 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.subscriptions.index,
     icon: <IconTicket size={18} />,
   },
-  {
-    title: 'Health Forms',
-    label: '',
-    href: webRoutes.healthForms.index,
-    icon: <IconClipboardCheck size={18} />,
-  },
+  // {
+  //   title: 'Health Forms',
+  //   label: '',
+  //   href: webRoutes.healthForms.index,
+  //   icon: <IconClipboardCheck size={18} />,
+  // },
   {
     title: 'Staff',
     label: '',
@@ -74,12 +72,12 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.resources.index,
     icon: <IconHome size={18} />,
   },
-  {
-    title: 'Hammam Sessions',
-    label: '',
-    href: webRoutes.hammamSessions.index,
-    icon: <IconSwimming size={18} />,
-  },
+  // {
+  //   title: 'Hammam Sessions',
+  //   label: '',
+  //   href: webRoutes.hammamSessions.index,
+  //   icon: <IconSwimming size={18} />,
+  // },
   {
     title: 'Payments',
     label: '',
