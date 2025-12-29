@@ -10,18 +10,10 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-
-export interface Service {
-  id: number;
-  name: string;
-  type: 'massage' | 'hammam' | 'coiffure';
-  duration: number;
-  price: number;
-  status: 'active' | 'inactive';
-  total_bookings: number;
-  image?: string;
-}
+import { Service } from '@/interfaces/models';
+import i18next from '@/i18n';
+ 
+ 
 
 interface ServiceColumnsProps {
   onView?: (service: Service) => void;
@@ -29,58 +21,47 @@ interface ServiceColumnsProps {
   onDelete?: (service: Service) => void;
 }
 
-const typeConfig = {
-  massage: { label: 'Massage', color: 'bg-blue-100 text-blue-800' },
-  hammam: { label: 'Hammam', color: 'bg-green-100 text-green-800' },
-  coiffure: { label: 'Hair Salon', color: 'bg-purple-100 text-purple-800' },
-};
+ 
 
 export const GetServiceColumns = ({
   onView,
   onEdit,
   onDelete,
 }: ServiceColumnsProps): ColumnDef<Service>[] => [
-  {
-    accessorKey: 'image',
-    header: 'Image',
-    cell: ({ row }) => {
-      const service = row.original;
-      return service.image ? (
-        <img
-          src={service.image}
-          alt={service.name}
-          className='h-12 w-12 rounded object-cover'
-        />
-      ) : (
-        <Avatar className='h-12 w-12'>
-          <AvatarFallback>{service.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-        </Avatar>
-      );
-    },
-  },
+  
   {
     accessorKey: 'name',
     header: 'Service Name',
-    cell: ({ row }) => <div className='font-medium'>{row.getValue('name')}</div>,
+    cell: ({ row }) => {
+      const service = row.original;
+      const currentLang = i18next.language as 'fr' | 'en';
+      const name = typeof service.name === 'string' 
+        ? service.name 
+        : service.name?.[currentLang] || service.name?.fr || service.name?.en || '';
+      return <div className='font-medium'>{name}</div>;
+    },
   },
   {
     accessorKey: 'type',
     header: 'Type',
     cell: ({ row }) => {
-      const type = row.getValue('type') as keyof typeof typeConfig;
-      const config = typeConfig[type];
+      const service = row.original;
+      const type = (service as any).type;
+      const currentLang = i18next.language as 'fr' | 'en';
+       
       return (
-        <Badge variant='outline' className={config.color}>
-          {config.label}
+        <Badge variant='outline' className=''>
+          {type?.name?.[currentLang] || type?.name?.fr || type?.name?.en || 'N/A'}
         </Badge>
       );
     },
   },
   {
-    accessorKey: 'duration',
+    accessorKey: 'duration_minutes',
     header: 'Duration',
     cell: ({ row }) => {
-      const duration = row.getValue('duration') as number;
+      const service = row.original;
+      const duration = service.duration_minutes || service.duration || 0;
       return <span>{duration} min</span>;
     },
   },
@@ -88,30 +69,24 @@ export const GetServiceColumns = ({
     accessorKey: 'price',
     header: 'Price',
     cell: ({ row }) => {
-      const price = parseFloat(row.getValue('price'));
+      const service = row.original;
+      const price = typeof service.price === 'string' ? parseFloat(service.price) : (service.price || 0);
       return <div className='font-medium'>€{price.toFixed(2)}</div>;
     },
   },
   {
-    accessorKey: 'total_bookings',
-    header: 'Total Bookings',
-    cell: ({ row }) => {
-      const count = row.getValue('total_bookings') as number;
-      return <div className='text-center'>{count}</div>;
-    },
-  },
-  {
-    accessorKey: 'status',
+    accessorKey: 'is_active',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue('status') as string;
+      const isActive = row.getValue('is_active') as boolean;
       return (
-        <Badge variant={status === 'active' ? 'default' : 'secondary'}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
+        <Badge variant={isActive ? 'default' : 'secondary'}>
+          {isActive ? 'Active' : 'Inactive'}
         </Badge>
       );
     },
   },
+ 
   {
     id: 'actions',
     cell: ({ row }) => {

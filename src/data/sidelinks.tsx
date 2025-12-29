@@ -102,10 +102,5 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.settings.index,
     icon: <IconSettings size={18} />,
   },
-  {
-    title: "Type service ",
-    label: '',
-    href: webRoutes.typeServices.index,
-    icon: <IconSettings size={18} />,
-  }
+ 
 ];

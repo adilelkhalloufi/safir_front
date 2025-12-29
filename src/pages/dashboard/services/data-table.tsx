@@ -19,9 +19,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
+import { Input } from '@/components/ui/input';
+import { Combobox } from '@/components/ui/combobox';
+import { useQuery } from '@tanstack/react-query';
+import http from '@/utils/http';
+import { apiRoutes } from '@/routes/api';
+import { ServiceType } from '@/interfaces/models/serviceType';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +36,12 @@ export function ServicesDataTable<TData, TValue>({ columns, data }: DataTablePro
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { t } = useTranslation();
+
+  // Fetch service types from API
+  const { data: serviceTypes = [] } = useQuery<ServiceType[]>({
+    queryKey: ['serviceTypes'],
+    queryFn: () => http.get(apiRoutes.adminServiceTypes).then(res => res.data?.data || res.data),
+  });
 
   const table = useReactTable({
     data,
@@ -48,6 +58,20 @@ export function ServicesDataTable<TData, TValue>({ columns, data }: DataTablePro
     },
   });
 
+  const typeOptions = [
+    { value: 'all', name: t('services.allTypes', 'All Types') },
+    ...serviceTypes.map(type => ({
+      value: type.id.toString(),
+      name: `${type.name.fr} | ${type.name.en}`,
+    })),
+  ];
+
+  const statusOptions = [
+    { value: 'all', name: t('services.allStatuses', 'All Statuses') },
+    { value: 'true', name: t('services.statusActive', 'Active') },
+    { value: 'false', name: t('services.statusInactive', 'Inactive') },
+  ];
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center gap-2'>
@@ -57,33 +81,26 @@ export function ServicesDataTable<TData, TValue>({ columns, data }: DataTablePro
           onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
           className='max-w-sm'
         />
-        <Select
-          value={(table.getColumn('type')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('type')?.setFilterValue(value === 'all' ? '' : value)}
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('services.filterByType', 'Filter by type')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('services.allTypes', 'All Types')}</SelectItem>
-            <SelectItem value='massage'>{t('services.typeMassage', 'Massage')}</SelectItem>
-            <SelectItem value='hammam'>{t('services.typeHammam', 'Hammam')}</SelectItem>
-            <SelectItem value='coiffure'>{t('services.typeCoiffure', 'Hair Salon')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={(table.getColumn('status')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('status')?.setFilterValue(value === 'all' ? '' : value)}
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('services.filterByStatus', 'Filter by status')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('services.allStatuses', 'All Statuses')}</SelectItem>
-            <SelectItem value='active'>{t('services.statusActive', 'Active')}</SelectItem>
-            <SelectItem value='inactive'>{t('services.statusInactive', 'Inactive')}</SelectItem>
-          </SelectContent>
-        </Select>
+        <Combobox
+          data={typeOptions}
+          defaultValue={(table.getColumn('type')?.getFilterValue() as string) || 'all'}
+          placeholder={t('services.filterByType', 'Filter by type')}
+          onSelectionChange={(value) => table.getColumn('type')?.setFilterValue(value === 'all' ? '' : value)}
+          returnFullObject={false}
+        />
+        <Combobox
+          data={statusOptions}
+          defaultValue={(table.getColumn('is_active')?.getFilterValue() as string) || 'all'}
+          placeholder={t('services.filterByStatus', 'Filter by status')}
+          onSelectionChange={(value) => {
+            if (value === 'all') {
+              table.getColumn('is_active')?.setFilterValue('');
+            } else {
+              table.getColumn('is_active')?.setFilterValue(value === 'true');
+            }
+          }}
+          returnFullObject={false}
+        />
       </div>
       <div className='rounded-md border'>
         <Table>
