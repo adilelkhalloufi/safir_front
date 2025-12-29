@@ -3,15 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { IconDotsVertical, IconEdit, IconEye } from '@tabler/icons-react';
+import i18n from '@/i18n';
+import { ServiceType } from '@/interfaces/models';
 
-export interface ServiceType {
-    id: number;
-    name: string;
-    code: string;
-    description?: string;
-    is_active: boolean;
-    services_count?: number;
-}
+
 
 interface GetColumnsProps {
     onView: (serviceType: ServiceType) => void;
@@ -22,54 +17,32 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
     {
         accessorKey: 'id',
         header: 'ID',
-        cell: ({ row }) => <span className="font-medium">#{row.getValue('id')}</span>,
+        cell: ({ row }) => <span className="font-medium">#{row.original.id}</span>,
     },
     {
         accessorKey: 'name',
         header: 'Name',
-        cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-                <span className="font-medium">{row.getValue('name')}</span>
-            </div>
-        ),
-    },
-    {
-        accessorKey: 'code',
-        header: 'Code',
-        cell: ({ row }) => (
-            <Badge variant="outline" className="font-mono">
-                {row.getValue('code')}
-            </Badge>
-        ),
-    },
-    {
-        accessorKey: 'description',
-        header: 'Description',
-        cell: ({ row }) => {
-            const description = row.getValue('description') as string;
-            return <span className="text-muted-foreground">{description || '-'}</span>;
+        cell: ({ row }) => { 
+            const currentLang = i18n.language;
+            const name = row.original?.name[currentLang];
+            return (
+                <div className="flex items-center gap-2">
+                    <span className="font-medium">{name}</span>
+                </div>
+            );
         },
     },
+ 
+  
     {
         accessorKey: 'services_count',
         header: 'Services',
         cell: ({ row }) => {
-            const count = row.getValue('services_count') as number;
+            const count = row.original.services_count;
             return <span className="font-medium">{count || 0}</span>;
         },
     },
-    {
-        accessorKey: 'is_active',
-        header: 'Status',
-        cell: ({ row }) => {
-            const isActive = row.getValue('is_active') as boolean;
-            return (
-                <Badge variant={isActive ? 'default' : 'secondary'}>
-                    {isActive ? 'Active' : 'Inactive'}
-                </Badge>
-            );
-        },
-    },
+   
     {
         id: 'actions',
         cell: ({ row }) => {

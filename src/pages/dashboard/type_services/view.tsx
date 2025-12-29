@@ -19,6 +19,8 @@ export default function TypeServicesView() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
+ 
+
     useEffect(() => {
         setPageTitle(t('typeServices.viewTitle', 'Service Type Details'));
     }, [t]);
@@ -27,7 +29,7 @@ export default function TypeServicesView() {
         queryKey: ['serviceType', id],
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminServiceTypeById(parseInt(id!)));
-            return response.data;
+            return response.data.data;
         },
         enabled: !!id,
     });
@@ -56,7 +58,7 @@ export default function TypeServicesView() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">{serviceType.name}</h1>
+                    <h1 className="text-3xl font-bold">{(serviceType?.name?.fr)} | {(serviceType?.name?.en)}</h1>
                     <p className="text-muted-foreground">
                         {t('typeServices.viewSubtitle', 'Service type details and statistics')}
                     </p>
@@ -82,23 +84,7 @@ export default function TypeServicesView() {
                     <CardContent className="space-y-4">
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('typeServices.name', 'Name')}</p>
-                            <p className="text-base font-semibold">{serviceType.name}</p>
-                        </div>
-
-                        <Separator />
-
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">{t('typeServices.code', 'Code')}</p>
-                            <Badge variant="outline" className="font-mono">
-                                {serviceType.code}
-                            </Badge>
-                        </div>
-
-                        <Separator />
-
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">{t('typeServices.description', 'Description')}</p>
-                            <p className="text-base">{serviceType.description || '-'}</p>
+                            <p className="text-base font-semibold">{serviceType?.name?.fr} | {serviceType?.name?.en}</p>
                         </div>
 
                         <Separator />
@@ -108,6 +94,13 @@ export default function TypeServicesView() {
                             <Badge variant={serviceType.is_active ? 'default' : 'secondary'}>
                                 {serviceType.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
                             </Badge>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">{t('typeServices.servicesCount', 'Services Count')}</p>
+                            <p className="text-base font-semibold">{serviceType.services_count || 0}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -158,22 +151,43 @@ export default function TypeServicesView() {
                                 </div>
                             </div>
                         )}
+
+                        {serviceType.updated_at && (
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">{t('typeServices.updatedAt', 'Updated At')}</p>
+                                    <p className="text-base">{format(new Date(serviceType.updated_at), 'PPP')}</p>
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
 
-            {serviceType.services_count !== undefined && (
+            {serviceType.services && serviceType.services.length > 0 && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Hash className="h-5 w-5" />
-                            {t('typeServices.statistics', 'Statistics')}
+                            {t('typeServices.services', 'Services')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">{t('typeServices.servicesCount', 'Total Services')}</p>
-                            <p className="text-3xl font-bold">{serviceType.services_count}</p>
+                        <div className="space-y-2">
+                            {serviceType.services.map((service: any, index: number) => (
+                                <div key={service.id || index} className="flex items-center justify-between p-2 border rounded">
+                                    <div>
+                                        <p className="font-medium">{service.name || `Service ${index + 1}`}</p>
+                                        {service.description && (
+                                            <p className="text-sm text-muted-foreground">{service.description}</p>
+                                        )}
+                                    </div>
+                                    <Badge variant={service.is_active ? 'default' : 'secondary'}>
+                                        {service.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
+                                    </Badge>
+                                </div>
+                            ))}
                         </div>
                     </CardContent>
                 </Card>

@@ -103,7 +103,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconSettings size={18} />,
   },
   {
-    title: "type service ",
+    title: "Type service ",
     label: '',
     href: webRoutes.typeServices.index,
     icon: <IconSettings size={18} />,

@@ -21,12 +21,12 @@ export default function TypeServicesIndex() {
         fetchTypeServices();
     }, [t]);
 
-    const fetchTypeServices = () => {
+    const fetchTypeServices = () => {   
         setLoading(true);
         http
             .get(apiRoutes.adminServiceTypes)
             .then((res) => {
-                setData(res.data || []);
+                setData(res.data.data || []);
             })
             .catch(() => {
                 toast({

@@ -22,7 +22,7 @@ export interface MagicFormFieldProps {
   error?: string;
   value?: any;
   defaultValue?: any;
-  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "table" | "label";
+  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "table" | "label" | "color";
   required?: boolean;
   order?: number;
   options?: MagicFormOptionProps[] | any[]; // Updated to any[]
@@ -353,6 +353,14 @@ const MagicForm = memo(({
             disabled={disabled}
             type="date"
             value={formData[name] ?? ""}
+            onChange={(e) => handleChange(e, name)}
+            className={errors[name] ? "border-red-500" : ""}
+          />
+        ) : type === "color" ? (
+          <Input
+            disabled={disabled}
+            type="color"
+            value={formData[name] ?? "#000000"}
             onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""}
           />
