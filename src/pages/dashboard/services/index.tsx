@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { ServicesDataTable } from './data-table';
-import {  GetServiceColumns } from './columns';
+import { GetServiceColumns } from './columns';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
@@ -29,7 +29,6 @@ export default function ServicesPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [formInitialValues, setFormInitialValues] = useState<any>({});
 
   // MagicForm fields configuration
   const getFormFields = (): MagicFormGroupProps[] => [
@@ -182,7 +181,6 @@ export default function ServicesPage() {
       });
       setIsAddEditDialogOpen(false);
       setSelectedService(null);
-      setFormInitialValues({});
     },
     onError: () => {
       toast({
@@ -200,23 +198,6 @@ export default function ServicesPage() {
 
   const handleEdit = (service: Service) => {
     setSelectedService(service);
-    const name = typeof service.name === 'string' ? { fr: service.name, en: service.name } : service.name || { fr: '', en: '' };
-    const description = typeof service.description === 'string' ? { fr: service.description, en: service.description } : service.description || { fr: '', en: '' };
-    
-    setFormInitialValues({
-      name_fr: name.fr || '',
-      name_en: name.en || '',
-      type_service_id: (service as any).type?.id || (service as any).type_service_id || '',
-      duration_minutes: service.duration_minutes || service.duration || 60,
-      price: typeof service.price === 'string' ? parseFloat(service.price) : service.price,
-      description_fr: description.fr || '',
-      description_en: description.en || '',
-      is_active: service.is_active ? 1 : 0,
-      requires_room: (service.requires_room ? 1 : 0) || 0,
-      requires_chair: (service.requires_chair ? 1 : 0) || 0,
-      requires_wash_station: (service.requires_wash_station ? 1 : 0) || 0,
-      requires_hammam_session: (service.requires_hammam_session ? 1 : 0) || 0,
-    });
     setIsAddEditDialogOpen(true);
   };
 
@@ -227,20 +208,7 @@ export default function ServicesPage() {
 
   const handleAddNew = () => {
     setSelectedService(null);
-    setFormInitialValues({
-      name_fr: '',
-      name_en: '',
-      type_service_id: '',
-      duration_minutes: 60,
-      price: 0,
-      description_fr: '',
-      description_en: '',
-      is_active: 1,
-      requires_room: 0,
-      requires_chair: 0,
-      requires_wash_station: 0,
-      requires_hammam_session: 0,
-    });
+
     setIsAddEditDialogOpen(true);
   };
 
@@ -306,9 +274,9 @@ export default function ServicesPage() {
               €
               {services.length > 0
                 ? (services.reduce((sum, service) => {
-                    const price = typeof service.price === 'string' ? parseFloat(service.price) : (service.price || 0);
-                    return sum + price;
-                  }, 0) / services.length).toFixed(2)
+                  const price = typeof service.price === 'string' ? parseFloat(service.price) : (service.price || 0);
+                  return sum + price;
+                }, 0) / services.length).toFixed(2)
                 : '0.00'}
             </div>
           </CardContent>
@@ -333,13 +301,11 @@ export default function ServicesPage() {
         <MagicForm
           fields={getFormFields()}
           onSubmit={handleFormSubmit}
-          initialValues={formInitialValues}
           loading={saveServiceMutation.isPending}
           modal={true}
           onClose={() => {
             setIsAddEditDialogOpen(false);
             setSelectedService(null);
-            setFormInitialValues({});
           }}
           button={t('common.save', 'Save')}
         />
