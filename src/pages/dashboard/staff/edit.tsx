@@ -27,22 +27,20 @@ export default function EditStaff() {
   });
 
   // Fetch service types
-  const { data: serviceTypes, isLoading: isLoadingTypes } = useQuery({
+  const { data: serviceTypesData, isLoading: isLoadingTypes } = useQuery({
     queryKey: ['serviceTypes'],
-    queryFn: async () => {
-      const response = await http.get(apiRoutes.adminServiceTypes);
-      return response.data.data || response.data;
-    },
+    queryFn: () => http.get(apiRoutes.adminServiceTypes),
   });
 
+  const serviceTypes = serviceTypesData?.data?.data || [];
+
   // Fetch services
-  const { data: services, isLoading: isLoadingServices } = useQuery({
+  const { data: servicesData, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
-    queryFn: async () => {
-      const response = await http.get(apiRoutes.adminServices);
-      return response.data.data || response.data;
-    },
+    queryFn: () => http.get(apiRoutes.adminServices),
   });
+
+  const services = servicesData?.data?.data || [];
 
   const handleSubmit = (values: any) => {
     setLoading(true);

@@ -31,6 +31,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import http from '@/utils/http';
+import { apiRoutes } from '@/routes/api';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -49,6 +52,14 @@ export function StaffDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [typeFilter, setTypeFilter] = useState<string>('all');
+
+  // Fetch service types from API
+  const { data: serviceTypesData } = useQuery({
+    queryKey: ['serviceTypes'],
+    queryFn: () => http.get(apiRoutes.adminServiceTypes),
+  });
+
+  const serviceTypes = serviceTypesData?.data.data || [];
 
   const table = useReactTable({
     data,
@@ -74,7 +85,8 @@ export function StaffDataTable<TData, TValue>({
     if (value === 'all') {
       table.getColumn('type')?.setFilterValue(undefined);
     } else {
-      table.getColumn('type')?.setFilterValue(value);
+      // Filter by type_staff.id (comparing as numbers)
+      table.getColumn('type')?.setFilterValue(parseInt(value));
     }
   };
 
@@ -95,9 +107,11 @@ export function StaffDataTable<TData, TValue>({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>{t('common.all', 'All')}</SelectItem>
-            <SelectItem value='massage'>{t('staff.types.massage', 'Massage Therapist')}</SelectItem>
-            <SelectItem value='coiffure'>{t('staff.types.coiffure', 'Hair Stylist')}</SelectItem>
-            <SelectItem value='hammam'>{t('staff.types.hammam', 'Hammam Attendant')}</SelectItem>
+            {serviceTypes.map((type: any) => (
+              <SelectItem key={type.id} value={type.id.toString()}>
+                {type.name?.fr || type.name?.en || type.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -115,9 +129,9 @@ export function StaffDataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>

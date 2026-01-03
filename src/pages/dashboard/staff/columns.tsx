@@ -52,6 +52,7 @@ export const GetStaffColumns = ({
 }: StaffColumnsProps): ColumnDef<Staff>[] => [
     {
       accessorKey: 'user.email',
+      id: 'name',
       header: 'Staff Member',
       cell: ({ row }) => {
         const staff = row.original;
@@ -76,9 +77,21 @@ export const GetStaffColumns = ({
           </div>
         );
       },
+      filterFn: (row, columnId, filterValue) => {
+        const staff = row.original;
+        const firstName = staff.user?.first_name?.toLowerCase() || '';
+        const lastName = staff.user?.last_name?.toLowerCase() || '';
+        const email = staff.user?.email?.toLowerCase() || '';
+        const searchValue = filterValue.toLowerCase();
+
+        return firstName.includes(searchValue) ||
+          lastName.includes(searchValue) ||
+          email.includes(searchValue);
+      },
     },
     {
       accessorKey: 'type_staff',
+      id: 'type',
       header: 'Type',
       cell: ({ row }) => {
         const staff = row.original;
@@ -90,6 +103,10 @@ export const GetStaffColumns = ({
             {typeName}
           </Badge>
         );
+      },
+      filterFn: (row, columnId, filterValue) => {
+        const typeStaffId = row.original.type_staff?.id;
+        return typeStaffId === filterValue;
       },
     },
     {
