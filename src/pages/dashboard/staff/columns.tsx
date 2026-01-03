@@ -14,12 +14,28 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export interface Staff {
   id: number;
-  name: string;
-  type: 'massage' | 'coiffure' | 'hammam';
-  phone: string;
-  email: string;
-  status: 'active' | 'inactive';
-  total_bookings: number;
+  user: {
+    id: number;
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+    phone: string;
+  };
+  type_staff: {
+    id: number;
+    name: {
+      en: string;
+      fr: string;
+    };
+    is_active: boolean;
+  };
+  specialization: string | null;
+  certification: string | null;
+  hire_date: string;
+  default_break_minutes: number;
+  is_active: boolean;
+  services: any[];
+  availability: any[];
 }
 
 interface StaffColumnsProps {
@@ -28,115 +44,121 @@ interface StaffColumnsProps {
   onSchedule?: (staff: Staff) => void;
 }
 
-const staffTypeConfig = {
-  massage: { label: 'Massage Therapist', color: 'bg-blue-100 text-blue-800' },
-  coiffure: { label: 'Hair Stylist', color: 'bg-purple-100 text-purple-800' },
-  hammam: { label: 'Hammam Attendant', color: 'bg-green-100 text-green-800' },
-};
 
 export const GetStaffColumns = ({
   onView,
   onEdit,
   onSchedule,
 }: StaffColumnsProps): ColumnDef<Staff>[] => [
-  {
-    accessorKey: 'name',
-    header: 'Staff Member',
-    cell: ({ row }) => {
-      const staff = row.original;
-      const initials = staff.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase();
+    {
+      accessorKey: 'user.email',
+      header: 'Staff Member',
+      cell: ({ row }) => {
+        const staff = row.original;
+        const firstName = staff.user?.first_name || '';
+        const lastName = staff.user?.last_name || '';
+        const fullName = [firstName, lastName].filter(Boolean).join(' ') || staff.user?.email?.split('@')[0] || 'N/A';
+        const initials = fullName
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase();
 
-      return (
-        <div className='flex items-center gap-3'>
-          <Avatar className='h-8 w-8'>
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className='font-medium'>{staff.name}</div>
-            <div className='text-sm text-muted-foreground'>{staff.email}</div>
+        return (
+          <div className='flex items-center gap-3'>
+            <Avatar className='h-8 w-8'>
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className='font-medium'>{fullName}</div>
+              <div className='text-sm text-muted-foreground'>{staff.user?.email || 'N/A'}</div>
+            </div>
           </div>
-        </div>
-      );
+        );
+      },
     },
-  },
-  {
-    accessorKey: 'type',
-    header: 'Type',
-    cell: ({ row }) => {
-      const type = row.getValue('type') as keyof typeof staffTypeConfig;
-      const config = staffTypeConfig[type];
-      return (
-        <Badge variant='outline' className={config.color}>
-          {config.label}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: 'phone',
-    header: 'Phone',
-  },
-  {
-    accessorKey: 'total_bookings',
-    header: 'Total Bookings',
-    cell: ({ row }) => {
-      const count = row.getValue('total_bookings') as number;
-      return <div className='text-center font-medium'>{count}</div>;
-    },
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const status = row.getValue('status') as string;
-      return (
-        <Badge variant={status === 'active' ? 'default' : 'secondary'}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Badge>
-      );
-    },
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => {
-      const staff = row.original;
+    {
+      accessorKey: 'type_staff',
+      header: 'Type',
+      cell: ({ row }) => {
+        const staff = row.original;
+        const typeStaff = staff.type_staff;
+        const typeName = typeStaff?.name?.en || typeStaff?.name?.fr || '';
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            {onView && (
-              <DropdownMenuItem onClick={() => onView(staff)}>
-                <Eye className='mr-2 h-4 w-4' />
-                View Details
-              </DropdownMenuItem>
-            )}
-            {onSchedule && (
-              <DropdownMenuItem onClick={() => onSchedule(staff)}>
-                <Calendar className='mr-2 h-4 w-4' />
-                Manage Schedule
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            {onEdit && (
-              <DropdownMenuItem onClick={() => onEdit(staff)}>
-                <Edit className='mr-2 h-4 w-4' />
-                Edit Staff
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+        return (
+          <Badge variant='outline' >
+            {typeName}
+          </Badge>
+        );
+      },
     },
-  },
-];
+    {
+      accessorKey: 'user.phone',
+      header: 'Phone',
+      cell: ({ row }) => {
+        const staff = row.original;
+        return <div>{staff.user?.phone || 'N/A'}</div>;
+      },
+    },
+    {
+      accessorKey: 'services',
+      header: 'Services',
+      cell: ({ row }) => {
+        const staff = row.original;
+        const count = staff.services?.length || 0;
+        return <div className='text-center font-medium'>{count}</div>;
+      },
+    },
+    {
+      accessorKey: 'is_active',
+      header: 'Status',
+      cell: ({ row }) => {
+        const staff = row.original;
+        const isActive = staff.is_active;
+        return (
+          <Badge variant={isActive ? 'default' : 'secondary'}>
+            {isActive ? 'Active' : 'Inactive'}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const staff = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              {onView && (
+                <DropdownMenuItem onClick={() => onView(staff)}>
+                  <Eye className='mr-2 h-4 w-4' />
+                  View Details
+                </DropdownMenuItem>
+              )}
+              {onSchedule && (
+                <DropdownMenuItem onClick={() => onSchedule(staff)}>
+                  <Calendar className='mr-2 h-4 w-4' />
+                  Manage Schedule
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(staff)}>
+                  <Edit className='mr-2 h-4 w-4' />
+                  Edit Staff
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];

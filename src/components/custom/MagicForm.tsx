@@ -22,7 +22,7 @@ export interface MagicFormFieldProps {
   error?: string;
   value?: any;
   defaultValue?: any;
-  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "table" | "label" | "color";
+  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color";
   required?: boolean;
   order?: number;
   options?: MagicFormOptionProps[] | any[]; // Updated to any[]
@@ -162,8 +162,14 @@ const MagicForm = memo(({
     fields.forEach(group => {
       group.fields.forEach(({ name, required, type, columns }) => {
         if (required) {
+          // Special handling for table type - check if at least one row exists
+          if (type === 'table') {
+            if (!Array.isArray(formData[name]) || formData[name].length === 0) {
+              newErrors[name] = "At least one entry is required";
+            }
+          }
           // Special handling for select/combobox
-          if (type === 'select') {
+          else if (type === 'select') {
             if (formData[name] === undefined || formData[name] === null || formData[name] === '') {
               newErrors[name] = "This field is required";
             }
@@ -273,15 +279,37 @@ const MagicForm = memo(({
       );
     }
 
+    if (col.type === "checkbox") {
+      return (
+        <div className="flex flex-col gap-1">
+          <Switch
+            key={cellKey}
+            disabled={col.disabled}
+            checked={row[col.name] === 1 || row[col.name] === true}
+            onCheckedChange={(checked) => handleTableChange(name, rowIndex, col.name, checked ? 1 : 0)}
+          />
+          {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+        </div>
+      );
+    }
+
+    // For color and time types, use specific input types
+    const inputType = col.type === "color" ? "color" :
+      col.type === "time" ? "time" :
+        col.type === "date" ? "date" :
+          col.type === "number" ? "number" :
+            "text";
+
     return (
       <div className="flex flex-col gap-1">
         <Input
           key={cellKey}
           disabled={col.disabled}
-          type={col.type}
+          type={inputType}
           value={row[col.name] || ""}
           onChange={(e) => handleTableChange(name, rowIndex, col.name, e.target.value)}
           className={hasError ? "border-red-500" : ""}
+          placeholder={col.placeholder}
         />
         {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
       </div>
@@ -356,6 +384,15 @@ const MagicForm = memo(({
             onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""}
           />
+        ) : type === "time" ? (
+          <Input
+            disabled={disabled}
+            type="time"
+            value={formData[name] ?? ""}
+            onChange={(e) => handleChange(e, name)}
+            placeholder={placeholder || "HH:MM"}
+            className={errors[name] ? "border-red-500" : ""}
+          />
         ) : type === "color" ? (
           <Input
             disabled={disabled}
@@ -396,6 +433,9 @@ const MagicForm = memo(({
               </TableBody>
             </Table>
             <Button disabled={disabled} className="mt-2" onClick={() => addTableRow(name, columns || [])}>Ajouter</Button>
+            {errors[name] && typeof errors[name] === 'string' && (
+              <p className="text-red-500 text-sm mt-2">{errors[name]}</p>
+            )}
           </div>
         ) : (
           <Input

@@ -1,32 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { LayoutSh as Layout } from '@/components/custom/layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
-import { IconArrowLeft, IconLoader2 } from '@tabler/icons-react';
+import { toast } from '@/components/ui/use-toast';
+import { setPageTitle, handleErrorResponse } from '@/utils';
+import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
+import { IconLoader2 } from '@tabler/icons-react';
 
 export default function EditStaff() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { id } = useParams();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    type: 'massage',
-    status: 'active'
-  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setPageTitle(t('staff.editTitle', 'Edit Staff Member'));
+  }, [t]);
 
   const { data: staff, isLoading } = useQuery({
     queryKey: ['staff', id],
@@ -34,172 +26,259 @@ export default function EditStaff() {
     enabled: !!id,
   });
 
-  useEffect(() => {
-    if (staff?.data) {
-      setFormData({
-        name: staff.data.name || '',
-        email: staff.data.email || '',
-        phone: staff.data.phone || '',
-        type: staff.data.type || 'massage',
-        status: staff.data.status || 'active'
-      });
-    }
-  }, [staff]);
-
-  const updateMutation = useMutation({
-    mutationFn: (data: any) => http.put(apiRoutes.adminStaffById(Number(id)), data),
-    onSuccess: () => {
-      toast({
-        title: t('staff.updateSuccess'),
-        description: t('staff.updateSuccessDesc'),
-      });
-      navigate(webRoutes.staff.index);
-    },
-    onError: (error: any) => {
-      toast({
-        title: t('staff.saveError'),
-        description: error?.message || t('staff.saveErrorDesc'),
-        variant: 'destructive',
-      });
+  // Fetch service types
+  const { data: serviceTypes, isLoading: isLoadingTypes } = useQuery({
+    queryKey: ['serviceTypes'],
+    queryFn: async () => {
+      const response = await http.get(apiRoutes.adminServiceTypes);
+      return response.data.data || response.data;
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateMutation.mutate(formData);
+  // Fetch services
+  const { data: services, isLoading: isLoadingServices } = useQuery({
+    queryKey: ['services'],
+    queryFn: async () => {
+      const response = await http.get(apiRoutes.adminServices);
+      return response.data.data || response.data;
+    },
+  });
+
+  const handleSubmit = (values: any) => {
+    setLoading(true);
+
+    // Transform service_ids from array of objects to array of IDs
+    const submitData = {
+      ...values,
+      service_ids: values.service_ids?.map((item: any) => item.service_id) || [],
+    };
+
+    http
+      .put(apiRoutes.adminStaffById(Number(id)), submitData)
+      .then(() => {
+        toast({
+          title: t('common.success', 'Success'),
+          description: t('staff.updateSuccess', 'Staff member updated successfully'),
+        });
+        navigate(webRoutes.staff.index);
+      })
+      .catch((e) => {
+        handleErrorResponse(e);
+        setLoading(false);
+      });
   };
 
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const staffFields: MagicFormGroupProps[] = [
+    {
+      group: t('staff.personalDetails', 'Personal Details'),
+      card: true,
+      layout: {
+        type: 'grid',
+        columns: 2,
+      },
+      fields: [
+        {
+          name: 'name',
+          label: t('staff.name', 'Full Name'),
+          type: 'text',
+          required: true,
+          placeholder: t('staff.namePlaceholder', 'Enter full name'),
+        },
+        {
+          name: 'email',
+          label: t('staff.email', 'Email'),
+          type: 'text',
+          required: true,
+          placeholder: t('staff.emailPlaceholder', 'email@example.com'),
+        },
+        {
+          name: 'phone',
+          label: t('staff.phone', 'Phone'),
+          type: 'text',
+          placeholder: t('staff.phonePlaceholder', '+1 234 567 8900'),
+        },
+        {
+          name: 'type_staff_id',
+          label: t('staff.type', 'Staff Type'),
+          type: 'select',
+          required: true,
+          disabled: isLoadingTypes,
+          options: serviceTypes?.map((type: any) => ({
+            value: type.id.toString(),
+            name: type.name?.fr || type.name?.en || type.name || type.type_name || type.type,
+          })) || [],
+          placeholder: isLoadingTypes ? 'Loading...' : t('staff.selectType', 'Select staff type'),
+          autocomplete: true,
+        },
+        {
+          name: 'specialization',
+          label: t('staff.specialization', 'Specialization'),
+          type: 'text',
+          placeholder: t('staff.specializationPlaceholder', 'e.g., Swedish massage, Deep tissue'),
+        },
+        {
+          name: 'certification',
+          label: t('staff.certification', 'Certification'),
+          type: 'textarea',
+          placeholder: t('staff.certificationPlaceholder', 'List certifications and qualifications'),
+        },
+        {
+          name: 'hire_date',
+          label: t('staff.hireDate', 'Hire Date'),
+          type: 'date',
+          required: true,
+        },
+        {
+          name: 'default_break_minutes',
+          label: t('staff.defaultBreak', 'Default Break (minutes)'),
+          type: 'number',
+          defaultValue: 15,
+          placeholder: '15',
+        },
+        {
+          name: 'is_active',
+          label: t('staff.isActive', 'Active'),
+          type: 'checkbox',
+          defaultValue: 1,
+        },
+      ],
+    },
+    {
+      group: t('staff.services', 'Services'),
+      card: true,
+      fields: [
+        {
+          name: 'service_ids',
+          label: t('staff.servicesCanProvide', 'Services this staff member can provide'),
+          type: 'table',
+          required: true,
+          columns: [
+            {
+              name: 'service_id',
+              label: t('staff.service', 'Service'),
+              type: 'select',
+              required: true,
+              disabled: isLoadingServices,
+              options: services?.map((service: any) => ({
+                value: service.id.toString(),
+                name: service.name?.fr || service.name?.en || service.name || service.service_name,
+              })) || [],
+              placeholder: isLoadingServices ? 'Loading...' : t('staff.selectService', 'Select service'),
+              autocomplete: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      group: t('staff.availability', 'Availability Schedule'),
+      card: true,
+      fields: [
+        {
+          name: 'availability',
+          label: t('staff.weeklySchedule', 'Weekly Schedule'),
+          type: 'table',
+          required: true,
+          columns: [
+            {
+              name: 'day_of_week',
+              label: t('staff.dayOfWeek', 'Day of Week'),
+              type: 'select',
+              required: true,
+              options: [
+                { value: '0', name: t('days.sunday', 'Sunday') },
+                { value: '1', name: t('days.monday', 'Monday') },
+                { value: '2', name: t('days.tuesday', 'Tuesday') },
+                { value: '3', name: t('days.wednesday', 'Wednesday') },
+                { value: '4', name: t('days.thursday', 'Thursday') },
+                { value: '5', name: t('days.friday', 'Friday') },
+                { value: '6', name: t('days.saturday', 'Saturday') },
+              ],
+              placeholder: t('staff.selectDay', 'Select day'),
+            },
+            {
+              name: 'start_time',
+              label: t('staff.startTime', 'Start Time'),
+              type: 'time',
+              required: true,
+              placeholder: '09:00',
+            },
+            {
+              name: 'end_time',
+              label: t('staff.endTime', 'End Time'),
+              type: 'time',
+              required: true,
+              placeholder: '17:00',
+            },
+            {
+              name: 'is_available',
+              label: t('staff.isAvailable', 'Available'),
+              type: 'checkbox',
+              defaultValue: 1,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const initialValues = useMemo(() => {
+    const staffData = staff?.data?.data;
+
+    if (!staffData) {
+      return {
+        name: '',
+        email: '',
+        phone: '',
+        type_staff_id: '',
+        specialization: '',
+        certification: '',
+        hire_date: new Date().toISOString().split('T')[0],
+        default_break_minutes: 15,
+        is_active: 1,
+        service_ids: [],
+        availability: [],
+      };
+    }
+
+    return {
+      name: staffData?.user?.email?.split('@')[0] || staffData?.name || '',
+      email: staffData?.user?.email || staffData?.email || '',
+      phone: staffData?.user?.phone || staffData?.phone || '',
+      type_staff_id: staffData?.type_staff?.id?.toString() || staffData?.type_staff_id?.toString() || '',
+      specialization: staffData?.specialization || '',
+      certification: staffData?.certification || '',
+      hire_date: staffData?.hire_date || new Date().toISOString().split('T')[0],
+      default_break_minutes: staffData?.default_break_minutes || 15,
+      is_active: staffData?.is_active ? 1 : 0,
+      service_ids: staffData?.services?.map((service: any) => ({
+        service_id: service.id?.toString(),
+      })) || [],
+      availability: staffData?.availability?.map((avail: any) => ({
+        day_of_week: avail.day_of_week?.toString() || '',
+        start_time: avail.start_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
+        end_time: avail.end_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
+        is_available: avail.is_available ? 1 : 0,
+      })) || [],
+    };
+  }, [staff?.data]);
 
   if (isLoading) {
     return (
-      <Layout>
-        <Layout.Body>
-          <div className="flex items-center justify-center h-full">
-            <IconLoader2 className="h-8 w-8 animate-spin" />
-          </div>
-        </Layout.Body>
-      </Layout>
+      <div className="flex items-center justify-center h-full">
+        <IconLoader2 className="h-8 w-8 animate-spin" />
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <Layout.Header>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(webRoutes.staff.index)}
-          >
-            <IconArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Edit Staff Member</h1>
-            <p className="text-muted-foreground">{t('staff.subtitle')}</p>
-          </div>
-        </div>
-      </Layout.Header>
-
-      <Layout.Body>
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit Staff Member</CardTitle>
-            <CardDescription>Update staff member details below</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="Enter full name"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    placeholder="email@example.com"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
-                    placeholder="+1 234 567 8900"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="type">Staff Type</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value) => handleChange('type', value)}
-                  >
-                    <SelectTrigger id="type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="massage">{t('staff.types.massage')}</SelectItem>
-                      <SelectItem value="hammam">{t('staff.types.hammam')}</SelectItem>
-                      <SelectItem value="coiffure">{t('staff.types.coiffure')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleChange('status', value)}
-                  >
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex gap-4 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(webRoutes.staff.index)}
-                  disabled={updateMutation.isPending}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button type="submit" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending && (
-                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {t('common.save')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </Layout.Body>
-    </Layout>
+    <MagicForm
+      title={t('staff.editTitle', 'Edit Staff Member')}
+      onSubmit={handleSubmit}
+      fields={staffFields}
+      button={t('common.save', 'Save')}
+      initialValues={initialValues}
+      loading={loading}
+    />
   );
 }

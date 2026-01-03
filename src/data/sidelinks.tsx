@@ -67,12 +67,6 @@ export const sidelinks: SideLink[] = [
     icon: <IconMassage size={18} />,
   },
   {
-    title: 'Service Types',
-    label: '',
-    href: webRoutes.typeServices.index,
-    icon: <IconMassage size={18} />,
-  },
-  {
     title: 'Resources',
     label: '',
     href: webRoutes.resources.index,
@@ -99,8 +93,25 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Settings',
     label: '',
-    href: webRoutes.settings.index,
+    href: '',
     icon: <IconSettings size={18} />,
+    sub: [
+      {
+        title: 'Type Services',
+        href: webRoutes.typeServices.index,
+        icon: <IconMassage size={18} />,
+      },
+      // {
+      //   title: 'types of Resources',
+      //   href: webRoutes.settings.typeResources,
+      //   icon: <IconHome size={18} />,
+      // },
+      {
+        title: 'General Settings',
+        href: webRoutes.settings.index,
+        icon: <IconUserCog size={18} />,
+      }
+    ],
   },
- 
+
 ];
