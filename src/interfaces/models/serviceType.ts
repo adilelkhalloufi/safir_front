@@ -9,3 +9,14 @@ export interface ServiceType {
     is_active: boolean;
     services_count?: number;
 }
+
+export interface TypeResource{
+    id: number;
+    name: {
+        fr: string;
+        en: string;
+    };
+    code?: string;
+    description?: string;
+    is_active: boolean;
+ } 

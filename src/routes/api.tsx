@@ -28,10 +28,6 @@ export const apiRoutes = {
   adminSubscriptionById: (id: number) => `${API_URL}/admin/subscriptions/${id}`,
   adminSubscriptionSuspend: (id: number) => `${API_URL}/admin/subscriptions/${id}/suspend`,
 
-  adminHealthForms: `${API_URL}/admin/health-forms`,
-  adminHealthFormsPending: `${API_URL}/admin/health-forms/pending`,
-  adminHealthFormById: (id: number) => `${API_URL}/admin/health-forms/${id}`,
-  adminHealthFormReview: (id: number) => `${API_URL}/admin/health-forms/${id}/review`,
 
   adminStaff: `${API_URL}/admin/staff`,
   adminStaffById: (id: number) => `${API_URL}/admin/staff/${id}`,
@@ -49,11 +45,10 @@ export const apiRoutes = {
   adminResourceStatus: (id: number) => `${API_URL}/admin/resources/${id}/status`,
   adminResourceSchedule: (id: number) => `${API_URL}/admin/resources/${id}/schedule`,
 
-  adminHammamSessions: `${API_URL}/admin/hammam-sessions`,
-  adminHammamSessionById: (id: number) => `${API_URL}/admin/hammam-sessions/${id}`,
-  adminHammamSessionCancel: (id: number) => `${API_URL}/admin/hammam-sessions/${id}/cancel`,
-  adminHammamSessionBookings: (id: number) => `${API_URL}/admin/hammam-sessions/${id}/bookings`,
-
+  adminTypeResources: `${API_URL}/admin/type-resources`,
+  adminTypeResourceById: (id: number) => `${API_URL}/admin/type-resources/${id}`,
+  
+  
   adminPayments: `${API_URL}/admin/payments`,
   adminPaymentById: (id: number) => `${API_URL}/admin/payments/${id}`,
   adminPaymentRefund: (id: number) => `${API_URL}/admin/payments/${id}/refund`,

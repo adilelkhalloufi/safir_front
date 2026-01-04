@@ -57,10 +57,11 @@ export const webRoutes = {
     add: '/dashboard/resources/add',
     edit: '/dashboard/resources/:id/edit',
   },
-  hammamSessions: {
-    index: '/dashboard/hammam-sessions',
-    view: '/dashboard/hammam-sessions/:id',
-    add: '/dashboard/hammam-sessions/add',
+  typeResources: {
+    index: '/dashboard/type-resources',
+    view: '/dashboard/type-resources/:id',
+    add: '/dashboard/type-resources/add',
+    edit: '/dashboard/type-resources/:id/edit',
   },
   payments: {
     index: '/dashboard/payments',

@@ -101,6 +101,11 @@ export const sidelinks: SideLink[] = [
         href: webRoutes.typeServices.index,
         icon: <IconMassage size={18} />,
       },
+      {
+        title: 'Type Resources',
+        href: webRoutes.typeResources.index,
+        icon: <IconHome size={18} />,
+      },
       // {
       //   title: 'types of Resources',
       //   href: webRoutes.settings.typeResources,

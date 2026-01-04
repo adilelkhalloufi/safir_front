@@ -41,7 +41,7 @@ export default function ResourcesPage() {
   // Fetch resources
   const { data: resources = [], isLoading } = useQuery<Resource[]>({
     queryKey: ['resources'],
-    queryFn: () => http.get(apiRoutes.adminResources),
+    queryFn: () => http.get(apiRoutes.adminResources).then((res) => res.data.data),
   });
 
   // Status change mutation
@@ -162,10 +162,10 @@ export default function ResourcesPage() {
   });
 
   // Calculate stats
-  const activeResources = resources.filter((r) => r.status === 'active').length;
-  const maintenanceResources = resources.filter((r) => r.status === 'maintenance').length;
-  const avgUtilization =
-    resources.length > 0 ? Math.round(resources.reduce((sum, r) => sum + r.utilization, 0) / resources.length) : 0;
+  // const activeResources = resources.filter((r) => r.status === 'active').length;
+  // const maintenanceResources = resources.filter((r) => r.status === 'maintenance').length;
+  // const avgUtilization =
+  //   resources.length > 0 ? Math.round(resources.reduce((sum, r) => sum + r.utilization, 0) / resources.length) : 0;
 
   if (isLoading) {
     return (
@@ -193,7 +193,7 @@ export default function ResourcesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className='grid gap-4 md:grid-cols-4'>
+      {/* <div className='grid gap-4 md:grid-cols-4'>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>{t('resources.totalResources', 'Total Resources')}</CardTitle>
@@ -228,7 +228,7 @@ export default function ResourcesPage() {
             <div className='text-2xl font-bold'>{avgUtilization}%</div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       {/* Resources Table */}
       <Card>
@@ -342,9 +342,9 @@ export default function ResourcesPage() {
             <DialogDescription>
               {statusAction === 'maintenance'
                 ? t(
-                    'resources.maintenanceConfirmation',
-                    'This resource will be marked as under maintenance and unavailable for bookings.'
-                  )
+                  'resources.maintenanceConfirmation',
+                  'This resource will be marked as under maintenance and unavailable for bookings.'
+                )
                 : t('resources.activateConfirmation', 'This resource will be activated and available for bookings.')}
             </DialogDescription>
           </DialogHeader>
