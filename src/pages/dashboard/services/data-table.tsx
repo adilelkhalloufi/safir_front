@@ -26,6 +26,7 @@ import { useQuery } from '@tanstack/react-query';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { ServiceType } from '@/interfaces/models/serviceType';
+import i18next from '@/i18n';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,10 +39,12 @@ export function ServicesDataTable<TData, TValue>({ columns, data }: DataTablePro
   const { t } = useTranslation();
 
   // Fetch service types from API
-  const { data: serviceTypes = [] } = useQuery<ServiceType[]>({
+  const { data: serviceTypesData } = useQuery<ServiceType[]>({
     queryKey: ['serviceTypes'],
     queryFn: () => http.get(apiRoutes.adminServiceTypes).then(res => res.data?.data || res.data),
   });
+
+  const serviceTypes = Array.isArray(serviceTypesData) ? serviceTypesData : [];
 
   const table = useReactTable({
     data,
@@ -60,10 +63,14 @@ export function ServicesDataTable<TData, TValue>({ columns, data }: DataTablePro
 
   const typeOptions = [
     { value: 'all', name: t('services.allTypes', 'All Types') },
-    ...serviceTypes.map(type => ({
-      value: type.id.toString(),
-      name: `${type.name.fr} | ${type.name.en}`,
-    })),
+    ...serviceTypes.map(type => {
+      const currentLang = i18next.language as 'fr' | 'en';
+      const name = type.name?.[currentLang] || type.name?.fr || type.name?.en || 'N/A';
+      return {
+        value: type.id.toString(),
+        name,
+      };
+    }),
   ];
 
   const statusOptions = [

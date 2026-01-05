@@ -1,9 +1,6 @@
-// Booking API Types based on Laravel backend
+import { ServiceType } from "./serviceType";
 
-export type ServiceType = 'masso' | 'coiffure' | 'hammam' | 'massage' | 'gommage' | 'spa' | 'other'
-export type Gender = 'femme' | 'homme' | 'mixte'
-export type BookingStatus = 'draft' | 'confirmed' | 'cancelled' | 'no_show' | 'completed'
-export type StaffType = 'masso' | 'coiffure' | 'hammam'
+ 
 
 export interface Service {
   id?: number

@@ -26,7 +26,8 @@ export default function StaffIndex() {
     http
       .get(apiRoutes.adminStaff)
       .then((res) => {
-        setData(res.data.data || res.data);
+        console.log("res.data => ", res.data);
+        setData(res.data.data || res.data || []);
       })
       .catch(() => {
         toast({

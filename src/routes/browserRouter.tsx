@@ -71,6 +71,18 @@ const ServicesIndex = loadable(() => import('../pages/dashboard/services'), {
   fallback: fallbackElement,
 });
 
+const ServicesAdd = loadable(() => import('../pages/dashboard/services/add'), {
+  fallback: fallbackElement,
+});
+
+const ServicesEdit = loadable(() => import('../pages/dashboard/services/edit'), {
+  fallback: fallbackElement,
+});
+
+const ServicesView = loadable(() => import('../pages/dashboard/services/view'), {
+  fallback: fallbackElement,
+});
+
 const TypeServices = loadable(() => import('../pages/dashboard/type_services'), {
   fallback: fallbackElement,
 });
@@ -122,17 +134,7 @@ const ResourcesView = loadable(() => import('../pages/dashboard/resources/view')
   fallback: fallbackElement,
 });
 
-const ServicesAdd = loadable(() => import('../pages/dashboard/services/add'), {
-  fallback: fallbackElement,
-});
 
-const ServicesEdit = loadable(() => import('../pages/dashboard/services/edit'), {
-  fallback: fallbackElement,
-});
-
-const ServicesView = loadable(() => import('../pages/dashboard/services/view'), {
-  fallback: fallbackElement,
-});
 
 const StaffAdd = loadable(() => import('../pages/dashboard/staff/add'), {
   fallback: fallbackElement,

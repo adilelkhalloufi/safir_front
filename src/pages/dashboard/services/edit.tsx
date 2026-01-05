@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -17,8 +17,7 @@ export default function EditService() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { id } = useParams();
-  const [loading, setLoading] = useState(false);
-
+ 
   useEffect(() => {
     setPageTitle(t('services.editService', 'Edit Service'));
   }, [t]);
@@ -37,41 +36,47 @@ export default function EditService() {
 
   const serviceTypes = serviceTypesData?.data?.data || [];
 
-  const serviceData = service?.data;
+  // Fetch type resources
+  const { data: typeResourcesData, isLoading: isLoadingTypeResources } = useQuery({
+    queryKey: ['resources'],
+    queryFn: () => http.get(apiRoutes.adminResources),
+  });
+
+  const typeResources = typeResourcesData?.data?.data || [];
+
+  const serviceData = service?.data?.data || [];
 
   const initialValues = useMemo(() => {
     if (!serviceData) {
       return {
         is_active: 1,
+        requirements: [],
       };
     }
 
     return {
-      name: serviceData.name || '',
-      type_service_id: serviceData.type_service?.id?.toString() || '',
+      name_fr: serviceData.name?.fr || '',
+      name_en: serviceData.name?.en || '',
+      type_service_id: serviceData.type?.id?.toString() || '',
       duration_minutes: serviceData.duration_minutes || '',
       price: serviceData.price || '',
-      description: serviceData.description || '',
-      requires_room: serviceData.requires_room ? 1 : 0,
-      requires_chair: serviceData.requires_chair ? 1 : 0,
-      requires_wash_station: serviceData.requires_wash_station ? 1 : 0,
-      requires_hammam_session: serviceData.requires_hammam_session ? 1 : 0,
+      description_fr: serviceData.description?.fr || '',
+      description_en: serviceData.description?.en || '',
       is_active: serviceData.is_active ? 1 : 0,
+      requirements: serviceData.requirements?.map((req: any) => ({
+        resource_id: req.resource_id?.toString() || req.resource?.id?.toString() || '',
+        quantity: req.quantity || 1,
+        is_required: req.is_required ? 1 : 0,
+      })) || [],
     };
   }, [serviceData]);
 
   const handleSubmit = (values: any) => {
-    setLoading(true);
-
-    const payload = {
-      ...values,
-      duration_minutes: parseInt(values.duration_minutes) || 30,
-      price: parseFloat(values.price) || 0,
-      is_active: values.is_active ? 1 : 0,
-    };
+ 
+  
 
     http
-      .put(apiRoutes.adminServiceById(Number(id)), payload)
+      .put(apiRoutes.adminServiceById(Number(id)), values)
       .then(() => {
         toast({
           title: t('services.updateSuccess', 'Service Updated'),
@@ -82,21 +87,30 @@ export default function EditService() {
       .catch((error) => {
         handleErrorResponse(error);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+ 
   };
 
   const formGroups: MagicFormGroupProps[] = [
     {
       group: t('services.basicInfo', 'Basic Information'),
+      layout: {
+        type: 'grid',
+        columns: 2,
+      },
       fields: [
         {
-          name: 'name',
-          label: t('services.serviceName', 'Service Name'),
+          name: 'name_fr',
+          label: t('services.serviceNameFr', 'Service Name (FR)'),
           type: 'text',
           required: true,
-          placeholder: t('services.serviceNamePlaceholder', 'Enter service name'),
+          placeholder: t('services.serviceNamePlaceholder', 'e.g. Massage Suédois'),
+        },
+        {
+          name: 'name_en',
+          label: t('services.serviceNameEn', 'Service Name (EN)'),
+          type: 'text',
+          required: true,
+          placeholder: t('services.serviceNamePlaceholder', 'e.g. Swedish Massage'),
         },
         {
           name: 'type_service_id',
@@ -124,44 +138,63 @@ export default function EditService() {
           required: true,
           placeholder: '0.00',
         },
-        {
-          name: 'description',
-          label: t('services.description', 'Description'),
-          type: 'textarea',
-          placeholder: t('services.descriptionPlaceholder', 'Enter service description'),
-        },
-      ],
-    },
-    {
-      group: t('services.resourceRequirements', 'Resource Requirements'),
-      fields: [
-        {
-          name: 'requires_room',
-          label: t('services.requiresRoom', 'Requires Room'),
-          type: 'checkbox',
-        },
-        {
-          name: 'requires_chair',
-          label: t('services.requiresChair', 'Requires Chair'),
-          type: 'checkbox',
-        },
-        {
-          name: 'requires_wash_station',
-          label: t('services.requiresWashStation', 'Requires Wash Station'),
-          type: 'checkbox',
-        },
-        {
-          name: 'requires_hammam_session',
-          label: t('services.requiresHammamSession', 'Requires Hammam Session'),
-          type: 'checkbox',
-        },
-        {
+           {
           name: 'is_active',
           label: t('services.isActive', 'Active Service'),
           type: 'checkbox',
         },
+        {
+          name: 'description_fr',
+          label: t('services.descriptionFr', 'Description (FR)'),
+          type: 'textarea',
+          placeholder: t('services.descriptionPlaceholder', 'Décrivez le service...'),
+        },
+        {
+          name: 'description_en',
+          label: t('services.descriptionEn', 'Description (EN)'),
+          type: 'textarea',
+          placeholder: t('services.descriptionPlaceholder', 'Describe the service...'),
+        },
+     
       ],
     },
+    {
+      group: t('services.requirements', 'Service Requirements'),
+      fields: [
+        {
+          name: 'requirements',
+          label: t('services.requirementsList', 'Requirements List'),
+          type: 'table',
+          required: false,
+          columns: [
+            {
+              name: 'resource_id',
+              label: t('services.resourceType', 'Resource Type'),
+              type: 'select',
+              required: true,
+              disabled: isLoadingTypeResources,
+              options: typeResources?.map((type: any) => ({
+                value: type.id.toString(),
+                name: type.name?.fr || type.name?.en || type.name,
+              })) || [],
+            },
+            {
+              name: 'quantity',
+              label: t('services.quantity', 'Quantity'),
+              type: 'number',
+              required: true,
+              placeholder: '1',
+            },
+            {
+              name: 'is_required',
+              label: t('services.isRequired', 'Is Required'),
+              type: 'checkbox',
+            },
+          ],
+        },
+      ],
+    },
+   
   ];
 
   if (isLoading) {
@@ -196,6 +229,7 @@ export default function EditService() {
 
       <Layout.Body>
         <MagicForm
+          title=''
           fields={formGroups}
           onSubmit={handleSubmit}
           initialValues={initialValues}

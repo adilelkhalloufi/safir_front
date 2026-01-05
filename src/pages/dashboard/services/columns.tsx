@@ -32,6 +32,11 @@ export const GetServiceColumns = ({
   {
     accessorKey: 'name',
     header: 'Service Name',
+    accessorFn: (row) => {
+      const nameObj = (row as any).name;
+      const currentLang = i18next.language as 'fr' | 'en';
+      return typeof nameObj === 'string' ? nameObj : nameObj?.[currentLang] || nameObj?.fr || nameObj?.en || '';
+    },
     cell: ({ row }) => {
       const service = row.original;
       const currentLang = i18next.language as 'fr' | 'en';
@@ -44,6 +49,7 @@ export const GetServiceColumns = ({
   {
     accessorKey: 'type',
     header: 'Type',
+    accessorFn: (row) => (row as any).type?.id,
     cell: ({ row }) => {
       const service = row.original;
       const type = (service as any).type;

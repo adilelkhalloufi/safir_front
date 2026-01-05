@@ -105,7 +105,7 @@ export default function ViewStaff() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Full Name</p>
                   <p className="text-base mt-1">
-                    {staffData?.user?.name || 'N/A'}
+                    {staffData?.user?.name|| 'N/A'}
                   </p>
                 </div>
                 <div>
@@ -164,11 +164,11 @@ export default function ViewStaff() {
                     >
                       <div>
                         <p className='font-medium'>
-                          {service.name?.fr || service.name?.en || service.name || 'N/A'}
+                          {service.name?.fr || service.name?.en || 'N/A'}
                         </p>
                         {service.description && (
                           <p className='text-sm text-muted-foreground'>
-                            {service.description.fr || service.description.en || service.description}
+                            {service.description?.fr || service.description?.en || ''}
                           </p>
                         )}
                       </div>
