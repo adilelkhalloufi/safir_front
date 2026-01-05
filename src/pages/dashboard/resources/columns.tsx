@@ -1,6 +1,6 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, Edit, Wrench, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ColumnDef } from '@tanstack/react-table'
+import { MoreHorizontal, Eye, Edit, CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,104 +8,108 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+} from '@/components/ui/dropdown-menu'
+import { Badge } from '@/components/ui/badge'
+import { TypeResource } from '@/interfaces/models'
 
 export interface Resource {
-  id: number;
-  name: string;
-  type: 'room' | 'chair' | 'wash_station';
-  capacity: number;
-  status: 'active' | 'maintenance' | 'inactive';
-  utilization: number;
-  location?: string;
+  id: number
+  name: {
+    fr: string
+    en: string
+  }
+  description: {
+    fr: string | null
+    en: string | null
+  }
+  capacity: number | null
+  location: string | null
+  is_available: boolean
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  type_resource: TypeResource
 }
 
 interface ResourceColumnsProps {
-  onView?: (resource: Resource) => void;
-  onEdit?: (resource: Resource) => void;
-  onMaintenance?: (resource: Resource) => void;
-  onActivate?: (resource: Resource) => void;
+  onView?: (resource: Resource) => void
+  onEdit?: (resource: Resource) => void
+  onActivate?: (resource: Resource) => void
+  t: (key: string, fallback: string) => string
+  currentLang: 'fr' | 'en'
 }
-
-const typeConfig = {
-  room: { label: 'Room', color: 'bg-blue-100 text-blue-800' },
-  chair: { label: 'Chair', color: 'bg-green-100 text-green-800' },
-  wash_station: { label: 'Wash Station', color: 'bg-purple-100 text-purple-800' },
-};
-
-const statusConfig = {
-  active: { label: 'Active', variant: 'default' as const },
-  maintenance: { label: 'Maintenance', variant: 'secondary' as const },
-  inactive: { label: 'Inactive', variant: 'outline' as const },
-};
 
 export const GetResourceColumns = ({
   onView,
   onEdit,
-  onMaintenance,
   onActivate,
+  t,
+  currentLang,
 }: ResourceColumnsProps): ColumnDef<Resource>[] => [
   {
     accessorKey: 'name',
-    header: 'Resource Name',
-    cell: ({ row }) => <div className='font-medium'>{row.getValue('name')}</div>,
+    header: t('resources.name', 'Name'),
+    cell: ({ row }) => {
+      const name = row.getValue('name') as { fr: string; en: string };
+      return <div className='font-medium'>{name[currentLang]}</div>;
+    },
   },
   {
-    accessorKey: 'type',
-    header: 'Type',
+    accessorKey: 'description',
+    header: t('resources.description', 'Description'),
     cell: ({ row }) => {
-      const type = row.getValue('type') as keyof typeof typeConfig;
-      const config = typeConfig[type];
+      const description = row.getValue('description') as {
+        fr: string | null
+        en: string | null
+      };
+      const desc = description[currentLang];
+      return <div className='max-w-xs truncate'>{desc || '-'}</div>;
+    },
+  },
+  {
+    accessorKey: 'capacity',
+    header: t('resources.capacity', 'Capacity'),
+    cell: ({ row }) => {
+      const capacity = row.getValue('capacity') as number | null;
+      return <div className='text-center'>{capacity ?? '-'}</div>;
+    },
+  },
+  {
+    accessorKey: 'location',
+    header: t('resources.location', 'Location'),
+    cell: ({ row }) => {
+      const location = row.getValue('location') as string | null;
+      return <div className='max-w-xs truncate'>{location || '-'}</div>;
+    },
+  },
+  {
+    accessorKey: 'type_resource',
+    header: t('resources.typeResource', 'Type Resource'),
+    cell: ({ row }) => {
+      const typeResource = row.original?.type_resource;
       return (
-        <Badge variant='outline' className={config.color}>
-          {config.label}
+        <Badge variant='secondary'>
+          {typeResource?.name?.[currentLang] || 'N/A'}
         </Badge>
       );
     },
   },
   {
-    accessorKey: 'location',
-    header: 'Location',
-    cell: ({ row }) => <div>{row.getValue('location') || '-'}</div>,
-  },
-  {
-    accessorKey: 'capacity',
-    header: 'Capacity',
-    cell: ({ row }) => {
-      const capacity = row.getValue('capacity') as number;
-      return <div className='text-center'>{capacity}</div>;
-    },
-  },
-  {
-    accessorKey: 'utilization',
-    header: 'Utilization',
-    cell: ({ row }) => {
-      const utilization = row.getValue('utilization') as number;
-      return (
-        <div className='space-y-1'>
-          <div className='flex items-center justify-between text-sm'>
-            <span>{utilization}%</span>
-          </div>
-          <Progress value={utilization} className='h-2' />
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: 'status',
+    accessorKey: 'is_active',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue('status') as keyof typeof statusConfig;
-      const config = statusConfig[status];
-      return <Badge variant={config.variant}>{config.label}</Badge>;
+      const isActive = row.getValue('is_active') as boolean
+      return (
+        <Badge variant={isActive ? 'default' : 'secondary'}>
+          {isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
+        </Badge>
+      );
     },
   },
   {
     id: 'actions',
     cell: ({ row }) => {
-      const resource = row.original;
+      const resource = row.original
 
       return (
         <DropdownMenu>
@@ -116,35 +120,37 @@ export const GetResourceColumns = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {t('common.actions', 'Actions')}
+            </DropdownMenuLabel>
             {onView && (
               <DropdownMenuItem onClick={() => onView(resource)}>
                 <Eye className='mr-2 h-4 w-4' />
-                View Details
+                {t('common.view', 'View')}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             {onEdit && (
               <DropdownMenuItem onClick={() => onEdit(resource)}>
                 <Edit className='mr-2 h-4 w-4' />
-                Edit Resource
+                {t('common.edit', 'Edit')}
               </DropdownMenuItem>
             )}
-            {resource.status === 'active' && onMaintenance && (
+            {/* {resource.is_active && onMaintenance && (
               <DropdownMenuItem onClick={() => onMaintenance(resource)}>
                 <Wrench className='mr-2 h-4 w-4' />
-                Set Maintenance
+                {t('resources.setMaintenance', 'Set Maintenance')}
               </DropdownMenuItem>
-            )}
-            {(resource.status === 'maintenance' || resource.status === 'inactive') && onActivate && (
+            )} */}
+            {!resource.is_active && onActivate && (
               <DropdownMenuItem onClick={() => onActivate(resource)}>
                 <CheckCircle2 className='mr-2 h-4 w-4' />
-                Activate
+                {t('resources.activate', 'Activate')}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-      );
+      )
     },
   },
-];
+]

@@ -21,48 +21,32 @@ export default function ViewResource() {
 
   const { data: resource, isLoading } = useQuery({
     queryKey: ['resource', id],
-    queryFn: () => http.get(apiRoutes.adminResourceById(Number(id))),
+    queryFn: async () => {
+      const response = await http.get(apiRoutes.adminResourceById(Number(id)));
+      return response.data.data;
+    },
     enabled: !!id,
   });
 
   const statusMutation = useMutation({
-    mutationFn: ({ status }: { status: string }) => 
-      http.put(apiRoutes.adminResourceStatus(Number(id)), { status }),
+    mutationFn: ({ is_active }: { is_active: boolean }) => 
+      http.put(apiRoutes.adminResourceById(Number(id)), { is_active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resource', id] });
       queryClient.invalidateQueries({ queryKey: ['resources'] });
       toast({
-        title: t('resources.statusUpdateSuccess'),
-        description: t('resources.statusUpdateSuccessDesc'),
+        title: t('resources.statusUpdateSuccess', 'Status updated'),
+        description: t('resources.statusUpdateSuccessDesc', 'The resource status has been updated.'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: t('resources.statusUpdateError'),
-        description: error?.message || t('resources.statusUpdateErrorDesc'),
+        title: t('resources.statusUpdateError', 'Error'),
+        description: error?.message || t('resources.statusUpdateErrorDesc', 'Failed to update status.'),
         variant: 'destructive',
       });
     },
   });
-
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { variant: any; label: string }> = {
-      active: { variant: 'success', label: t('resources.statusActive') },
-      maintenance: { variant: 'warning', label: t('resources.statusMaintenance') },
-      inactive: { variant: 'secondary', label: t('resources.statusInactive') },
-    };
-    const statusInfo = statusMap[status] || statusMap.active;
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
-  };
-
-  const getTypeBadge = (type: string) => {
-    const typeMap: Record<string, string> = {
-      room: t('resources.typeRoom'),
-      chair: t('resources.typeChair'),
-      wash_station: t('resources.typeWashStation'),
-    };
-    return <Badge variant="outline">{typeMap[type] || type}</Badge>;
-  };
 
   if (isLoading) {
     return (
@@ -76,7 +60,7 @@ export default function ViewResource() {
     );
   }
 
-  const resourceData = resource?.data;
+  const resourceData = resource;
 
   return (
     <Layout>
@@ -91,54 +75,54 @@ export default function ViewResource() {
               <IconArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{resourceData?.name}</h1>
-              <p className="text-muted-foreground">{t('resources.subtitle')}</p>
+              <h1 className="text-2xl font-bold tracking-tight">{resourceData?.name?.fr} | {resourceData?.name?.en}</h1>
+              <p className="text-muted-foreground">{t('resources.subtitle', 'Resource details')}</p>
             </div>
           </div>
           <div className="flex gap-2">
-            {resourceData?.status === 'active' && (
+            {resourceData?.is_active && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" disabled={statusMutation.isPending}>
                     <IconSettings className="mr-2 h-4 w-4" />
-                    {t('resources.setMaintenance')}
+                    {t('resources.deactivate', 'Deactivate')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>{t('resources.setMaintenance')}</DialogTitle>
+                    <DialogTitle>{t('resources.deactivate', 'Deactivate')}</DialogTitle>
                     <DialogDescription>
-                      {t('resources.maintenanceConfirmation')}
+                      {t('resources.deactivateConfirmation', 'Are you sure you want to deactivate this resource?')}
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => {}}>{t('common.cancel')}</Button>
-                    <Button onClick={() => statusMutation.mutate({ status: 'maintenance' })}>
-                      {t('common.save')}
+                    <Button variant="outline" onClick={() => {}}>{t('common.cancel', 'Cancel')}</Button>
+                    <Button onClick={() => statusMutation.mutate({ is_active: false })}>
+                      {t('common.confirm', 'Confirm')}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             )}
-            {resourceData?.status === 'maintenance' && (
+            {!resourceData?.is_active && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" disabled={statusMutation.isPending}>
                     <IconSettings className="mr-2 h-4 w-4" />
-                    {t('resources.activateResource')}
+                    {t('resources.activate', 'Activate')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>{t('resources.activateResource')}</DialogTitle>
+                    <DialogTitle>{t('resources.activate', 'Activate')}</DialogTitle>
                     <DialogDescription>
-                      {t('resources.activateConfirmation')}
+                      {t('resources.activateConfirmation', 'Are you sure you want to activate this resource?')}
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => {}}>{t('common.cancel')}</Button>
-                    <Button onClick={() => statusMutation.mutate({ status: 'active' })}>
-                      {t('common.save')}
+                    <Button variant="outline" onClick={() => {}}>{t('common.cancel', 'Cancel')}</Button>
+                    <Button onClick={() => statusMutation.mutate({ is_active: true })}>
+                      {t('common.confirm', 'Confirm')}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -146,7 +130,7 @@ export default function ViewResource() {
             )}
             <Button onClick={() => navigate(webRoutes.resources.edit.replace(':id', id!))}>
               <IconEdit className="mr-2 h-4 w-4" />
-              {t('common.edit')}
+              {t('common.edit', 'Edit')}
             </Button>
           </div>
         </div>
@@ -156,30 +140,54 @@ export default function ViewResource() {
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t('resources.title')}</CardTitle>
-              <CardDescription>{t('common.view')} {resourceData?.name}</CardDescription>
+              <CardTitle>{t('resources.title', 'Resource')}</CardTitle>
+              <CardDescription>{t('common.view', 'View')} {resourceData?.name?.fr}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('resources.resourceName')}</p>
-                  <p className="text-base mt-1">{resourceData?.name}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.nameFr', 'Name (French)')}</p>
+                  <p className="text-base mt-1">{resourceData?.name?.fr}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('resources.resourceType')}</p>
-                  <div className="mt-1">{getTypeBadge(resourceData?.type)}</div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.nameEn', 'Name (English)')}</p>
+                  <p className="text-base mt-1">{resourceData?.name?.en}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('resources.capacity')}</p>
-                  <p className="text-base mt-1">{resourceData?.capacity}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.descriptionFr', 'Description (French)')}</p>
+                  <p className="text-base mt-1">{resourceData?.description?.fr || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('resources.location')}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.descriptionEn', 'Description (English)')}</p>
+                  <p className="text-base mt-1">{resourceData?.description?.en || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.typeResource', 'Type Resource')}</p>
+                  <p className="text-base mt-1">{resourceData?.type_resource?.name?.fr || resourceData?.type_resource?.name?.en || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.capacity', 'Capacity')}</p>
+                  <p className="text-base mt-1">{resourceData?.capacity ?? '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.location', 'Location')}</p>
                   <p className="text-base mt-1">{resourceData?.location || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('resources.status')}</p>
-                  <div className="mt-1">{getStatusBadge(resourceData?.status)}</div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.isAvailable', 'Available')}</p>
+                  <div className="mt-1">
+                    <Badge variant={resourceData?.is_available ? 'default' : 'secondary'}>
+                      {resourceData?.is_available ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('resources.status', 'Status')}</p>
+                  <div className="mt-1">
+                    <Badge variant={resourceData?.is_active ? 'default' : 'secondary'}>
+                      {resourceData?.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </CardContent>
