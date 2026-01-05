@@ -129,10 +129,10 @@ export default function TypeServicesEdit() {
             fields={serviceTypeFields}
             button={t('common.update', 'Update')}
             initialValues={{
-                name_fr: serviceType?.name_fr,
-                name_en: serviceType?.name_en,
-                description_fr: serviceType?.description_fr || '',
-                description_en: serviceType?.description_en || '',
+                name_fr: serviceType?.name.fr,
+                name_en: serviceType?.name.en,
+                description_fr: serviceType?.description.fr || '',
+                description_en: serviceType?.description.en || '',
                 icon: serviceType?.icon,
                 color: serviceType?.color,
                 is_active: serviceType?.is_active,

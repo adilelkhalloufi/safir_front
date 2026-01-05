@@ -40,12 +40,12 @@ export default function TypeServicesIndex() {
             });
     };
 
-    const handleView = (serviceType: ServiceType) => {
-        navigate(webRoutes.typeServices.view.replace(':id', serviceType.id.toString()));
+    const handleView = (ressourceType: ServiceType) => {
+        navigate(webRoutes.typeResources.view.replace(':id', ressourceType.id.toString()));
     };
 
-    const handleEdit = (serviceType: ServiceType) => {
-        navigate(webRoutes.typeServices.edit.replace(':id', serviceType.id.toString()));
+    const handleEdit = (ressourceType: ServiceType) => {
+        navigate(webRoutes.typeResources.edit.replace(':id', ressourceType.id.toString()));
     };
 
     const columns = useMemo(

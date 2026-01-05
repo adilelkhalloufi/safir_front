@@ -52,7 +52,7 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
     {
         id: 'actions',
         cell: ({ row }) => {
-            const serviceType = row.original;
+            const ressourceType = row.original;
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -61,11 +61,11 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(serviceType)}>
+                        <DropdownMenuItem onClick={() => onView(ressourceType)}>
                             <IconEye className="mr-2 h-4 w-4" />
                             View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(serviceType)}>
+                        <DropdownMenuItem onClick={() => onEdit(ressourceType)}>
                             <IconEdit className="mr-2 h-4 w-4" />
                             Edit
                         </DropdownMenuItem>
