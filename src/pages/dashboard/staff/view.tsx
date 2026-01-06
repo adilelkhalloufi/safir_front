@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { LayoutSh as Layout } from '@/components/custom/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +16,7 @@ export default function ViewStaff() {
 
   const { data: staff, isLoading } = useQuery({
     queryKey: ['staff', id],
-    queryFn: () => http.get(apiRoutes.adminStaffById(Number(id))),
+    queryFn: () => http.get(apiRoutes.adminStaffById(Number(id))).then(res => res.data?.data),
     enabled: !!id,
   });
 
@@ -53,48 +52,38 @@ export default function ViewStaff() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <Layout.Body>
-          <div className="flex items-center justify-center h-full">
-            <IconLoader2 className="h-8 w-8 animate-spin" />
-          </div>
-        </Layout.Body>
-      </Layout>
+      <div className="flex items-center justify-center h-full">
+        <IconLoader2 className="h-8 w-8 animate-spin" />
+      </div>
     );
   }
 
-  const staffData = staff?.data?.data;
-  console.log('Staff Data:', staffData);
-
+  
   return (
-    <Layout>
-      <Layout.Header>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(webRoutes.staff.index)}
-            >
-              <IconArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {staffData?.user?.first_name && staffData?.user?.last_name
-                  ? `${staffData.user.first_name} ${staffData.user.last_name}`
-                  : staffData?.user?.email || 'N/A'}
-              </h1>
-              <p className="text-muted-foreground">{t('staff.subtitle')}</p>
-            </div>
-          </div>
-          <Button onClick={() => navigate(webRoutes.staff.edit.replace(':id', id!))}>
-            <IconEdit className="mr-2 h-4 w-4" />
-            {t('common.edit')}
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(webRoutes.staff.index)}
+          >
+            <IconArrowLeft className="h-5 w-5" />
           </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {staff?.user?.first_name && staff?.user?.last_name
+                ? `${staff.user.first_name} ${staff.user.last_name}`
+                : staff?.user?.email || 'N/A'}
+            </h1>
+            <p className="text-muted-foreground">{t('staff.subtitle')}</p>
+          </div>
         </div>
-      </Layout.Header>
-
-      <Layout.Body>
+        <Button onClick={() => navigate(webRoutes.staff.edit.replace(':id', id!))}>
+          <IconEdit className="mr-2 h-4 w-4" />
+          {t('common.edit')}
+        </Button>
+      </div>
         <div className="grid gap-6">
           <Card>
             <CardHeader>
@@ -105,59 +94,61 @@ export default function ViewStaff() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Full Name</p>
                   <p className="text-base mt-1">
-                    {staffData?.user?.name|| 'N/A'}
+                    {staff?.user?.name|| 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Staff Type</p>
-                  <div className="mt-1">{getTypeBadge(staffData?.type_staff)}</div>
+                  <div className="mt-1">{getTypeBadge(staff?.type_staff)}</div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Email</p>
                   <div className="flex items-center gap-2 mt-1">
                     <IconMail className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-base">{staffData?.user?.email || 'N/A'}</p>
+                    <p className="text-base">{staff?.user?.email || 'N/A'}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Phone</p>
                   <div className="flex items-center gap-2 mt-1">
                     <IconPhone className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-base">{staffData?.user?.phone || '-'}</p>
+                    <p className="text-base">{staff?.user?.phone || '-'}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <div className="mt-1">{getStatusBadge(staffData?.is_active)}</div>
+                  <div className="mt-1">{getStatusBadge(staff?.is_active)}</div>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Specialization</p>
-                  <p className="text-base mt-1">{staffData?.specialization || '-'}</p>
+                  <p className="text-base mt-1">{staff?.specialization || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Certification</p>
-                  <p className="text-base mt-1">{staffData?.certification || '-'}</p>
+                  <p className="text-base mt-1">{staff?.certification || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Hire Date</p>
-                  <p className="text-base mt-1">{staffData?.hire_date || '-'}</p>
+                  <p className="text-base mt-1">{staff?.hire_date || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Default Break (minutes)</p>
-                  <p className="text-base mt-1">{staffData?.default_break_minutes || '-'}</p>
+                  <p className="text-base mt-1">{staff?.default_break_minutes || '-'}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
+                <div className='flex flex-col md:flex-row md:gap-5 justify-between'>
 
-          <Card>
+              
+          <Card className='w-full'>
             <CardHeader>
               <CardTitle>{t('staff.services', 'Services')}</CardTitle>
             </CardHeader>
             <CardContent>
-              {staffData?.services && staffData.services.length > 0 ? (
+              {staff?.services && staff.services.length > 0 ? (
                 <div className='grid gap-2'>
-                  {staffData.services.map((service: any) => (
+                  {staff.services.map((service: any) => (
                     <div
                       key={service.id}
                       className='flex items-center justify-between p-3 border rounded-lg'
@@ -187,14 +178,14 @@ export default function ViewStaff() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className='w-full'>
             <CardHeader>
               <CardTitle>{t('staff.availability', 'Availability Schedule')}</CardTitle>
             </CardHeader>
             <CardContent>
-              {staffData?.availability && staffData.availability.length > 0 ? (
+              {staff?.availability && staff.availability.length > 0 ? (
                 <div className='grid gap-2'>
-                  {staffData.availability.map((avail: any, index: number) => (
+                  {staff.availability.map((avail: any, index: number) => (
                     <div
                       key={index}
                       className='flex items-center justify-between p-3 border rounded-lg'
@@ -221,8 +212,8 @@ export default function ViewStaff() {
               )}
             </CardContent>
           </Card>
+            </div>
         </div>
-      </Layout.Body>
-    </Layout>
+    </div>
   );
 }

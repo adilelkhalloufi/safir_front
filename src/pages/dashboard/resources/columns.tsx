@@ -53,6 +53,12 @@ export const GetResourceColumns = ({
       const name = row.getValue('name') as { fr: string; en: string };
       return <div className='font-medium'>{name[currentLang]}</div>;
     },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true;
+      const name = row.original?.name;
+      const currentName = name?.fr || name?.en || '';
+      return currentName.toLowerCase().includes(filterValue.toLowerCase());
+    },
   },
   {
     accessorKey: 'description',
@@ -93,6 +99,11 @@ export const GetResourceColumns = ({
         </Badge>
       );
     },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true;
+      const typeResource = row.original?.type_resource;
+      return typeResource?.id?.toString() === filterValue;
+    },
   },
   {
     accessorKey: 'is_active',
@@ -104,6 +115,11 @@ export const GetResourceColumns = ({
           {isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
         </Badge>
       );
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true;
+      const isActive = row.original?.is_active;
+      return isActive?.toString() === filterValue;
     },
   },
   {

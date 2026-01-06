@@ -31,20 +31,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import http from '@/utils/http';
-import { apiRoutes } from '@/routes/api';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   loading?: boolean;
+  serviceTypes?: any[];
 }
 
 export function StaffDataTable<TData, TValue>({
   columns,
   data,
   loading,
+  serviceTypes = [],
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -53,14 +52,9 @@ export function StaffDataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = useState({});
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  // Fetch service types from API
-  const { data: serviceTypesData } = useQuery({
-    queryKey: ['serviceTypes'],
-    queryFn: () => http.get(apiRoutes.adminServiceTypes),
-  });
+  // Removed serviceTypes query - now passed as prop
 
-  const serviceTypes = serviceTypesData?.data.data || [];
-
+ 
   const table = useReactTable({
     data,
     columns,
@@ -101,13 +95,13 @@ export function StaffDataTable<TData, TValue>({
           }
           className='max-w-sm'
         />
-        <Select value={typeFilter} onValueChange={handleTypeFilter}>
+         <Select value={typeFilter} onValueChange={handleTypeFilter}>
           <SelectTrigger className='w-[200px]'>
             <SelectValue placeholder={t('staff.filterByType', 'Filter by type')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>{t('common.all', 'All')}</SelectItem>
-            {serviceTypes.map((type: any) => (
+            {serviceTypes && serviceTypes.map((type: any) => (
               <SelectItem key={type.id} value={type.id.toString()}>
                 {type.name?.fr || type.name?.en || type.name}
               </SelectItem>

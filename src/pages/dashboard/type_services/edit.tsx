@@ -74,7 +74,7 @@ export default function TypeServicesEdit() {
                 {
                     name: 'icon',
                     label: t('typeServices.icon', 'Icon'),
-                    type: 'text',
+                    type: 'iconpicker',
                     placeholder: t('typeServices.iconPlaceholder', 'Icon class or emoji'),
                 },
                 {

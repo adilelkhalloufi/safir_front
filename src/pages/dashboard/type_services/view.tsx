@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Package, Calendar, Hash, Palette } from 'lucide-react';
 import { format } from 'date-fns';
+import IconDisplay from '@/components/custom/IconDisplay';
 
 export default function TypeServicesView() {
     const { t } = useTranslation();
@@ -116,7 +117,7 @@ export default function TypeServicesView() {
                         {serviceType.icon && (
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('typeServices.icon', 'Icon')}</p>
-                                <p className="text-2xl">{serviceType.icon}</p>
+                                 <IconDisplay color={serviceType.color || 'currentColor'} iconName={serviceType.icon} />
                             </div>
                         )}
 

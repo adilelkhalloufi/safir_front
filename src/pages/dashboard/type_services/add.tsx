@@ -55,13 +55,11 @@ export default function TypeServicesAdd() {
                     error: t('typeServices.nameRequired', 'Name is required'),
                     placeholder: t('typeServices.namePlaceholder', 'e.g., Massage Services'),
                 },
-            
-         
                 {
                     name: 'icon',
                     label: t('typeServices.icon', 'Icon'),
-                    type: 'text',
-                    placeholder: t('typeServices.iconPlaceholder', 'Icon class or emoji'),
+                    type: 'iconpicker',
+                    placeholder: t('typeServices.iconPlaceholder', 'Select an icon'),
                 },
                 {
                     name: 'color',
@@ -84,6 +82,7 @@ export default function TypeServicesAdd() {
     ];
 
     return (
+      
         <MagicForm
             title={t('typeServices.addTitle', 'Add New Service Type')}
             onSubmit={handleSubmit}

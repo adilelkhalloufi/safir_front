@@ -1,10 +1,16 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import { CheckCircle2, Clock, ChevronRight, Sparkles, Scissors, Droplets, Hand, Waves } from 'lucide-react'
+import { CheckCircle2, Clock, ChevronRight, X, Search, DollarSign } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Service } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
+import IconDisplay  from '@/components/custom/IconDisplay'
 
 interface SelectServicesProps {
     services: Service[]
@@ -13,88 +19,249 @@ interface SelectServicesProps {
     onNext: () => void | null
 }
 
-const SERVICE_ICONS: Record<string, any> = {
-    'masso': Sparkles,
-    'coiffure': Scissors,
-    'hammam': Droplets,
-    'massage': Hand,
-    'gommage': Waves,
-    'spa': Sparkles,
-    'other': Sparkles
-}
-
 export function SelectServices({ services, selected, onToggle, onNext }: SelectServicesProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
+    const [searchQuery, setSearchQuery] = useState('')
+    const [activeTab, setActiveTab] = useState<string>('all')
 
-    // Group services by type
+    // Group services by type considering language and sort by display order
     const groupedServices = services.reduce((acc, service: any) => {
-        const type = service.type_service || 'other'
-        if (!acc[type]) {
-            acc[type] = []
+        const typeId = service.type?.id || 'other'
+        const typeName = getLocalizedValue(service.type?.name, currentLang) || t('bookingWizard.selectServices.serviceTypes.other', 'Other')
+        
+        if (!acc[typeId]) {
+            acc[typeId] = {
+                name: typeName,
+                color: service.type?.color || '#E09900',
+                displayOrder: service.type?.display_order || 999,
+                icon: service.type?.icon || null,
+                services: []
+            }
         }
-        acc[type].push(service)
+        acc[typeId].services.push(service)
         return acc
-    }, {} as Record<string, Service[]>)
+    }, {} as Record<string, { name: string, color: string, displayOrder: number, icon: string | null, services: Service[] }>)
+
+    // Sort types by display order
+    const sortedGroupedServices = Object.entries(groupedServices)
+        .sort(([, a], [, b]) => a.displayOrder - b.displayOrder)
+        .reduce((acc, [key, value]) => {
+            // Sort services within each type by name
+            value.services.sort((a: any, b: any) => {
+                const nameA = getLocalizedValue(a.name, currentLang) || ''
+                const nameB = getLocalizedValue(b.name, currentLang) || ''
+                return nameA.localeCompare(nameB)
+            })
+            acc[key] = value
+            return acc
+        }, {} as Record<string, { name: string, color: string, displayOrder: number, services: Service[] }>)
+
+    // Get selected service details
+    const selectedServices = services.filter(s => selected.includes(s.id))
+    const totalPrice = selectedServices.reduce((sum, s: any) => sum + (s.price || 0), 0)
+    const totalDuration = selectedServices.reduce((sum, s: any) => sum + (s.duration_minutes || s.duration || 0), 0)
+
+    // Filter services based on search
+    const filterServices = (servicesList: any[]) => {
+        if (!searchQuery) return servicesList
+        return servicesList.filter((svc: any) => {
+            const name = getLocalizedValue(svc.name, currentLang) || ''
+            const description = getLocalizedValue(svc.description, currentLang) || ''
+            return name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                   description.toLowerCase().includes(searchQuery.toLowerCase())
+        })
+    }
+
+    // Get all services or filtered by type
+    const getDisplayServices = () => {
+        if (activeTab === 'all') {
+            return filterServices(services)
+        }
+        return filterServices(sortedGroupedServices[activeTab]?.services || [])
+    }
+
+    const displayServices = getDisplayServices()
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
                 <CardHeader>
                     <CardTitle className="text-2xl">{t('bookingWizard.selectServices.title')}</CardTitle>
                     <p className="text-sm text-muted-foreground">{t('bookingWizard.selectServices.subtitle')}</p>
                 </CardHeader>
-                <CardContent className="space-y-8">
-                    {Object.entries(groupedServices).map(([type, servicesList]) => (
-                        <div key={type} className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-                                <h3 className="text-lg font-semibold text-[#020F44]">
-                                    {t(`bookingWizard.selectServices.serviceTypes.${type}`) || type}
+                <CardContent className="space-y-4">
+                    {/* Selected Services Summary - Fixed at top */}
+                    {selected.length > 0 && (
+                        <div className="bg-gradient-to-r from-orange-50 to-blue-50 rounded-lg p-4 border-2 border-[#E09900]/30">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-[#020F44]">
+                                    {t('bookingWizard.selectServices.selectedServices', 'Selected Services')} ({selected.length})
                                 </h3>
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                                <div className="flex items-center gap-4 text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4 text-green-600" />
+                                        <span className="font-medium">{totalDuration} min</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <DollarSign className="h-4 w-4 text-[#E09900]" />
+                                        <span className="font-semibold text-[#E09900]">{totalPrice}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                {servicesList.map((svc: any) => {
-                                    const Icon = SERVICE_ICONS[svc.type_service] || Sparkles
-                                    const isSelected = selected.includes(svc.id)
-
-                                    return (
+                            <div className="flex flex-wrap gap-2">
+                                {selectedServices.map((svc: any) => (
+                                    <Badge 
+                                        key={svc.id}
+                                        variant="secondary"
+                                        className="pl-3 pr-2 py-1.5 bg-white hover:bg-white/80"
+                                    >
+                                        <span className="mr-2">{getLocalizedValue(svc.name, currentLang)}</span>
                                         <button
-                                            key={svc.id}
-                                            className={cn(
-                                                'group relative rounded-xl border-2 p-6 text-left transition-all duration-300 hover:shadow-xl hover:-translate-y-1',
-                                                isSelected
-                                                    ? 'border-[#E09900] bg-gradient-to-br from-orange-50 to-blue-50 shadow-lg'
-                                                    : 'border-gray-200 bg-white hover:border-[#E09900]/30'
-                                            )}
                                             onClick={() => onToggle(svc.id, svc)}
+                                            className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
                                         >
-                                            {isSelected && (
-                                                <div className="absolute top-3 right-3">
-                                                    <CheckCircle2 className="h-6 w-6 text-[#E09900]" />
-                                                </div>
-                                            )}
-                                            <div className={cn(
-                                                'mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300',
-                                                isSelected ? 'bg-gradient-to-r from-[#020F44] to-[#E09900]' : 'bg-gray-100 group-hover:bg-orange-100'
-                                            )}>
-                                                <Icon className={cn('h-6 w-6', isSelected ? 'text-white' : 'text-gray-600 group-hover:text-[#E09900]')} />
-                                            </div>
-                                            <div className="font-semibold text-lg mb-1">{getLocalizedValue(svc.name, currentLang)}</div>
-                                            <div className="text-sm text-muted-foreground mb-3">{getLocalizedValue(svc.description, currentLang)}</div>
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <Clock className="h-3 w-3 text-green-600" />
-                                                <span className="text-green-600 font-medium">{svc.duration_minutes || svc.duration} min</span>
-                                            </div>
-                                            <div className="mt-2 text-sm font-semibold text-[#E09900]">{svc.price} $</div>
+                                            <X className="h-3 w-3" />
                                         </button>
-                                    )
-                                })}
+                                    </Badge>
+                                ))}
                             </div>
                         </div>
-                    ))}
-                    <div className="mt-6 flex justify-between items-center">
+                    )}
+
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder={t('bookingWizard.selectServices.search', 'Search services...')}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9"
+                        />
+                    </div>
+
+                    {/* Tabs for Service Types */}
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <ScrollArea className="w-full">
+                            <TabsList className="inline-flex w-max">
+                                <TabsTrigger value="all" className="flex items-center gap-2">
+                                    {t('bookingWizard.selectServices.allServices', 'All Services')}
+                                    <Badge variant="secondary" className="ml-1">{services.length}</Badge>
+                                </TabsTrigger>
+                                {Object.entries(sortedGroupedServices).map(([typeId, typeData]) => (
+                                    <TabsTrigger key={typeId} value={typeId} className="flex items-center gap-2">
+                                        {typeData.icon && <IconDisplay iconName={typeData.icon} size={20} stroke={1.5} />}
+                                        
+                                        {typeData.name}
+                                        <Badge variant="secondary" className="ml-1">{typeData.services.length}</Badge>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </ScrollArea>
+
+                        {/* Services List */}
+                        <div className="mt-4">
+                            <ScrollArea className="h-[400px] pr-4">
+                                <div className="space-y-2">
+                                    {displayServices.length === 0 ? (
+                                        <div className="text-center py-12 text-muted-foreground">
+                                            {t('bookingWizard.selectServices.noResults', 'No services found')}
+                                        </div>
+                                    ) : (
+                                        displayServices.map((svc: any) => {
+                                            const isSelected = selected.includes(svc.id)
+                                            const typeColor = svc.type?.color || '#E09900'
+                                            const typeIcon = svc.type?.icon
+
+                                            return (
+                                                <button
+                                                    key={svc.id}
+                                                    className={cn(
+                                                        'w-full group relative rounded-lg border-2 p-4 text-left transition-all duration-200',
+                                                        'hover:shadow-md hover:-translate-y-0.5',
+                                                        isSelected
+                                                            ? 'border-[#E09900] bg-gradient-to-r from-orange-50 to-blue-50 shadow-md'
+                                                            : 'border-gray-200 bg-white hover:border-[#E09900]/30'
+                                                    )}
+                                                    onClick={() => onToggle(svc.id, svc)}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        {/* Type Indicator */}
+                                                        <div 
+                                                            className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
+                                                            style={{ backgroundColor: typeColor }}
+                                                        />
+                                                        
+                                                        {/* Type Icon - Big and Nice */}
+                                                        {typeIcon && (
+                                                            <div 
+                                                                className="shrink-0 rounded-lg p-3 ml-3 flex items-center justify-center"
+                                                                style={{ 
+                                                                    backgroundColor: `${typeColor}15`,
+                                                                }}
+                                                            >
+                                                                <IconDisplay 
+                                                                    iconName={typeIcon}
+                                                                    size={40} 
+                                                                    stroke={1.5}
+                                                                    color={typeColor}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {/* Service Info */}
+                                                        <div className={cn("flex-1", !typeIcon && "ml-3")}>
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div>
+                                                                    <h4 className="font-semibold text-base mb-1">
+                                                                        {getLocalizedValue(svc.name, currentLang)}
+                                                                    </h4>
+                                                                    {svc.description && getLocalizedValue(svc.description, currentLang) && (
+                                                                        <p className="text-sm text-muted-foreground line-clamp-2">
+                                                                            {getLocalizedValue(svc.description, currentLang)}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                {isSelected && (
+                                                                    <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0" />
+                                                                )}
+                                                            </div>
+                                                            
+                                                            <div className="flex items-center gap-4 mt-3">
+                                                                <div className="flex items-center gap-1.5 text-sm">
+                                                                    <Clock className="h-3.5 w-3.5 text-green-600" />
+                                                                    <span className="text-green-600 font-medium">
+                                                                        {svc.duration_minutes || svc.duration} min
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 text-sm font-semibold text-[#E09900]">
+                                                                    <DollarSign className="h-3.5 w-3.5" />
+                                                                    {svc.price}
+                                                                </div>
+                                                                <Badge 
+                                                                    variant="outline" 
+                                                                    className="text-xs"
+                                                                    style={{ 
+                                                                        borderColor: typeColor,
+                                                                        color: typeColor 
+                                                                    }}
+                                                                >
+                                                                    {getLocalizedValue(svc.type?.name, currentLang)}
+                                                                </Badge>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            )
+                                        })
+                                    )}
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </Tabs>
+
+                    {/* Footer with Continue Button */}
+                    <div className="flex justify-between items-center pt-4 border-t">
                         <p className="text-sm text-muted-foreground">
                             {t('bookingWizard.selectServices.selected', { count: selected.length })}
                         </p>

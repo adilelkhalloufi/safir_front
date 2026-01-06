@@ -26,9 +26,10 @@ import { useTranslation } from 'react-i18next';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  resourceTypes?: any[];
 }
 
-export function ResourcesDataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function ResourcesDataTable<TData, TValue>({ columns, data, resourceTypes = [] }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { t } = useTranslation();
@@ -58,31 +59,32 @@ export function ResourcesDataTable<TData, TValue>({ columns, data }: DataTablePr
           className='max-w-sm'
         />
         <Select
-          value={(table.getColumn('type')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('type')?.setFilterValue(value === 'all' ? '' : value)}
+          value={(table.getColumn('type_resource')?.getFilterValue() as string) ?? 'all'}
+          onValueChange={(value) => table.getColumn('type_resource')?.setFilterValue(value === 'all' ? '' : value)}
         >
           <SelectTrigger className='w-[180px]'>
             <SelectValue placeholder={t('resources.filterByType', 'Filter by type')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>{t('resources.allTypes', 'All Types')}</SelectItem>
-            <SelectItem value='room'>{t('resources.typeRoom', 'Room')}</SelectItem>
-            <SelectItem value='chair'>{t('resources.typeChair', 'Chair')}</SelectItem>
-            <SelectItem value='wash_station'>{t('resources.typeWashStation', 'Wash Station')}</SelectItem>
+            {resourceTypes && resourceTypes.map((type: any) => (
+              <SelectItem key={type.id} value={type.id.toString()}>
+                {type.name?.fr || type.name?.en || type.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select
-          value={(table.getColumn('status')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('status')?.setFilterValue(value === 'all' ? '' : value)}
+          value={(table.getColumn('is_active')?.getFilterValue() as string) ?? 'all'}
+          onValueChange={(value) => table.getColumn('is_active')?.setFilterValue(value === 'all' ? '' : value)}
         >
           <SelectTrigger className='w-[180px]'>
             <SelectValue placeholder={t('resources.filterByStatus', 'Filter by status')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>{t('resources.allStatuses', 'All Statuses')}</SelectItem>
-            <SelectItem value='active'>{t('resources.statusActive', 'Active')}</SelectItem>
-            <SelectItem value='maintenance'>{t('resources.statusMaintenance', 'Maintenance')}</SelectItem>
-            <SelectItem value='inactive'>{t('resources.statusInactive', 'Inactive')}</SelectItem>
+            <SelectItem value='true'>{t('resources.statusActive', 'Active')}</SelectItem>
+            <SelectItem value='false'>{t('resources.statusInactive', 'Inactive')}</SelectItem>
           </SelectContent>
         </Select>
       </div>

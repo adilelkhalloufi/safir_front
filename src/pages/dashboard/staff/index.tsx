@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { setPageTitle } from '@/utils';
 
 export default function StaffIndex() {
@@ -15,6 +16,12 @@ export default function StaffIndex() {
   const [data, setData] = useState<Staff[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
+
+  // Fetch service types from API
+  const { data: serviceTypes = [] } = useQuery({
+    queryKey: ['serviceTypes'],
+    queryFn: () => http.get(apiRoutes.adminServiceTypes).then(res => res.data?.data),
+  });
 
   useEffect(() => {
     setPageTitle(t('staff.title', 'Staff Management'));
@@ -78,7 +85,7 @@ export default function StaffIndex() {
         </Button>
       </div>
 
-      <StaffDataTable columns={columns} data={data} loading={loading} />
+      <StaffDataTable columns={columns} data={data} loading={loading} serviceTypes={serviceTypes} />
     </>
   );
 }

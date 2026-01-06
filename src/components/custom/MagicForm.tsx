@@ -10,6 +10,7 @@ import { IconTrash } from "@tabler/icons-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { Combobox } from "../ui/combobox";
 import { Loader2 } from "lucide-react";
+import IconPicker from "./IconPicker";
 
 export interface MagicFormOptionProps {
   value: any;
@@ -22,7 +23,7 @@ export interface MagicFormFieldProps {
   error?: string;
   value?: any;
   defaultValue?: any;
-  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color";
+  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color" | "iconpicker";
   required?: boolean;
   order?: number;
   options?: MagicFormOptionProps[] | any[]; // Updated to any[]
@@ -400,6 +401,19 @@ const MagicForm = memo(({
             value={formData[name] ?? "#000000"}
             onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""}
+          />
+        ) : type === "iconpicker" ? (
+          <IconPicker
+            disabled={disabled}
+            value={formData[name] ?? ""}
+            placeholder={placeholder || `Select ${label || name}`}
+            onChange={(iconName) => {
+              setFormData((prev: any) => ({ ...prev, [name]: iconName }));
+              // Clear error when icon is selected
+              if (iconName) {
+                setErrors((prev: any) => ({ ...prev, [name]: undefined }));
+              }
+            }}
           />
         ) : type === "table" ? (
           <div className="w-full">

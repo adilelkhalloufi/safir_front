@@ -23,6 +23,12 @@ export default function ResourcesPage() {
     queryFn: () => http.get(apiRoutes.adminResources).then((res) => res.data.data),
   });
 
+  // Fetch resource types
+  const { data: resourceTypes = [] } = useQuery({
+    queryKey: ['resourceTypes'],
+    queryFn: () => http.get(apiRoutes.adminTypeResources).then(res => res.data?.data),
+  });
+
    
  
 
@@ -86,7 +92,7 @@ export default function ResourcesPage() {
           <CardDescription>{t('resources.resourcesListDesc', 'View and manage all resources')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResourcesDataTable columns={columns} data={resources} />
+          <ResourcesDataTable columns={columns} data={resources} resourceTypes={resourceTypes} />
         </CardContent>
       </Card>
 
