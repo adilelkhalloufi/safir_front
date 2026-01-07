@@ -35,6 +35,7 @@ export const webRoutes = {
   },
   staff: {
     index: '/dashboard/staff',
+    calendar: '/dashboard/staff/calendar',
     view: '/dashboard/staff/:id',
     add: '/dashboard/staff/add',
     edit: '/dashboard/staff/:id/edit',

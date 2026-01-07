@@ -34,11 +34,10 @@ export function Review({
     onConfirm,
     onPrev
 }: ReviewProps) {
-    const { i18n } = useTranslation()
-    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
+    const { i18n, t } = useTranslation()
+    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' 
     const totalPrice = selectedScenario?.total_price || 0
-
-    return (
+     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
@@ -49,65 +48,97 @@ export function Review({
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
-                    {/* Services */}
+                    {/* Services with Individual Date/Time */}
                     <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2 mb-4">
                             <Sparkles className="h-5 w-5 text-amber-600" />
                             <h3 className="font-semibold">{t('bookingWizard.review.servicesTitle')}</h3>
                         </div>
-                        <div className="space-y-2">
-                            {selectedServices.map((service: any) => (
-                                <div key={service.id} className="flex justify-between items-center">
-                                    <div>
-                                        <p className="font-medium">{getLocalizedValue(service.name, currentLang)}</p>
-                                        {selectedStaff[service.id] && (
-                                            <p className="text-sm text-muted-foreground">
-                                                {t('bookingWizard.review.with')} {selectedStaff[service.id].name}
-                                            </p>
+                        <div className="space-y-4">
+                            {selectedServices.map((service: any) => {
+                                const selectedServiceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+                                
+                                // Debug logs
+                                console.log('Service:', service.id, getLocalizedValue(service.name, currentLang))
+                                console.log('selectedServiceDetails:', selectedServiceDetails)
+                                console.log('selectedScenario:', selectedScenario)
+                                
+                                // Display the date and time from the selected slot
+                                let displayDate = null
+                                let displayStartTime = null
+                                let displayEndTime = null
+                                
+                                if (selectedServiceDetails?.start_datetime && selectedServiceDetails?.end_datetime) {
+                                    console.log('Has datetime:', selectedServiceDetails.start_datetime, selectedServiceDetails.end_datetime)
+                                    const startDate = new Date(selectedServiceDetails.start_datetime)
+                                    const endDate = new Date(selectedServiceDetails.end_datetime)
+                                    
+                                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                                        displayDate = startDate
+                                        displayStartTime = format(startDate, 'HH:mm')
+                                        displayEndTime = format(endDate, 'HH:mm')
+                                        console.log('Formatted time:', displayStartTime, displayEndTime)
+                                    }
+                                } else {
+                                    console.log('No datetime found, using selectedDate:', selectedDate)
+                                    if (selectedDate) {
+                                        displayDate = new Date(selectedDate)
+                                    }
+                                }
+                                
+                                return (
+                                    <div key={service.id} className="pb-4 border-b last:border-b-0 last:pb-0">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-lg">{getLocalizedValue(service.name, currentLang)}</p>
+                                                {selectedServiceDetails?.staff_name && (
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {t('bookingWizard.review.with')} {selectedServiceDetails.staff_name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-semibold">{service.price} $</p>
+                                                <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
+                                            </div>
+                                        </div>
+                                        {displayDate && (
+                                            <div className="mt-2 space-y-1 text-sm bg-amber-50 p-2 rounded">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-3.5 w-3.5 text-amber-600" />
+                                                    <p className="text-muted-foreground">
+                                                        {format(displayDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                                                    </p>
+                                                </div>
+                                                {displayStartTime && displayEndTime && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-3.5 w-3.5 text-amber-600" />
+                                                        <p className="font-medium text-foreground">
+                                                            {displayStartTime} - {displayEndTime}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-semibold">{service.price} $</p>
-                                        <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
-                        {selectedGender && (
-                            <div className="mt-3 pt-3 border-t">
-                                <p className="text-sm text-muted-foreground">
-                                    {t('bookingWizard.review.gender')} <span className="font-medium text-foreground">{selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}</span>
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Date & Time */}
-                    {selectedDate && selectedScenario && (
-                        <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Calendar className="h-5 w-5 text-amber-600" />
-                                <h3 className="font-semibold">{t('bookingWizard.review.dateTimeTitle')}</h3>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    <p>{format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <p>
-                                        {format(new Date(selectedScenario.start_datetime), 'HH:mm')} - {' '}
-                                        {format(new Date(selectedScenario.end_datetime), 'HH:mm')}
+                        <div className="mt-4 pt-4 border-t flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">
+                                {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
+                            </p>
+                            {selectedGender && (
+                                <>
+                                    <span className="text-muted-foreground">•</span>
+                                    <p className="text-sm text-muted-foreground">
+                                        {selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}
                                     </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Users className="h-4 w-4 text-muted-foreground" />
-                                    <p>{personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}</p>
-                                </div>
-                            </div>
+                                </>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {/* Customer Info */}
                     <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
@@ -123,7 +154,7 @@ export function Review({
                     </div>
 
                     {/* Total */}
-                    <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
+                    {/* <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
                         <div className="flex justify-between items-center">
                             <span className="text-lg font-semibold">{t('bookingWizard.review.total')}</span>
                             <span className="text-2xl font-bold text-amber-600">{totalPrice} $</span>
@@ -131,7 +162,7 @@ export function Review({
                         <p className="text-xs text-muted-foreground mt-1">
                             {t('bookingWizard.review.guaranteePaid', { amount: 50 })}
                         </p>
-                    </div>
+                    </div> */}
 
                     <Alert>
                         <AlertDescription className="text-sm">

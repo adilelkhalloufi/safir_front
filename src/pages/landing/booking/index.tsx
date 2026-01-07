@@ -30,7 +30,8 @@ import type {
     ConfirmBookingRequest,
     GuestBookingResponse,
     AvailabilitySlotsRequest,
-    AvailabilitySlot
+    AvailabilitySlot,
+    TransformedSlot
 } from '../../../interfaces/models/booking'
 import type { Step, CustomerInfo } from './types'
 import { Progress } from './Progress'
@@ -73,27 +74,24 @@ export default function BookingWizard() {
 
     // Fetch availability slots from API
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
-        queryKey: ['availability', selectedServices, selectedDate, personCount, selectedGender],
+        queryKey: ['availability', selectedServices, selectedDate ? format(new Date(selectedDate), 'yyyy-MM-dd') : null, personCount, selectedGender],
         queryFn: async () => {
             if (!selectedDate || selectedServices.length === 0) return null
 
-            const endDate = new Date(selectedDate)
-            endDate.setDate(endDate.getDate() + 7) // Check next 7 days
-
             const requestData: AvailabilitySlotsRequest = {
                 service_ids: selectedServices,
-                start_date: format(selectedDate, 'yyyy-MM-dd'),
-                end_date: format(endDate, 'yyyy-MM-dd'),
+                date: format(selectedDate, 'yyyy-MM-dd'),
                 group_size: personCount,
                 ...(selectedGender && { gender_preference: selectedGender as 'female' | 'male' | 'mixed' })
             }
 
-            const response = await defaultHttp.post(apiRoutes.availabilitySlots, requestData)
-            return response.data.data.slots as AvailabilitySlot[]
+            const response = await defaultHttp.post(apiRoutes.availability, requestData)
+            return response.data.data
         },
-        enabled: selectedDate !== undefined && selectedServices.length > 0
+        enabled: !!selectedDate && selectedServices.length > 0,
+        retry: false
     })
-
+    console.log('Availability Data:', availabilityData)
     // Create guest booking mutation
     const createBookingMutation = useMutation({
         mutationFn: async (bookingData: CreateGuestBookingRequest) => {
@@ -232,25 +230,53 @@ export default function BookingWizard() {
                         availability={availability}
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
-                        onSelectScenario={(slot: any) => {
-                            // Convert AvailabilitySlot to AvailabilityScenario format
-                            if (slot) {
-                                const service = selectedServiceDetails[0] // For now, single service
-                                const price = typeof service?.price === 'string' ? parseFloat(service.price) : (service?.price || 0)
-                                dispatch(setSelectedScenario({
-                                    scenario_id: `slot-${slot.datetime}`,
-                                    start_datetime: slot.datetime,
-                                    end_datetime: slot.datetime, // Will be calculated by backend
-                                    total_duration: service?.duration_minutes || service?.duration || 60,
-                                    total_price: price * personCount,
-                                    services: [{
-                                        service_id: service?.id,
-                                        service_name: typeof service?.name === 'string' ? service.name : service?.name?.[currentLang] || service?.name?.fr || '',
-                                        order_index: 0,
-                                        start_datetime: slot.datetime,
+                        personCount={personCount}
+                        onSelectScenario={(selection: any) => {
+                            if (selection?.slot && selection?.serviceId) {
+                                const { slot, serviceId } = selection
+                                
+                                // Find the selected service details
+                                const selectedService = selectedServiceDetails.find(s => s.id === serviceId)
+                                const price = typeof selectedService?.price === 'string' ? parseFloat(selectedService.price) : (selectedService?.price || 0)
+                                
+                                // Get existing services array or create new one
+                                const existingServices = selectedScenario?.services || []
+                                
+                                // Remove any previous selection for this service and add new one
+                                const updatedServices = [
+                                    ...existingServices.filter((s: any) => s.service_id !== serviceId),
+                                    {
+                                        service_id: serviceId,
+                                        service_name: typeof selectedService?.name === 'string' ? selectedService.name : selectedService?.name?.[currentLang] || selectedService?.name?.fr || '',
+                                        order_index: existingServices.length,
+                                        start_datetime: slot.start_datetime,
                                         staff_id: slot.staff_id,
                                         staff_name: slot.staff_name
-                                    }]
+                                    }
+                                ]
+                                
+                                // Calculate total price and duration
+                                let totalPrice = 0
+                                let totalDuration = 0
+                                let earliestStart = slot.start_datetime
+                                let latestEnd = slot.end_datetime
+                                
+                                updatedServices.forEach((service: any) => {
+                                    const svc = selectedServiceDetails.find(s => s.id === service.service_id)
+                                    if (svc) {
+                                        const svcPrice = typeof svc.price === 'string' ? parseFloat(svc.price) : (svc.price || 0)
+                                        totalPrice += svcPrice * personCount
+                                        totalDuration += svc.duration_minutes || svc.duration || 60
+                                    }
+                                })
+                                
+                                dispatch(setSelectedScenario({
+                                    scenario_id: `multi-slot-${Date.now()}`,
+                                    start_datetime: earliestStart,
+                                    end_datetime: latestEnd,
+                                    total_duration: totalDuration,
+                                    total_price: totalPrice,
+                                    services: updatedServices
                                 }))
                             } else {
                                 dispatch(setSelectedScenario(null))
@@ -287,16 +313,16 @@ export default function BookingWizard() {
                 )}
 
                 {/* Step 5: Guarantee Payment */}
-                {step === 5 && selectedScenario && (
+                {/* {step === 5 && selectedScenario && (
                     <Guarantee
                         totalPrice={selectedScenario.total_price}
                         onNext={handleNext}
                         onPrev={handlePrev}
                     />
-                )}
+                )} */}
 
-                {/* Step 6: Review & Confirm */}
-                {step === 6 && selectedScenario && (
+                {/* Step 5 (6): Review & Confirm */}
+                {step === 5 && selectedScenario && (
                     <Review
                         selectedServices={selectedServiceDetails}
                         selectedStaff={selectedStaff}

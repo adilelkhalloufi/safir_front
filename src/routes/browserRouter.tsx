@@ -148,6 +148,10 @@ const StaffView = loadable(() => import('../pages/dashboard/staff/view'), {
   fallback: fallbackElement,
 });
 
+const StaffCalendar = loadable(() => import('../pages/dashboard/staff/calendar'), {
+  fallback: fallbackElement,
+});
+
 const PaymentsIndex = loadable(() => import('../pages/dashboard/payments'), {
   fallback: fallbackElement,
 });
@@ -247,6 +251,10 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.staff.index,
         element: <StaffIndex />,
+      },
+      {
+        path: webRoutes.staff.calendar,
+        element: <StaffCalendar />,
       },
       {
         path: webRoutes.subscriptions.index,

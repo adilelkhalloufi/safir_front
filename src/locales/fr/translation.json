@@ -94,6 +94,9 @@
     "searchPlaceholder": "Rechercher par nom...",
     "filterByType": "Filtrer par type",
     "addNew": "Ajouter un nouveau membre",
+    "viewCalendar": "Calendrier hebdomadaire",
+    "calendarTitle": "Calendrier hebdomadaire du personnel",
+    "calendarSubtitle": "Voir la disponibilité du personnel toute la semaine",
     "noStaff": "Aucun membre trouvé",
     "noStaffDesc": "Aucun membre ne correspond à vos critères",
     "fetchError": "Échec du chargement du personnel",
@@ -174,6 +177,8 @@
       "men": "Hommes",
       "mixed": "Mixte",
       "otherDates": "Autres dates disponibles:",
+      "notEnough": "Insuffisant",
+      "insufficientCapacity": "Ce créneau a seulement {{available}} places disponibles, mais vous avez besoin de {{needed}} places. Veuillez sélectionner un autre créneau.",
       "back": "Retour",
       "continue": "Continuer"
     },
@@ -229,5 +234,26 @@
       "person": "personne",
       "persons": "personnes"
     }
+  },
+  "calendar": {
+    "sunday": "Dimanche",
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sun": "Dim",
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mer",
+    "thu": "Jeu",
+    "fri": "Ven",
+    "sat": "Sam",
+    "schedule": "Horaire",
+    "staffMembers": "membres du personnel",
+    "noStaff": "Aucun personnel programmé",
+    "more": "plus",
+    "services": "Services"
   }
 }

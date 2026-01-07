@@ -34,6 +34,10 @@ export const apiRoutes = {
   adminStaffSchedule: (id: number) => `${API_URL}/admin/staff/${id}/schedule`,
   adminStaffAvailability: (id: number) => `${API_URL}/admin/staff/${id}/availability`,
 
+  // Calendar API
+  calendarWeekly: `${API_URL}/calendar/weekly`,
+  calendarDay: `${API_URL}/calendar/day`,
+
   adminServices: `${API_URL}/admin/services`,
   adminServiceById: (id: number) => `${API_URL}/admin/services/${id}`,
 
@@ -66,7 +70,7 @@ export const apiRoutes = {
   serviceById: (id: number) => `${API_URL}/services/${id}`,
   staff: `${API_URL}/staff`,
   availabilitySlots: `${API_URL}/availability/slots`,
-  availability: `${API_URL}/availability/multi-service`,
+  availability: `${API_URL}/availability/multiple-services`,
   hammamSessions: `${API_URL}/hammam/sessions`,
   bookings: `${API_URL}/bookings`,
   guestBookings: `${API_URL}/guest-bookings`,

@@ -191,15 +191,43 @@ export interface ConfirmBookingRequest {
 }
 
 export interface AvailabilitySlot {
+  start_time: string
+  end_time: string
+  start_datetime: string
+  end_datetime: string
+  services_breakdown: {
+    service_id: number
+    service_name: string
+    duration: number
+    start_time: string
+    end_time: string
+    staff_id: number
+    staff_name: string
+  }[]
+  available_staff: {
+    staff_id: number
+    staff_name: string
+    specialization: string
+    type_staff: {
+      id: number
+      name_en: string
+      name_fr: string
+    }
+    work_hours: {
+      start: string
+      end: string
+    }
+  }[]
+}
+
+// Transformed slot for SelectDateTime component
+export interface TransformedSlot {
   date: string
   time: string
   datetime: string
   available: boolean
   staff_id?: number
   staff_name?: string
-  resource_id?: number
-  resource_type?: string
-  hammam_session_id?: number
   session_type?: string
   available_capacity?: number
 }

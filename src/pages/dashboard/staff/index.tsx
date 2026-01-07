@@ -10,6 +10,7 @@ import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { setPageTitle } from '@/utils';
+import { Calendar } from 'lucide-react';
 
 export default function StaffIndex() {
   const { t } = useTranslation();
@@ -80,9 +81,15 @@ export default function StaffIndex() {
             {t('staff.subtitle', 'Manage team members and schedules')}
           </p>
         </div>
-        <Button onClick={() => navigate(webRoutes.staff.add)}>
-          {t('staff.addNew', 'Add New Staff')}
-        </Button>
+        <div className='flex gap-2'>
+          <Button variant='outline' onClick={() => navigate(webRoutes.staff.calendar)}>
+            <Calendar className='mr-2 h-4 w-4' />
+            {t('staff.viewCalendar', 'Weekly Calendar')}
+          </Button>
+          <Button onClick={() => navigate(webRoutes.staff.add)}>
+            {t('staff.addNew', 'Add New Staff')}
+          </Button>
+        </div>
       </div>
 
       <StaffDataTable columns={columns} data={data} loading={loading} serviceTypes={serviceTypes} />

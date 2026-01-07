@@ -15,7 +15,7 @@ export function Progress({ step }: ProgressProps) {
         t('bookingWizard.progress.options'),
         t('bookingWizard.progress.dateTime'),
         t('bookingWizard.progress.contact'),
-        t('bookingWizard.progress.payment'),
+        // t('bookingWizard.progress.payment'),
         t('bookingWizard.progress.summary')
     ]
 

@@ -94,6 +94,9 @@
     "searchPlaceholder": "Search by name...",
     "filterByType": "Filter by type",
     "addNew": "Add New Staff",
+    "viewCalendar": "Weekly Calendar",
+    "calendarTitle": "Staff Weekly Calendar",
+    "calendarSubtitle": "View staff availability throughout the week",
     "noStaff": "No staff found",
     "noStaffDesc": "No staff members match your search criteria",
     "fetchError": "Failed to fetch staff",
@@ -440,6 +443,8 @@
       "men": "Men",
       "mixed": "Mixed",
       "otherDates": "Other available dates:",
+      "notEnough": "Not enough",
+      "insufficientCapacity": "This slot has only {{available}} places available, but you need {{needed}} places. Please select another slot.",
       "back": "Back",
       "continue": "Continue"
     },
@@ -495,5 +500,26 @@
       "person": "person",
       "persons": "persons"
     }
+  },
+  "calendar": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "schedule": "Schedule",
+    "staffMembers": "staff members",
+    "noStaff": "No staff scheduled",
+    "more": "more",
+    "services": "Services"
   }
 }
