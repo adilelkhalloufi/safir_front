@@ -19,29 +19,26 @@ import {
     setSelectedScenario,
     setSelectedTimeSlot,
     updateCustomerInfo,
-    resetBooking
+    setSelectedStaffMembers,
+    resetBooking,
+     
 } from '../../../store/slices/bookingSlice'
 import type {
     Service,
-    Staff,
-    AvailabilityScenario,
-    Gender as APIGender,
-    CreateGuestBookingRequest,
-    ConfirmBookingRequest,
+ 
+     CreateGuestBookingRequest,
+ 
     GuestBookingResponse,
     AvailabilitySlotsRequest,
-    AvailabilitySlot,
-    TransformedSlot
+ 
 } from '../../../interfaces/models/booking'
-import type { Step, CustomerInfo } from './types'
-import { Progress } from './Progress'
+ import { Progress } from './Progress'
 import { SelectServices } from './SelectServices'
 import { SelectPersonCount } from './SelectPersonCount'
 import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
 import { CustomerDetails } from './CustomerDetails'
-import { Guarantee } from './Guarantee'
-import { Review } from './Review'
+ import { Review } from './Review'
 
 export default function BookingWizard() {
     const { i18n, t } = useTranslation()
@@ -58,6 +55,7 @@ export default function BookingWizard() {
         selectedDate,
         selectedScenario,
         selectedTimeSlots,
+        selectedStaffMembers,
         customerInfo
     } = useSelector((state: RootState) => state.booking)
 
@@ -74,13 +72,14 @@ export default function BookingWizard() {
 
     // Fetch availability slots from API
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
-        queryKey: ['availability', selectedServices, selectedDate ? format(new Date(selectedDate), 'yyyy-MM-dd') : null, personCount, selectedGender],
+        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null, personCount, selectedGender],
         queryFn: async () => {
             if (!selectedDate || selectedServices.length === 0) return null
 
+            const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
             const requestData: AvailabilitySlotsRequest = {
                 service_ids: selectedServices,
-                date: format(selectedDate, 'yyyy-MM-dd'),
+                date: format(dateObj, 'yyyy-MM-dd'),
                 group_size: personCount,
                 ...(selectedGender && { gender_preference: selectedGender as 'female' | 'male' | 'mixed' })
             }
@@ -91,27 +90,19 @@ export default function BookingWizard() {
         enabled: !!selectedDate && selectedServices.length > 0,
         retry: false
     })
-    console.log('Availability Data:', availabilityData)
-    // Create guest booking mutation
+     // Create guest booking mutation
     const createBookingMutation = useMutation({
         mutationFn: async (bookingData: CreateGuestBookingRequest) => {
             const response = await defaultHttp.post(apiRoutes.guestBookings, bookingData)
             return response.data as GuestBookingResponse
         },
-        onSuccess: (data) => {
-            // Store booking ID for confirmation
-            const bookingId = data.data.id
+        onSuccess: () => {
+             
             showNotification(t('bookingWizard.bookingCreated'), NotificationType.SUCCESS)
+            dispatch(resetBooking())
+      
             
-            // Automatically confirm booking (in real app, this would happen after payment)
-            confirmBookingMutation.mutate({
-                bookingId,
-                confirmData: {
-                    payment_method: 'card',
-                    cardholder_name: customerInfo.name,
-                    card_last4: '4242' // TODO: Get from actual payment form
-                }
-            })
+         
         },
         onError: (error: any) => {
             showNotification(
@@ -121,29 +112,29 @@ export default function BookingWizard() {
         }
     })
 
-    // Confirm booking mutation
-    const confirmBookingMutation = useMutation({
-        mutationFn: async ({ bookingId, confirmData }: { bookingId: number, confirmData: ConfirmBookingRequest }) => {
-            const response = await defaultHttp.post(apiRoutes.confirmGuestBooking(bookingId), confirmData)
-            return response.data as GuestBookingResponse
-        },
-        onSuccess: (data) => {
-            showNotification(
-                `${t('bookingWizard.bookingConfirmed')} ${data.data.booking_reference}`,
-                NotificationType.SUCCESS
-            )
-            // Reset wizard after a delay to show success
-            setTimeout(() => {
-                dispatch(resetBooking())
-            }, 3000)
-        },
-        onError: (error: any) => {
-            showNotification(
-                error?.response?.data?.message || t('bookingWizard.bookingConfirmError'),
-                NotificationType.ERROR
-            )
-        }
-    })
+    // // Confirm booking mutation
+    // const confirmBookingMutation = useMutation({
+    //     mutationFn: async ({ bookingId, confirmData }: { bookingId: number, confirmData: ConfirmBookingRequest }) => {
+    //         const response = await defaultHttp.post(apiRoutes.confirmGuestBooking(bookingId), confirmData)
+    //         return response.data as GuestBookingResponse
+    //     },
+    //     onSuccess: (data) => {
+    //         showNotification(
+    //             `${t('bookingWizard.bookingConfirmed')} ${data.data.booking_reference}`,
+    //             NotificationType.SUCCESS
+    //         )
+    //         // Reset wizard after a delay to show success
+    //         setTimeout(() => {
+    //             dispatch(resetBooking())
+    //         }, 3000)
+    //     },
+    //     onError: (error: any) => {
+    //         showNotification(
+    //             error?.response?.data?.message || t('bookingWizard.bookingConfirmError'),
+    //             NotificationType.ERROR
+    //         )
+    //     }
+    // })
 
     // Navigation handlers
     const handleNext = () => dispatch(nextStep())
@@ -216,7 +207,7 @@ export default function BookingWizard() {
                         staffSelections={{}} // Empty - no manual staff selection
                         onSelectStaff={() => {}} // No-op - staff auto-assigned
                         gender={selectedGender || ''}
-                        onSelectGender={(gender) => dispatch(setSelectedGender(gender as APIGender))}
+                        onSelectGender={(gender) => dispatch(setSelectedGender(gender ))}
                         onNext={handleNext}
                         onPrev={handlePrev}
                     />
@@ -225,7 +216,7 @@ export default function BookingWizard() {
                 {/* Step 3: Select Date & Time */}
                 {step === 3 && (
                     <SelectDateTime
-                        selectedDate={selectedDate}
+                        selectedDate={selectedDate }
                         onSelectDate={(date) => dispatch(setSelectedDate(date))}
                         availability={availability}
                         isLoading={availabilityLoading}
@@ -237,7 +228,20 @@ export default function BookingWizard() {
                                 
                                 // Find the selected service details
                                 const selectedService = selectedServiceDetails.find(s => s.id === serviceId)
-                                const price = typeof selectedService?.price === 'string' ? parseFloat(selectedService.price) : (selectedService?.price || 0)
+                                 
+                                // Automatically assign staff based on personCount
+                                let assignedStaff: any[] = []
+                                if (slot.available_staff && slot.available_staff.length > 0) {
+                                    // Select the required number of staff (up to personCount)
+                                    const numberOfStaffNeeded = Math.min(personCount, slot.available_staff.length)
+                                    assignedStaff = slot.available_staff.slice(0, numberOfStaffNeeded)
+                                    
+                                    // Store the selected staff members
+                                    dispatch(setSelectedStaffMembers({ 
+                                        serviceId, 
+                                        staffMembers: assignedStaff 
+                                    }))
+                                }
                                 
                                 // Get existing services array or create new one
                                 const existingServices = selectedScenario?.services || []
@@ -250,8 +254,10 @@ export default function BookingWizard() {
                                         service_name: typeof selectedService?.name === 'string' ? selectedService.name : selectedService?.name?.[currentLang] || selectedService?.name?.fr || '',
                                         order_index: existingServices.length,
                                         start_datetime: slot.start_datetime,
-                                        staff_id: slot.staff_id,
-                                        staff_name: slot.staff_name
+                                        end_datetime: slot.end_datetime,
+                                        assigned_staff: assignedStaff,
+                                        staff_count: assignedStaff.length,
+                                        available_staff: slot.available_staff || []
                                     }
                                 ]
                                 
@@ -283,7 +289,7 @@ export default function BookingWizard() {
                             }
                         }}
                         selectedTimeSlots={selectedTimeSlots}
-                        onSelectTimeSlot={(serviceId, scenario) => {
+                        onSelectTimeSlot={(serviceId :any, scenario:any) => {
                             dispatch(setSelectedTimeSlot({ serviceId, scenario }))
                         }}
                         selectedServices={selectedServiceDetails}
@@ -331,31 +337,10 @@ export default function BookingWizard() {
                         selectedDate={selectedDate}
                         customerInfo={customerInfo}
                         selectedGender={selectedGender}
-                        isSubmitting={createBookingMutation.isPending || confirmBookingMutation.isPending}
-                        onConfirm={() => {
-                            // Parse customer name into first and last name
-                            const nameParts = customerInfo.name.trim().split(' ')
-                            const firstName = nameParts[0] || customerInfo.name
-                            const lastName = nameParts.slice(1).join(' ') || firstName
-
-                            // Build guest booking request
-                            const bookingData: CreateGuestBookingRequest = {
-                                guest_info: {
-                                    first_name: firstName,
-                                    last_name: lastName,
-                                    email: customerInfo.email,
-                                    phone: customerInfo.phone
-                                },
-                                service_ids: selectedServices,
-                                start_datetime: selectedScenario.start_datetime || '',
-                                group_size: personCount,
-                                ...(selectedGender && { 
-                                    gender_preference: selectedGender as 'female' | 'male' | 'mixed' 
-                                }),
-                                ...(customerInfo.notes && { notes: customerInfo.notes }),
-                                language: currentLang
-                            }
-                            createBookingMutation.mutate(bookingData)
+                        isSubmitting={createBookingMutation.isPending}
+                        onConfirm={(bookingSummary) => {
+                            
+                            createBookingMutation.mutate(bookingSummary)
                         }}
                         onPrev={handlePrev}
                     />

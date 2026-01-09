@@ -14,11 +14,11 @@ interface ReviewProps {
     selectedStaff: { [key: number]: Staff }
     personCount: number
     selectedScenario: AvailabilityScenario | any
-    selectedDate: Date | undefined
+    selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
     selectedGender?: 'femme' | 'homme' | 'mixte'
     isSubmitting: boolean
-    onConfirm: () => void
+    onConfirm: (bookingSummary: any) => void
     onPrev: () => void
 }
 
@@ -37,7 +37,49 @@ export function Review({
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' 
     const totalPrice = selectedScenario?.total_price || 0
-     return (
+
+    // Format date to YYYY-MM-DD for backend
+    const formattedDate = selectedDate 
+        ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd')
+        : ''
+
+    // Prepare booking summary object matching backend validation structure
+    const bookingSummary = {
+        services: selectedServices.map(service => {
+            const serviceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+            return {
+                id: service.id,
+                name: getLocalizedValue(service.name, currentLang),
+                price: typeof service.price === 'string' ? parseFloat(service.price) : service.price,
+                duration: service.duration_minutes || service.duration || 60,
+                start_datetime: serviceDetails?.start_datetime || '',
+                end_datetime: serviceDetails?.end_datetime || '',
+                assigned_staff: (serviceDetails?.assigned_staff || []).map((staff: any) => ({
+                    staff_id: staff.staff_id,
+                    staff_name: staff.staff_name
+                })),
+                staff_count: serviceDetails?.staff_count || 0
+            }
+        }),
+        date: formattedDate,
+        personCount: personCount,
+        customer: {
+            name: customerInfo.name,
+            email: customerInfo.email,
+            phone: customerInfo.phone,
+            notes: customerInfo.notes || ''
+        },
+        totalPrice: totalPrice,
+        totalStaffAssigned: selectedServices.reduce((total, service) => {
+            const serviceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+            return total + (serviceDetails?.staff_count || 0)
+        }, 0),
+        gender: selectedGender,
+        language: currentLang
+    }
+
+ 
+    return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
@@ -48,6 +90,45 @@ export function Review({
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
+                    {/* Booking Summary Card */}
+                    <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Calendar className="h-5 w-5 text-amber-600" />
+                            <h3 className="font-semibold text-amber-900">{t('bookingWizard.review.bookingSummary')}</h3>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium">{t('bookingWizard.review.date')}:</span>
+                                <span className="text-muted-foreground">
+                                    {selectedDate && format(
+                                        typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate,
+                                        'EEEE d MMMM yyyy',
+                                        { locale: fr }
+                                    )}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium">{t('bookingWizard.review.guests')}:</span>
+                                <span className="text-muted-foreground">
+                                    {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
+                                    {selectedGender && ` • ${selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}`}
+                                </span>
+                            </div>
+                            {selectedScenario?.start_datetime && (
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4 text-amber-600" />
+                                    <span className="font-medium">{t('bookingWizard.review.bookingTime')}:</span>
+                                    <span className="text-muted-foreground">
+                                        {format(new Date(selectedScenario.start_datetime.replace(' ', 'T')), 'HH:mm')}
+                                        {selectedScenario.end_datetime && ` - ${format(new Date(selectedScenario.end_datetime.replace(' ', 'T')), 'HH:mm')}`}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Services with Individual Date/Time */}
                     <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-4">
@@ -58,46 +139,59 @@ export function Review({
                             {selectedServices.map((service: any) => {
                                 const selectedServiceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
                                 
-                                // Debug logs
-                                console.log('Service:', service.id, getLocalizedValue(service.name, currentLang))
-                                console.log('selectedServiceDetails:', selectedServiceDetails)
-                                console.log('selectedScenario:', selectedScenario)
-                                
                                 // Display the date and time from the selected slot
                                 let displayDate = null
                                 let displayStartTime = null
                                 let displayEndTime = null
                                 
-                                if (selectedServiceDetails?.start_datetime && selectedServiceDetails?.end_datetime) {
-                                    console.log('Has datetime:', selectedServiceDetails.start_datetime, selectedServiceDetails.end_datetime)
-                                    const startDate = new Date(selectedServiceDetails.start_datetime)
-                                    const endDate = new Date(selectedServiceDetails.end_datetime)
+                                if (selectedServiceDetails?.start_datetime) {
+                                    // Parse datetime string (format: "2026-01-09 19:00:00" or ISO string)
+                                    const startDateStr = selectedServiceDetails.start_datetime.replace(' ', 'T')
+                                    const startDate = new Date(startDateStr)
                                     
-                                    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                                    if (!isNaN(startDate.getTime())) {
                                         displayDate = startDate
                                         displayStartTime = format(startDate, 'HH:mm')
-                                        displayEndTime = format(endDate, 'HH:mm')
-                                        console.log('Formatted time:', displayStartTime, displayEndTime)
+                                        
+                                        // Parse end datetime if available
+                                        if (selectedServiceDetails.end_datetime) {
+                                            const endDateStr = selectedServiceDetails.end_datetime.replace(' ', 'T')
+                                            const endDate = new Date(endDateStr)
+                                            if (!isNaN(endDate.getTime())) {
+                                                displayEndTime = format(endDate, 'HH:mm')
+                                            }
+                                        }
                                     }
-                                } else {
-                                    console.log('No datetime found, using selectedDate:', selectedDate)
-                                    if (selectedDate) {
-                                        displayDate = new Date(selectedDate)
-                                    }
+                                } else if (selectedDate) {
+                                    // Fallback to selectedDate
+                                    displayDate = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
                                 }
+                                
+                                // Get assigned staff members
+                                const assignedStaff = selectedServiceDetails?.assigned_staff || []
                                 
                                 return (
                                     <div key={service.id} className="pb-4 border-b last:border-b-0 last:pb-0">
                                         <div className="flex justify-between items-start mb-2">
-                                            <div>
+                                            <div className="flex-1">
                                                 <p className="font-medium text-lg">{getLocalizedValue(service.name, currentLang)}</p>
-                                                {selectedServiceDetails?.staff_name && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {t('bookingWizard.review.with')} {selectedServiceDetails.staff_name}
-                                                    </p>
+                                                {/* Display all assigned staff */}
+                                                {assignedStaff.length > 0 && (
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {assignedStaff.map((staff: any) => (
+                                                            <div key={staff.staff_id} className="flex items-center gap-1.5 px-2 py-1 bg-amber-100 rounded-md">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-amber-700" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                                </svg>
+                                                                <span className="text-sm font-medium text-amber-900">
+                                                                    {staff.staff_name}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 )}
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right ml-4">
                                                 <p className="font-semibold">{service.price} $</p>
                                                 <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
                                             </div>
@@ -153,16 +247,30 @@ export function Review({
                         </div>
                     </div>
 
-                    {/* Total */}
-                    {/* <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
-                        <div className="flex justify-between items-center">
-                            <span className="text-lg font-semibold">{t('bookingWizard.review.total')}</span>
-                            <span className="text-2xl font-bold text-amber-600">{totalPrice} $</span>
+                    {/* Total Price Section */}
+                    <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4">
+                        <div className="space-y-2">
+                            {/* Service breakdown */}
+                            {selectedServices.map((service: any) => (
+                                <div key={service.id} className="flex justify-between text-sm">
+                                    <span className="text-gray-700">
+                                        {getLocalizedValue(service.name, currentLang)} × {personCount}
+                                    </span>
+                                    <span className="font-medium text-gray-900">
+                                        {(typeof service.price === 'string' ? parseFloat(service.price) : service.price) * personCount} $
+                                    </span>
+                                </div>
+                            ))}
+                            
+                            {/* Total */}
+                            <div className="pt-2 border-t border-amber-300">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-lg font-semibold">{t('bookingWizard.review.total')}</span>
+                                    <span className="text-2xl font-bold text-amber-600">{totalPrice} $</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            {t('bookingWizard.review.guaranteePaid', { amount: 50 })}
-                        </p>
-                    </div> */}
+                    </div>
 
                     <Alert>
                         <AlertDescription className="text-sm">
@@ -176,7 +284,7 @@ export function Review({
                         {t('bookingWizard.review.back')}
                     </Button>
                     <Button
-                        onClick={onConfirm}
+                        onClick={() => onConfirm(bookingSummary)}
                         disabled={isSubmitting}
                         size="lg"
                         className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"

@@ -14,9 +14,10 @@ export interface BookingState {
     selectedStaff: Record<number, Staff>;
     personCount: number;
     selectedGender: APIGender | undefined;
-    selectedDate: Date | undefined;
+    selectedDate: string | undefined; // Store as ISO string for Redux serialization
     selectedScenario: AvailabilityScenario | null;
     selectedTimeSlots: Record<number, AvailabilityScenario>;
+    selectedStaffMembers: Record<number, any[]>; // serviceId -> array of staff members
     customerInfo: CustomerInfo;
 }
 
@@ -30,6 +31,7 @@ const initialState: BookingState = {
     selectedDate: undefined,
     selectedScenario: null,
     selectedTimeSlots: {},
+    selectedStaffMembers: {},
     customerInfo: {
         name: '',
         email: '',
@@ -74,8 +76,13 @@ export const bookingSlice = createSlice({
         setSelectedGender: (state, action: PayloadAction<APIGender | undefined>) => {
             state.selectedGender = action.payload;
         },
-        setSelectedDate: (state, action: PayloadAction<Date | undefined>) => {
-            state.selectedDate = action.payload;
+        setSelectedDate: (state, action: PayloadAction<Date | string | undefined>) => {
+            // Convert Date to ISO string for serialization
+            if (action.payload instanceof Date) {
+                state.selectedDate = action.payload.toISOString();
+            } else {
+                state.selectedDate = action.payload;
+            }
         },
         setSelectedScenario: (state, action: PayloadAction<AvailabilityScenario | null>) => {
             state.selectedScenario = action.payload;
@@ -94,6 +101,10 @@ export const bookingSlice = createSlice({
         },
         removeStaffSelection: (state, action: PayloadAction<number>) => {
             delete state.selectedStaff[action.payload];
+        },
+        setSelectedStaffMembers: (state, action: PayloadAction<{ serviceId: number; staffMembers: any[] }>) => {
+            const { serviceId, staffMembers } = action.payload;
+            state.selectedStaffMembers[serviceId] = staffMembers;
         },
         resetBooking: () => {
             return initialState;
@@ -114,6 +125,7 @@ export const {
     updateCustomerInfo,
     setStaffSelection,
     removeStaffSelection,
+    setSelectedStaffMembers,
     resetBooking
 } = bookingSlice.actions;
 

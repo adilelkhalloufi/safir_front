@@ -64,7 +64,7 @@ export function SelectDateTime({
 }: SelectDateTimeProps) {
     const { t } = useTranslation()
 
-    // Handler for slot selection
+    // Handler for slot selection - automatically assigns staff based on personCount
     const handleSlotClick = (slot: any, serviceId: number) => {
         // Check if there's enough capacity using the slot's available_capacity
         const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
@@ -77,6 +77,8 @@ export function SelectDateTime({
             )
             return
         }
+        
+        // Automatically proceed with staff assignment
         onSelectScenario({ slot, serviceId })
     }
 
@@ -181,12 +183,29 @@ export function SelectDateTime({
                                                                     {slot.start_time}
                                                                 </div>
 
-                                                                <div className={cn(
-                                                                    'text-[10px] mt-0.5',
-                                                                    isSelected ? 'text-amber-600' : 'text-gray-400'
-                                                                )}>
-                                                                    {slot.staff_name}
-                                                                </div>
+                                                                {/* Display all staff names */}
+                                                                {slot.available_staff && slot.available_staff.length > 0 && (
+                                                                    <div className={cn(
+                                                                        'text-[9px] mt-0.5 max-h-12 overflow-y-auto',
+                                                                        isSelected ? 'text-amber-600' : 'text-gray-500'
+                                                                    )}>
+                                                                        {slot.available_staff.map((staff: any, idx: number) => (
+                                                                            <div key={staff.staff_id} className="truncate">
+                                                                                {staff.staff_name}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Fallback to single staff name if available_staff is not present */}
+                                                                {(!slot.available_staff || slot.available_staff.length === 0) && slot.staff_name && (
+                                                                    <div className={cn(
+                                                                        'text-[10px] mt-0.5',
+                                                                        isSelected ? 'text-amber-600' : 'text-gray-400'
+                                                                    )}>
+                                                                        {slot.staff_name}
+                                                                    </div>
+                                                                )}
 
                                                                 {/* Capacity indicator */}
                                                                 {availableCapacity > 0 && (
