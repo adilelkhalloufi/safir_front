@@ -27,7 +27,7 @@ export default function BookingsView() {
         queryKey: ['booking', id],
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminBookingById(parseInt(id!)));
-            return response.data;
+            return response.data.data;
         },
         enabled: !!id,
     });
@@ -37,7 +37,7 @@ export default function BookingsView() {
             draft: 'bg-gray-500',
             confirmed: 'bg-blue-500',
             cancelled: 'bg-red-500',
-            no_show: 'bg-orange-500',
+            'no-show': 'bg-orange-500',
             completed: 'bg-green-500',
         };
         return colors[status] || 'bg-gray-500';
@@ -102,16 +102,18 @@ export default function BookingsView() {
 
                         <Separator />
 
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">{t('bookings.startDateTime', 'Start Date & Time')}</p>
-                            <p className="text-base">{format(new Date(booking.start_datetime), 'PPP p')}</p>
-                        </div>
+                        {booking.booking_items && booking.booking_items.length > 0 && (
+                            <>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">{t('bookings.startDateTime', 'Start Date & Time')}</p>
+                                    <p className="text-base">{format(new Date(booking.booking_items[0].start_datetime), 'PPP p')}</p>
+                                </div>
 
-                        {booking.end_datetime && (
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">{t('bookings.endDateTime', 'End Date & Time')}</p>
-                                <p className="text-base">{format(new Date(booking.end_datetime), 'PPP p')}</p>
-                            </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">{t('bookings.endDateTime', 'End Date & Time')}</p>
+                                    <p className="text-base">{format(new Date(booking.booking_items[0].end_datetime), 'PPP p')}</p>
+                                </div>
+                            </>
                         )}
 
                         <div>
@@ -137,21 +139,21 @@ export default function BookingsView() {
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('common.name', 'Name')}</p>
                             <p className="text-base">
-                                {booking.user?.first_name} {booking.user?.last_name}
+                                {booking.client?.name || 'N/A'}
                             </p>
                         </div>
 
-                        {booking.user?.email && (
+                        {booking.client?.email && (
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('common.email', 'Email')}</p>
-                                <p className="text-base">{booking.user.email}</p>
+                                <p className="text-base">{booking.client.email}</p>
                             </div>
                         )}
 
-                        {booking.user?.phone && (
+                        {booking.client?.phone && (
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('common.phone', 'Phone')}</p>
-                                <p className="text-base">{booking.user.phone}</p>
+                                <p className="text-base">{booking.client.phone}</p>
                             </div>
                         )}
                     </CardContent>
@@ -170,23 +172,30 @@ export default function BookingsView() {
                         {booking.booking_items?.map((item: any) => (
                             <div key={item.id} className="flex justify-between items-start p-4 border rounded-lg">
                                 <div className="flex-1">
-                                    <h4 className="font-semibold">{item.service?.name}</h4>
-                                    <p className="text-sm text-muted-foreground">{item.service?.description}</p>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Badge style={{ backgroundColor: item.service?.type?.color }} className="text-white">
+                                            {item.service?.type?.name?.[booking.language] || item.service?.type?.name?.en}
+                                        </Badge>
+                                        <h4 className="font-semibold">{item.service?.name?.[booking.language] || item.service?.name?.en}</h4>
+                                    </div>
+                                    {item.service?.description?.[booking.language] && (
+                                        <p className="text-sm text-muted-foreground mb-2">{item.service.description[booking.language]}</p>
+                                    )}
                                     <div className="flex items-center gap-4 mt-2 text-sm">
                                         <span className="flex items-center gap-1">
                                             <Clock className="h-4 w-4" />
-                                            {item.service?.duration_minutes} min
+                                            {item.duration_minutes} min
                                         </span>
                                         {item.staff && (
                                             <span className="flex items-center gap-1">
                                                 <User className="h-4 w-4" />
-                                                {item.staff.name}
+                                                {[item.staff.user?.first_name, item.staff.user?.last_name].filter(Boolean).join(' ') || item.staff.user?.email || `Staff #${item.staff.id}`} ({item.staff.specialization})
                                             </span>
                                         )}
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-semibold">{item.service?.price} DH</p>
+                                    <p className="font-semibold">{item.price} DH</p>
                                 </div>
                             </div>
                         ))}

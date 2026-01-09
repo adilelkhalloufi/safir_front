@@ -13,7 +13,7 @@ export default function HeaderBooking() {
   const navigate = useNavigate();
   const admin = useSelector((state: RootState) => state.admin);
   return (
-    <header className="  bg-primary flex items-center justify-between p-4 relative min-h-24">
+    <header className="fixed top-0 left-0 right-0 bg-primary flex items-center justify-between p-4 min-h-24">
       <div className="w-12"></div>
       <img src="/logo.png" alt="Booking Header" className="absolute left-1/2 transform -translate-x-1/2 h-20" />
       <div className="flex flex-row gap-4">

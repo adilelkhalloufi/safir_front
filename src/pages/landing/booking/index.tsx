@@ -160,7 +160,7 @@ export default function BookingWizard() {
     const availability = availabilityData || []
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-8 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-8 px-4 mt-20">
             <div className="mx-auto max-w-4xl">
                 {/* Header */}
                 <div className="mb-8 text-center">
