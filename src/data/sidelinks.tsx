@@ -42,12 +42,12 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.clients.index,
     icon: <IconUsers size={18} />,
   },
-  {
-    title: 'Subscriptions',
-    label: '',
-    href: webRoutes.subscriptions.index,
-    icon: <IconTicket size={18} />,
-  },
+  // {
+  //   title: 'Subscriptions',
+  //   label: '',
+  //   href: webRoutes.subscriptions.index,
+  //   icon: <IconTicket size={18} />,
+  // },
   // {
   //   title: 'Health Forms',
   //   label: '',
@@ -84,12 +84,12 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.payments.index,
     icon: <IconCreditCard size={18} />,
   },
-  {
-    title: 'Reports',
-    label: '',
-    href: webRoutes.reports.index,
-    icon: <IconChartBar size={18} />,
-  },
+  // {
+  //   title: 'Reports',
+  //   label: '',
+  //   href: webRoutes.reports.index,
+  //   icon: <IconChartBar size={18} />,
+  // },
   {
     title: 'Settings',
     label: '',
