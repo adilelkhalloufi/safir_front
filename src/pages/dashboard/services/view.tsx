@@ -19,6 +19,9 @@ import {
   IconClock,
   IconCurrencyEuro,
   IconPackage,
+  IconUsers,
+  IconMail,
+  IconPhone,
 } from '@tabler/icons-react'
 import ViewLoading from '@/components/skeleton/ViewLoading'
 
@@ -220,6 +223,72 @@ export default function ViewService() {
                               </p>
                             </div>
                           )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Staff Members Card */}
+          {service?.staffs && service?.staffs.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <IconUsers className='h-5 w-5' />
+                  {t('services.staffMembers', 'Staff Members')}
+                </CardTitle>
+                <CardDescription>
+                  {t('services.staffMembersDescription', 'Staff members who can provide this service')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  {service.staffs.map((staff: any) => (
+                    <div
+                      key={staff.id}
+                      className='rounded-lg border p-4 hover:bg-accent/50 transition-colors'
+                    >
+                      <div className='grid gap-4 md:grid-cols-4'>
+                        <div>
+                          <p className='text-sm font-medium text-muted-foreground'>
+                            {t('common.name', 'Name')}
+                          </p>
+                          <p className='mt-1 text-base font-medium'>
+                            {staff.name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className='text-sm font-medium text-muted-foreground'>
+                            {t('common.email', 'Email')}
+                          </p>
+                          <div className='mt-1 flex items-center gap-2'>
+                            <IconMail className='h-4 w-4 text-muted-foreground' />
+                            <p className='text-base'>{staff.email}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className='text-sm font-medium text-muted-foreground'>
+                            {t('common.phone', 'Phone')}
+                          </p>
+                          <div className='mt-1 flex items-center gap-2'>
+                            <IconPhone className='h-4 w-4 text-muted-foreground' />
+                            <p className='text-base'>{staff.phone}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className='text-sm font-medium text-muted-foreground'>
+                            {t('common.status', 'Status')}
+                          </p>
+                          <div className='mt-1'>
+                            <Badge
+                              variant={staff.status === 1 ? 'default' : 'secondary'}
+                            >
+                              {staff.status === 1 ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -104,6 +104,9 @@ export const bookingSlice = createSlice({
         },
         setSelectedStaffMembers: (state, action: PayloadAction<{ serviceId: number; staffMembers: any[] }>) => {
             const { serviceId, staffMembers } = action.payload;
+            if (!state.selectedStaffMembers) {
+                state.selectedStaffMembers = {};
+            }
             state.selectedStaffMembers[serviceId] = staffMembers;
         },
         resetBooking: () => {
