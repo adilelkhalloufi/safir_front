@@ -48,7 +48,6 @@ export function ClientsDataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const table = useReactTable({
     data,
@@ -69,14 +68,7 @@ export function ClientsDataTable<TData, TValue>({
     },
   });
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-    if (value === 'all') {
-      table.getColumn('status')?.setFilterValue(undefined);
-    } else {
-      table.getColumn('status')?.setFilterValue(value);
-    }
-  };
+
 
   return (
     <div className='space-y-4'>
@@ -89,16 +81,7 @@ export function ClientsDataTable<TData, TValue>({
           }
           className='max-w-sm'
         />
-        <Select value={statusFilter} onValueChange={handleStatusFilter}>
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('clients.filterByStatus', 'Filter by status')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('common.all', 'All')}</SelectItem>
-            <SelectItem value='active'>{t('clients.active', 'Active')}</SelectItem>
-            <SelectItem value='inactive'>{t('clients.inactive', 'Inactive')}</SelectItem>
-          </SelectContent>
-        </Select>
+
       </div>
 
       <div className='rounded-md border'>
@@ -114,9 +97,9 @@ export function ClientsDataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>

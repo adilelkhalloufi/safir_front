@@ -26,7 +26,7 @@ export default function ClientsIndex() {
     http
       .get(apiRoutes.adminClients)
       .then((res) => {
-        setData(res.data);
+        setData(res.data?.data);
       })
       .catch(() => {
         toast({
