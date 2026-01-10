@@ -50,43 +50,7 @@ export function PaymentsDataTable<TData, TValue>({ columns, data }: DataTablePro
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center gap-2'>
-        <Input
-          placeholder={t('payments.searchPlaceholder', 'Search by client or transaction ID...')}
-          value={(table.getColumn('client_name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('client_name')?.setFilterValue(event.target.value)}
-          className='max-w-sm'
-        />
-        <Select
-          value={(table.getColumn('payment_method')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('payment_method')?.setFilterValue(value === 'all' ? '' : value)}
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('payments.filterByMethod', 'Filter by method')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('payments.allMethods', 'All Methods')}</SelectItem>
-            <SelectItem value='card'>{t('payments.methodCard', 'Card')}</SelectItem>
-            <SelectItem value='cash'>{t('payments.methodCash', 'Cash')}</SelectItem>
-            <SelectItem value='bank_transfer'>{t('payments.methodBank', 'Bank Transfer')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={(table.getColumn('status')?.getFilterValue() as string) ?? 'all'}
-          onValueChange={(value) => table.getColumn('status')?.setFilterValue(value === 'all' ? '' : value)}
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('payments.filterByStatus', 'Filter by status')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('payments.allStatuses', 'All Statuses')}</SelectItem>
-            <SelectItem value='success'>{t('payments.statusSuccess', 'Success')}</SelectItem>
-            <SelectItem value='pending'>{t('payments.statusPending', 'Pending')}</SelectItem>
-            <SelectItem value='failed'>{t('payments.statusFailed', 'Failed')}</SelectItem>
-            <SelectItem value='refunded'>{t('payments.statusRefunded', 'Refunded')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+
       <div className='rounded-md border'>
         <Table>
           <TableHeader>

@@ -156,6 +156,10 @@ const PaymentsIndex = loadable(() => import('../pages/dashboard/payments'), {
   fallback: fallbackElement,
 });
 
+const PaymentsAdd = loadable(() => import('../pages/dashboard/payments/add'), {
+  fallback: fallbackElement,
+});
+
 const PaymentsView = loadable(() => import('../pages/dashboard/payments/view'), {
   fallback: fallbackElement,
 });
@@ -353,6 +357,10 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.payments.index,
         element: <PaymentsIndex />,
+      },
+      {
+        path: webRoutes.payments.add,
+        element: <PaymentsAdd />,
       },
       {
         path: webRoutes.payments.view,

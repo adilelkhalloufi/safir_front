@@ -66,6 +66,7 @@ export const webRoutes = {
   },
   payments: {
     index: '/dashboard/payments',
+    add: '/dashboard/payments/add',
     view: '/dashboard/payments/:id',
   },
   reports: {

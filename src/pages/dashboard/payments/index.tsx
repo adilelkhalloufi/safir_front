@@ -35,7 +35,7 @@ export default function PaymentsPage() {
   // Fetch payments
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
     queryKey: ['payments'],
-    queryFn: () => http.get(apiRoutes.adminPayments),
+    queryFn: () => http.get(apiRoutes.adminPayments).then((res) => res.data.data),
   });
 
   // Refund mutation
@@ -90,13 +90,14 @@ export default function PaymentsPage() {
 
   // Calculate stats
   const totalRevenue = payments
-    .filter((p) => p.status === 'success')
+    .filter((p) => p.status === 'completed')
     .reduce((sum, p) => sum + p.amount, 0);
-  const successfulPayments = payments.filter((p) => p.status === 'success').length;
-  const pendingPayments = payments.filter((p) => p.status === 'pending').length;
-  const refundedAmount = payments
-    .filter((p) => p.status === 'refunded')
-    .reduce((sum, p) => sum + p.amount, 0);
+  // const successfulPayments = payments.filter((p) => p.status === 'completed').length;
+  // const pendingPayments = payments.filter((p) => p.status === 'pending').length;
+  // const refundedAmount = payments
+  //   .filter((p) => p.status === 'refunded')
+  //   .reduce((sum, p) => sum + p.amount, 0);
+
 
   if (isLoading) {
     return (
@@ -117,6 +118,9 @@ export default function PaymentsPage() {
             {t('payments.subtitle', 'Track transactions and manage refunds')}
           </p>
         </div>
+        {/* <Button onClick={() => navigate(webRoutes.payments.add)}>
+          {t('payments.addNew', 'Add New Payment')}
+        </Button> */}
       </div>
 
       {/* Stats Cards */}
@@ -126,33 +130,33 @@ export default function PaymentsPage() {
             <CardTitle className='text-sm font-medium'>{t('payments.totalRevenue', 'Total Revenue')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>€{totalRevenue.toFixed(2)}</div>
+            <div className='text-2xl font-bold'>${totalRevenue.toFixed(2)}</div>
           </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>{t('payments.successfulPayments', 'Successful')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{successfulPayments}</div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>{t('payments.pendingPayments', 'Pending')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{pendingPayments}</div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>{t('payments.refundedAmount', 'Refunded')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>€{refundedAmount.toFixed(2)}</div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Payments Table */}
