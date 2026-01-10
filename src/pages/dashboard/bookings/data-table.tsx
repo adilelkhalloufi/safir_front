@@ -80,29 +80,7 @@ export function BookingsDataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center gap-4'>
-        <Input
-          placeholder={t('bookings.searchPlaceholder', 'Search by client name...')}
-          value={(table.getColumn('client_name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('client_name')?.setFilterValue(event.target.value)
-          }
-          className='max-w-sm'
-        />
-        <Select value={statusFilter} onValueChange={handleStatusFilter}>
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder={t('bookings.filterByStatus', 'Filter by status')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('common.all', 'All')}</SelectItem>
-            <SelectItem value='pending'>{t('dashboard.status.pending')}</SelectItem>
-            <SelectItem value='confirmed'>{t('dashboard.status.confirmed')}</SelectItem>
-            <SelectItem value='completed'>{t('dashboard.status.completed')}</SelectItem>
-            <SelectItem value='cancelled'>{t('dashboard.status.cancelled')}</SelectItem>
-            <SelectItem value='no-show'>{t('dashboard.status.no-show')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+
 
       <div className='rounded-md border'>
         {loading ? (
@@ -117,9 +95,9 @@ export function BookingsDataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>

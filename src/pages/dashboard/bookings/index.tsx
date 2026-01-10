@@ -21,13 +21,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MagicForm from '@/components/custom/MagicForm';
 import BookingCalendarView from './calendar-view';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarIcon, List, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 
 export default function BookingsIndex() {
   const { t } = useTranslation();
@@ -51,16 +46,35 @@ export default function BookingsIndex() {
     client: '',
     status: 'all',
   });
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     setPageTitle(t('bookings.title', 'Bookings Management'));
     fetchBookings();
   }, [t]);
 
-  const fetchBookings = () => {
+  const fetchBookings = (filterParams?: any) => {
     setLoading(true);
+
+    // Build query parameters
+    const params: any = {};
+    if (filterParams) {
+      if (filterParams.date_from) {
+        params.date_from = format(new Date(filterParams.date_from), 'yyyy-MM-dd');
+      }
+      if (filterParams.date_to) {
+        params.date_to = format(new Date(filterParams.date_to), 'yyyy-MM-dd');
+      }
+      if (filterParams.client) {
+        params.client = filterParams.client;
+      }
+      if (filterParams.status && filterParams.status !== 'all') {
+        params.status = filterParams.status;
+      }
+    }
+
     http
-      .get(apiRoutes.adminBookings)
+      .get(apiRoutes.adminBookings, { params })
       .then((res) => {
         setData(res.data.data);
       })
@@ -180,41 +194,16 @@ export default function BookingsIndex() {
       });
   };
 
-  const filteredData = useMemo(() => {
-    return data.filter((booking) => {
-      // Filter by date range
-      if (filters.dateFrom || filters.dateTo) {
-        const firstItem = booking.booking_items[0];
-        if (firstItem) {
-          const bookingDate = new Date(firstItem.start_datetime);
-          if (filters.dateFrom && bookingDate < filters.dateFrom) return false;
-          if (filters.dateTo) {
-            const endOfDay = new Date(filters.dateTo);
-            endOfDay.setHours(23, 59, 59, 999);
-            if (bookingDate > endOfDay) return false;
-          }
-        }
-      }
-
-      // Filter by client
-      if (filters.client) {
-        const searchLower = filters.client.toLowerCase();
-        const clientName = `${booking.client.first_name || ''} ${booking.client.last_name || ''}`.toLowerCase();
-        const clientEmail = booking.client.email.toLowerCase();
-        const clientPhone = booking.client.phone.toLowerCase();
-        if (!clientName.includes(searchLower) && !clientEmail.includes(searchLower) && !clientPhone.includes(searchLower)) {
-          return false;
-        }
-      }
-
-      // Filter by status
-      if (filters.status !== 'all' && booking.status !== filters.status) {
-        return false;
-      }
-
-      return true;
+  const handleFilterSubmit = (filterData: any) => {
+    setFilters({
+      dateFrom: filterData.date_from ? new Date(filterData.date_from) : undefined,
+      dateTo: filterData.date_to ? new Date(filterData.date_to) : undefined,
+      client: filterData.client || '',
+      status: filterData.status || 'all',
     });
-  }, [data, filters]);
+    fetchBookings(filterData);
+    setShowFilters(false);
+  };
 
   const columns = useMemo(
     () =>
@@ -272,93 +261,90 @@ export default function BookingsIndex() {
         </div>
 
         {/* Filters */}
-        <div className='grid gap-4 md:grid-cols-4 lg:grid-cols-5'>
-          {/* Date From */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant='outline'
-                className={cn(
-                  'justify-start text-left font-normal',
-                  !filters.dateFrom && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className='mr-2 h-4 w-4' />
-                {filters.dateFrom ? format(filters.dateFrom, 'PPP') : t('bookings.dateFrom', 'Date From')}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-auto p-0'>
-              <Calendar
-                mode='single'
-                selected={filters.dateFrom}
-                onSelect={(date) => setFilters({ ...filters, dateFrom: date })}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-
-          {/* Date To */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant='outline'
-                className={cn(
-                  'justify-start text-left font-normal',
-                  !filters.dateTo && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className='mr-2 h-4 w-4' />
-                {filters.dateTo ? format(filters.dateTo, 'PPP') : t('bookings.dateTo', 'Date To')}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-auto p-0'>
-              <Calendar
-                mode='single'
-                selected={filters.dateTo}
-                onSelect={(date) => setFilters({ ...filters, dateTo: date })}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-
-          {/* Client Search */}
-          <Input
-            placeholder={t('bookings.searchClient', 'Search client...')}
-            value={filters.client}
-            onChange={(e) => setFilters({ ...filters, client: e.target.value })}
-            className='max-w-sm'
-          />
-
-          {/* Status Filter */}
-          <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder={t('bookings.filterStatus', 'Filter by status')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>{t('bookings.allStatus', 'All Status')}</SelectItem>
-              <SelectItem value='draft'>{t('bookings.status_draft', 'Draft')}</SelectItem>
-              <SelectItem value='confirmed'>{t('bookings.status_confirmed', 'Confirmed')}</SelectItem>
-              <SelectItem value='completed'>{t('bookings.status_completed', 'Completed')}</SelectItem>
-              <SelectItem value='cancelled'>{t('bookings.status_cancelled', 'Cancelled')}</SelectItem>
-              <SelectItem value='no-show'>{t('bookings.status_no-show', 'No-show')}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Clear Filters */}
-          {(filters.dateFrom || filters.dateTo || filters.client || filters.status !== 'all') && (
-            <Button variant='ghost' onClick={clearFilters} className='gap-2'>
-              <X className='h-4 w-4' />
-              {t('bookings.clearFilters', 'Clear')}
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <Button variant='outline' onClick={() => setShowFilters(!showFilters)}>
+              <CalendarIcon className='mr-2 h-4 w-4' />
+              {t('bookings.filters', 'Filters')}
+              {(filters.dateFrom || filters.dateTo || filters.client || filters.status !== 'all') && (
+                <span className='ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground'>
+                  Active
+                </span>
+              )}
             </Button>
+            {(filters.dateFrom || filters.dateTo || filters.client || filters.status !== 'all') && (
+              <Button variant='ghost' onClick={clearFilters} className='gap-2'>
+                <X className='h-4 w-4' />
+                {t('bookings.clearFilters', 'Clear')}
+              </Button>
+            )}
+          </div>
+
+          {showFilters && (
+            <div className='rounded-lg border bg-card p-4'>
+              <MagicForm
+                title=''
+                fields={[
+                  {
+                    group: 'filters',
+                    fields: [
+                      {
+                        name: 'date_from',
+                        label: t('bookings.dateFrom', 'Date From'),
+                        type: 'date',
+                        placeholder: t('bookings.selectDateFrom', 'Select start date'),
+                        width: 'half',
+                        defaultValue: filters.dateFrom ? format(filters.dateFrom, 'yyyy-MM-dd') : undefined,
+                      },
+                      {
+                        name: 'date_to',
+                        label: t('bookings.dateTo', 'Date To'),
+                        type: 'date',
+                        placeholder: t('bookings.selectDateTo', 'Select end date'),
+                        width: 'half',
+                        defaultValue: filters.dateTo ? format(filters.dateTo, 'yyyy-MM-dd') : undefined,
+                      },
+                      {
+                        name: 'client',
+                        label: t('bookings.client', 'Client'),
+                        type: 'text',
+                        placeholder: t('bookings.searchClient', 'Search by name, email or phone...'),
+                        width: 'half',
+                        defaultValue: filters.client,
+                      },
+                      {
+                        name: 'status',
+                        label: t('bookings.status', 'Status'),
+                        type: 'select',
+                        placeholder: t('bookings.selectStatus', 'Select status'),
+                        width: 'half',
+                        defaultValue: filters.status,
+                        options: [
+                          { value: 'all', name: t('bookings.allStatus', 'All Status') },
+                          { value: 'draft', name: t('bookings.status_draft', 'Draft') },
+                          { value: 'confirmed', name: t('bookings.status_confirmed', 'Confirmed') },
+                          { value: 'completed', name: t('bookings.status_completed', 'Completed') },
+                          { value: 'cancelled', name: t('bookings.status_cancelled', 'Cancelled') },
+                          { value: 'no-show', name: t('bookings.status_no-show', 'No-show') },
+                        ],
+                      },
+                    ],
+                  },
+                ]}
+                onSubmit={handleFilterSubmit}
+                button={t('bookings.applyFilters', 'Apply Filters')}
+                loading={loading}
+              />
+            </div>
           )}
         </div>
       </div>
 
       {/* View Content */}
       {viewMode === 'table' ? (
-        <BookingsDataTable columns={columns} data={filteredData} loading={loading} />
+        <BookingsDataTable columns={columns} data={data} loading={loading} />
       ) : (
-        <BookingCalendarView bookings={filteredData} />
+        <BookingCalendarView bookings={data} />
       )}
 
       {/* Cancel Dialog */}
