@@ -4,12 +4,10 @@ import {
   IconSettings,
   IconCalendar,
   IconUsers,
-  IconTicket,
   IconUserCog,
   IconMassage,
   IconHome,
   IconCreditCard,
-  IconChartBar,
 } from '@tabler/icons-react';
 
 export interface NavLink {
@@ -84,12 +82,12 @@ export const sidelinks: SideLink[] = [
     href: webRoutes.payments.index,
     icon: <IconCreditCard size={18} />,
   },
-  {
-    title: 'Reports',
-    label: '',
-    href: webRoutes.reports.index,
-    icon: <IconChartBar size={18} />,
-  },
+  // {
+  //   title: 'Reports',
+  //   label: '',
+  //   href: webRoutes.reports.index,
+  //   icon: <IconChartBar size={18} />,
+  // },
   {
     title: 'Settings',
     label: '',
