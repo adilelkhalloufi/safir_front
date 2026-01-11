@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  IconCalendar, 
-  IconCurrencyEuro, 
-  IconUsers, 
-  IconClipboardCheck 
+import {
+  IconCalendar,
+  IconCurrencyEuro,
+  IconUsers,
+  IconClipboardCheck
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,14 +11,12 @@ interface StatsCardsProps {
   todayBookings: number;
   todayRevenue: number;
   activeClients: number;
-  pendingForms: number;
 }
 
-export function StatsCards({ 
-  todayBookings, 
-  todayRevenue, 
-  activeClients, 
-  pendingForms 
+export function StatsCards({
+  todayBookings,
+  todayRevenue,
+  activeClients,
 }: StatsCardsProps) {
   const { t } = useTranslation();
 
@@ -33,7 +31,7 @@ export function StatsCards({
     },
     {
       title: t('dashboard.todayRevenue'),
-      value: `€${todayRevenue.toFixed(2)}`,
+      value: `$ ${(todayRevenue || 0).toFixed(2)}`,
       icon: IconCurrencyEuro,
       description: t('dashboard.revenueToday'),
       color: 'text-green-600',
@@ -47,14 +45,7 @@ export function StatsCards({
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
-    {
-      title: t('dashboard.pendingForms'),
-      value: pendingForms,
-      icon: IconClipboardCheck,
-      description: t('dashboard.awaitingReview'),
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-    },
+
   ];
 
   return (

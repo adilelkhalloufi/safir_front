@@ -14,7 +14,7 @@ interface BookingStatusChartProps {
 export function BookingStatusChart({ data }: BookingStatusChartProps) {
   const { t } = useTranslation();
 
-  const chartData = data.map(item => ({
+  const chartData = (data || []).map(item => ({
     status: t(`dashboard.status.${item.status.toLowerCase()}`, item.status),
     count: item.count,
   }));
@@ -27,8 +27,8 @@ export function BookingStatusChart({ data }: BookingStatusChartProps) {
       <CardContent>
         <ResponsiveContainer width='100%' height={300}>
           <BarChart data={chartData}>
-            <XAxis 
-              dataKey='status' 
+            <XAxis
+              dataKey='status'
               stroke='#888888'
               fontSize={12}
               tickLine={false}
@@ -42,9 +42,9 @@ export function BookingStatusChart({ data }: BookingStatusChartProps) {
               tickFormatter={(value) => `${value}`}
             />
             <Tooltip />
-            <Bar 
-              dataKey='count' 
-              fill='#3b82f6' 
+            <Bar
+              dataKey='count'
+              fill='#3b82f6'
               radius={[8, 8, 0, 0]}
             />
           </BarChart>

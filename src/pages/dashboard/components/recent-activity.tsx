@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useTranslation } from 'react-i18next';
-import { 
-  IconCalendar, 
-  IconX, 
-  IconUserPlus 
+import {
+  IconCalendar,
+  IconX,
+  IconUserPlus
 } from '@tabler/icons-react';
 
 interface RecentActivity {
@@ -53,7 +53,7 @@ export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
 
   const getStatusBadge = (status?: string) => {
     if (!status) return null;
-    
+
     const statusConfig: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline', label: string }> = {
       confirmed: { variant: 'default', label: t('dashboard.confirmed') },
       pending: { variant: 'secondary', label: t('dashboard.pending') },
@@ -72,12 +72,12 @@ export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
-          {activities.length === 0 ? (
+          {(activities || []).length === 0 ? (
             <div className='text-center py-8 text-muted-foreground'>
               {t('dashboard.noRecentActivity')}
             </div>
           ) : (
-            activities.map((activity) => (
+            (activities || []).map((activity) => (
               <div key={activity.id} className='flex items-start gap-4'>
                 <div className={`rounded-full p-2 ${getActivityColor(activity.type)}`}>
                   {getActivityIcon(activity.type)}

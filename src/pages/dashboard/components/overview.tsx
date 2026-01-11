@@ -28,10 +28,10 @@ export function Overview({ monthly_revenue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value} DH`}
+          tickFormatter={(value) => `${value} $`}
         />
         <Tooltip 
-          formatter={(value) => [`${value} DH`, "Revenu"]} 
+          formatter={(value) => [`${value} $`, "Revenu"]} 
           labelFormatter={(label) => `Mois: ${label}`}
           contentStyle={{ 
             backgroundColor: 'rgba(255, 255, 255, 0.9)',

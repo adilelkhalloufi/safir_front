@@ -16,7 +16,7 @@ export function ServiceTypeChart({ data }: ServiceTypeChartProps) {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
 
-  const chartData = data.map((item, index) => ({
+  const chartData = (data || []).map((item, index) => ({
     name: t(`dashboard.serviceTypes.${item.service_type.toLowerCase()}`, item.service_type),
     value: item.count,
     fill: COLORS[index % COLORS.length],

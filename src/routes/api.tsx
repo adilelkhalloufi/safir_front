@@ -51,14 +51,15 @@ export const apiRoutes = {
 
   adminTypeResources: `${API_URL}/admin/type-resources`,
   adminTypeResourceById: (id: number) => `${API_URL}/admin/type-resources/${id}`,
-  
-  
+
+
   adminPayments: `${API_URL}/admin/payments`,
   adminPaymentById: (id: number) => `${API_URL}/admin/payments/${id}`,
   adminPaymentRefund: (id: number) => `${API_URL}/admin/payments/${id}/refund`,
   adminPaymentSummary: `${API_URL}/admin/payments/summary`,
 
   adminReports: `${API_URL}/admin/reports`,
+  adminAnalytics: `${API_URL}/admin/analytics`,
   adminStaffPerformance: `${API_URL}/admin/reports/staff-performance`,
   adminServiceStats: `${API_URL}/admin/reports/service-stats`,
 
