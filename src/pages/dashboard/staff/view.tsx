@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import http from '@/utils/http';
@@ -58,7 +58,7 @@ export default function ViewStaff() {
     );
   }
 
-  
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -84,63 +84,63 @@ export default function ViewStaff() {
           {t('common.edit')}
         </Button>
       </div>
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('staff.personalDetails', 'Personal Details')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                  <p className="text-base mt-1">
-                    {staff?.user?.name|| 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Staff Type</p>
-                  <div className="mt-1">{getTypeBadge(staff?.type_staff)}</div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <IconMail className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-base">{staff?.user?.email || 'N/A'}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <IconPhone className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-base">{staff?.user?.phone || '-'}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <div className="mt-1">{getStatusBadge(staff?.is_active)}</div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Specialization</p>
-                  <p className="text-base mt-1">{staff?.specialization || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Certification</p>
-                  <p className="text-base mt-1">{staff?.certification || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Hire Date</p>
-                  <p className="text-base mt-1">{staff?.hire_date || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Default Break (minutes)</p>
-                  <p className="text-base mt-1">{staff?.default_break_minutes || '-'}</p>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('staff.personalDetails', 'Personal Details')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                <p className="text-base mt-1">
+                  {staff?.user?.name || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Staff Type</p>
+                <div className="mt-1">{getTypeBadge(staff?.type_staff)}</div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <IconMail className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-base">{staff?.user?.email || 'N/A'}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-                <div className='flex flex-col md:flex-row md:gap-5 justify-between'>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <IconPhone className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-base">{staff?.user?.phone || '-'}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Status</p>
+                <div className="mt-1">{getStatusBadge(staff?.is_active)}</div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Specialization</p>
+                <p className="text-base mt-1">{staff?.specialization || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Certification</p>
+                <p className="text-base mt-1">{staff?.certification || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Hire Date</p>
+                <p className="text-base mt-1">{staff?.hire_date || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Default Break (minutes)</p>
+                <p className="text-base mt-1">{staff?.default_break_minutes || '-'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <div className='flex flex-col md:flex-row md:gap-5 justify-between'>
 
-              
+
           <Card className='w-full'>
             <CardHeader>
               <CardTitle>{t('staff.services', 'Services')}</CardTitle>
@@ -212,8 +212,8 @@ export default function ViewStaff() {
               )}
             </CardContent>
           </Card>
-            </div>
         </div>
+      </div>
     </div>
   );
 }

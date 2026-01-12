@@ -2,8 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   IconCalendar,
   IconCurrencyEuro,
-  IconUsers,
-  IconClipboardCheck
+  IconUsers
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 

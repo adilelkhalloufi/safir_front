@@ -1,19 +1,17 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { IconDotsVertical, IconEdit, IconEye } from '@tabler/icons-react';
 import i18n from '@/i18n';
-import { ServiceType } from '@/interfaces/models';
 
 
 
 interface GetColumnsProps {
-    onView: (serviceType: ServiceType) => void;
-    onEdit: (serviceType: ServiceType) => void;
+    onView: (serviceType: any) => void;
+    onEdit: (serviceType: any) => void;
 }
 
-export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): ColumnDef<ServiceType>[] => [
+export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): ColumnDef<any>[] => [
     {
         accessorKey: 'id',
         header: 'ID',
@@ -22,7 +20,7 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
     {
         accessorKey: 'name',
         header: 'Name',
-        cell: ({ row }) => { 
+        cell: ({ row }) => {
             const currentLang = i18n.language;
             const name = row.original?.name[currentLang];
             return (
@@ -32,8 +30,8 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
             );
         },
     },
- 
-  
+
+
     {
         accessorKey: 'services_count',
         header: 'Services',
@@ -42,7 +40,7 @@ export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): Colu
             return <span className="font-medium">{count || 0}</span>;
         },
     },
-   
+
     {
         id: 'actions',
         cell: ({ row }) => {

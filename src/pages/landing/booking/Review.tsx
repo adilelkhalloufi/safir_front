@@ -24,7 +24,6 @@ interface ReviewProps {
 
 export function Review({
     selectedServices,
-    selectedStaff,
     personCount,
     selectedScenario,
     selectedDate,
@@ -35,11 +34,11 @@ export function Review({
     onPrev
 }: ReviewProps) {
     const { i18n, t } = useTranslation()
-    const currentLang = (i18n.language || 'fr') as 'fr' | 'en' 
+    const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
     const totalPrice = selectedScenario?.total_price || 0
 
     // Format date to YYYY-MM-DD for backend
-    const formattedDate = selectedDate 
+    const formattedDate = selectedDate
         ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd')
         : ''
 
@@ -78,7 +77,7 @@ export function Review({
         language: currentLang
     }
 
- 
+
     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
             <CardHeader>
@@ -138,21 +137,21 @@ export function Review({
                         <div className="space-y-4">
                             {selectedServices.map((service: any) => {
                                 const selectedServiceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
-                                
+
                                 // Display the date and time from the selected slot
                                 let displayDate = null
                                 let displayStartTime = null
                                 let displayEndTime = null
-                                
+
                                 if (selectedServiceDetails?.start_datetime) {
                                     // Parse datetime string (format: "2026-01-09 19:00:00" or ISO string)
                                     const startDateStr = selectedServiceDetails.start_datetime.replace(' ', 'T')
                                     const startDate = new Date(startDateStr)
-                                    
+
                                     if (!isNaN(startDate.getTime())) {
                                         displayDate = startDate
                                         displayStartTime = format(startDate, 'HH:mm')
-                                        
+
                                         // Parse end datetime if available
                                         if (selectedServiceDetails.end_datetime) {
                                             const endDateStr = selectedServiceDetails.end_datetime.replace(' ', 'T')
@@ -166,10 +165,10 @@ export function Review({
                                     // Fallback to selectedDate
                                     displayDate = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
                                 }
-                                
+
                                 // Get assigned staff members
                                 const assignedStaff = selectedServiceDetails?.assigned_staff || []
-                                
+
                                 return (
                                     <div key={service.id} className="pb-4 border-b last:border-b-0 last:pb-0">
                                         <div className="flex justify-between items-start mb-2">
@@ -261,7 +260,7 @@ export function Review({
                                     </span>
                                 </div>
                             ))}
-                            
+
                             {/* Total */}
                             <div className="pt-2 border-t border-amber-300">
                                 <div className="flex justify-between items-center">

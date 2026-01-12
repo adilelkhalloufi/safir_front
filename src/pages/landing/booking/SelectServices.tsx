@@ -3,14 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Clock, ChevronRight, X, Search, DollarSign } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Service } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
-import IconDisplay  from '@/components/custom/IconDisplay'
+import IconDisplay from '@/components/custom/IconDisplay'
 
 interface SelectServicesProps {
     services: Service[]
@@ -29,7 +29,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
     const groupedServices = services.reduce((acc, service: any) => {
         const typeId = service.type?.id || 'other'
         const typeName = getLocalizedValue(service.type?.name, currentLang) || t('bookingWizard.selectServices.serviceTypes.other', 'Other')
-        
+
         if (!acc[typeId]) {
             acc[typeId] = {
                 name: typeName,
@@ -58,7 +58,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
         }, {} as Record<string, { name: string, color: string, displayOrder: number, services: Service[] }>)
 
     // Get selected service details
-    const selectedServices = services.filter(s => selected.includes(s.id))
+    const selectedServices = services.filter((s: any) => selected.includes(s.id))
     const totalPrice = selectedServices.reduce((sum, s: any) => sum + (s.price || 0), 0)
     const totalDuration = selectedServices.reduce((sum, s: any) => sum + (s.duration_minutes || s.duration || 0), 0)
 
@@ -68,8 +68,8 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
         return servicesList.filter((svc: any) => {
             const name = getLocalizedValue(svc.name, currentLang) || ''
             const description = getLocalizedValue(svc.description, currentLang) || ''
-            return name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                   description.toLowerCase().includes(searchQuery.toLowerCase())
+            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                description.toLowerCase().includes(searchQuery.toLowerCase())
         })
     }
 
@@ -111,7 +111,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {selectedServices.map((svc: any) => (
-                                    <Badge 
+                                    <Badge
                                         key={svc.id}
                                         variant="secondary"
                                         className="pl-3 pr-2 py-1.5 bg-white hover:bg-white/80"
@@ -148,10 +148,10 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                     {t('bookingWizard.selectServices.allServices', 'All Services')}
                                     <Badge variant="secondary" className="ml-1">{services.length}</Badge>
                                 </TabsTrigger>
-                                {Object.entries(sortedGroupedServices).map(([typeId, typeData]) => (
+                                {Object.entries(sortedGroupedServices).map(([typeId, typeData]: any) => (
                                     <TabsTrigger key={typeId} value={typeId} className="flex items-center gap-2">
-                                        {typeData.icon && <IconDisplay iconName={typeData.icon} size={20} stroke={1.5} />}
-                                        
+                                        {typeData?.icon && <IconDisplay iconName={typeData.icon} size={20} stroke={1.5} />}
+
                                         {typeData.name}
                                         <Badge variant="secondary" className="ml-1">{typeData.services.length}</Badge>
                                     </TabsTrigger>
@@ -187,28 +187,28 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                 >
                                                     <div className="flex items-start gap-4">
                                                         {/* Type Indicator */}
-                                                        <div 
+                                                        <div
                                                             className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
                                                             style={{ backgroundColor: typeColor }}
                                                         />
-                                                        
+
                                                         {/* Type Icon - Big and Nice */}
                                                         {typeIcon && (
-                                                            <div 
+                                                            <div
                                                                 className="shrink-0 rounded-lg p-3 ml-3 flex items-center justify-center"
-                                                                style={{ 
+                                                                style={{
                                                                     backgroundColor: `${typeColor}15`,
                                                                 }}
                                                             >
-                                                                <IconDisplay 
+                                                                <IconDisplay
                                                                     iconName={typeIcon}
-                                                                    size={40} 
+                                                                    size={40}
                                                                     stroke={1.5}
                                                                     color={typeColor}
                                                                 />
                                                             </div>
                                                         )}
-                                                        
+
                                                         {/* Service Info */}
                                                         <div className={cn("flex-1", !typeIcon && "ml-3")}>
                                                             <div className="flex items-start justify-between gap-2">
@@ -226,7 +226,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                                     <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0" />
                                                                 )}
                                                             </div>
-                                                            
+
                                                             <div className="flex items-center gap-4 mt-3">
                                                                 <div className="flex items-center gap-1.5 text-sm">
                                                                     <Clock className="h-3.5 w-3.5 text-green-600" />
@@ -238,12 +238,12 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                                     <DollarSign className="h-3.5 w-3.5" />
                                                                     {svc.price}
                                                                 </div>
-                                                                <Badge 
-                                                                    variant="outline" 
+                                                                <Badge
+                                                                    variant="outline"
                                                                     className="text-xs"
-                                                                    style={{ 
+                                                                    style={{
                                                                         borderColor: typeColor,
-                                                                        color: typeColor 
+                                                                        color: typeColor
                                                                     }}
                                                                 >
                                                                     {getLocalizedValue(svc.type?.name, currentLang)}

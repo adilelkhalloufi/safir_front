@@ -49,7 +49,7 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
         .filter((name, index, self) => self.indexOf(name) === index); // unique names
 
       // Get client name
-      const clientName = [booking.client.first_name, booking.client.last_name]
+      const clientName = [booking.client.name]
         .filter(Boolean)
         .join(' ') || booking.client.email;
 
@@ -58,7 +58,7 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
       const title = `#${booking.id} - ${clientName} (${booking.group_size}p) - ${servicesText}`;
 
       const firstItem = booking.booking_items[0];
-      
+
       return {
         title,
         start: new Date(firstItem.start_datetime),
@@ -120,7 +120,7 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
           return `#${event.booking.id} | ${clientName} | ${client.phone} | Group: ${groupSize} | ${servicesText}${staffText}`;
         }}
       />
-      
+
       <div className="mt-4 flex flex-wrap gap-2">
         <div className="text-sm font-medium">Status Legend:</div>
         {Object.entries(statusColors).map(([status, color]) => (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -17,33 +17,32 @@ import {
     setSelectedGender,
     setSelectedDate,
     setSelectedScenario,
-    setSelectedTimeSlot,
     updateCustomerInfo,
     setSelectedStaffMembers,
     resetBooking,
-     
+
 } from '../../../store/slices/bookingSlice'
 import type {
     Service,
- 
-     CreateGuestBookingRequest,
- 
+
+    CreateGuestBookingRequest,
+
     GuestBookingResponse,
     AvailabilitySlotsRequest,
- 
+
 } from '../../../interfaces/models/booking'
- import { Progress } from './Progress'
+import { Progress } from './Progress'
 import { SelectServices } from './SelectServices'
 import { SelectPersonCount } from './SelectPersonCount'
 import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
 import { CustomerDetails } from './CustomerDetails'
- import { Review } from './Review'
+import { Review } from './Review'
 
 export default function BookingWizard() {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'en' | 'fr'
-    
+
     const dispatch = useDispatch<AppDispatch>()
     const {
         step,
@@ -54,8 +53,6 @@ export default function BookingWizard() {
         selectedGender,
         selectedDate,
         selectedScenario,
-        selectedTimeSlots,
-        selectedStaffMembers,
         customerInfo
     } = useSelector((state: RootState) => state.booking)
 
@@ -90,19 +87,19 @@ export default function BookingWizard() {
         enabled: !!selectedDate && selectedServices.length > 0,
         retry: false
     })
-     // Create guest booking mutation
+    // Create guest booking mutation
     const createBookingMutation = useMutation({
         mutationFn: async (bookingData: CreateGuestBookingRequest) => {
             const response = await defaultHttp.post(apiRoutes.guestBookings, bookingData)
             return response.data as GuestBookingResponse
         },
         onSuccess: () => {
-             
+
             showNotification(t('bookingWizard.bookingCreated'), NotificationType.SUCCESS)
             dispatch(resetBooking())
-      
-            
-         
+
+
+
         },
         onError: (error: any) => {
             showNotification(
@@ -205,9 +202,9 @@ export default function BookingWizard() {
                         selectedServices={selectedServiceDetails}
                         staff={[]} // Empty - staff is auto-assigned by API
                         staffSelections={{}} // Empty - no manual staff selection
-                        onSelectStaff={() => {}} // No-op - staff auto-assigned
+                        onSelectStaff={() => { }} // No-op - staff auto-assigned
                         gender={selectedGender || ''}
-                        onSelectGender={(gender) => dispatch(setSelectedGender(gender ))}
+                        onSelectGender={(gender) => dispatch(setSelectedGender(gender))}
                         onNext={handleNext}
                         onPrev={handlePrev}
                     />
@@ -216,36 +213,37 @@ export default function BookingWizard() {
                 {/* Step 3: Select Date & Time */}
                 {step === 3 && (
                     <SelectDateTime
-                        selectedDate={selectedDate }
+                        selectedDate={selectedDate ? (typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate) : undefined}
                         onSelectDate={(date) => dispatch(setSelectedDate(date))}
                         availability={availability}
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
                         personCount={personCount}
+                        selectedServices={selectedServiceDetails}
                         onSelectScenario={(selection: any) => {
                             if (selection?.slot && selection?.serviceId) {
                                 const { slot, serviceId } = selection
-                                
+
                                 // Find the selected service details
                                 const selectedService = selectedServiceDetails.find(s => s.id === serviceId)
-                                 
+
                                 // Automatically assign staff based on personCount
                                 let assignedStaff: any[] = []
                                 if (slot.available_staff && slot.available_staff.length > 0) {
                                     // Select the required number of staff (up to personCount)
                                     const numberOfStaffNeeded = Math.min(personCount, slot.available_staff.length)
                                     assignedStaff = slot.available_staff.slice(0, numberOfStaffNeeded)
-                                    
+
                                     // Store the selected staff members
-                                    dispatch(setSelectedStaffMembers({ 
-                                        serviceId, 
-                                        staffMembers: assignedStaff 
+                                    dispatch(setSelectedStaffMembers({
+                                        serviceId,
+                                        staffMembers: assignedStaff
                                     }))
                                 }
-                                
+
                                 // Get existing services array or create new one
                                 const existingServices = selectedScenario?.services || []
-                                
+
                                 // Remove any previous selection for this service and add new one
                                 const updatedServices = [
                                     ...existingServices.filter((s: any) => s.service_id !== serviceId),
@@ -260,13 +258,13 @@ export default function BookingWizard() {
                                         available_staff: slot.available_staff || []
                                     }
                                 ]
-                                
+
                                 // Calculate total price and duration
                                 let totalPrice = 0
                                 let totalDuration = 0
                                 let earliestStart = slot.start_datetime
                                 let latestEnd = slot.end_datetime
-                                
+
                                 updatedServices.forEach((service: any) => {
                                     const svc = selectedServiceDetails.find(s => s.id === service.service_id)
                                     if (svc) {
@@ -275,7 +273,7 @@ export default function BookingWizard() {
                                         totalDuration += svc.duration_minutes || svc.duration || 60
                                     }
                                 })
-                                
+
                                 dispatch(setSelectedScenario({
                                     scenario_id: `multi-slot-${Date.now()}`,
                                     start_datetime: earliestStart,
@@ -288,11 +286,6 @@ export default function BookingWizard() {
                                 dispatch(setSelectedScenario(null))
                             }
                         }}
-                        selectedTimeSlots={selectedTimeSlots}
-                        onSelectTimeSlot={(serviceId :any, scenario:any) => {
-                            dispatch(setSelectedTimeSlot({ serviceId, scenario }))
-                        }}
-                        selectedServices={selectedServiceDetails}
                         onNext={() => {
                             if (selectedDate && selectedScenario) {
                                 handleNext()
@@ -339,7 +332,7 @@ export default function BookingWizard() {
                         selectedGender={selectedGender}
                         isSubmitting={createBookingMutation.isPending}
                         onConfirm={(bookingSummary) => {
-                            
+
                             createBookingMutation.mutate(bookingSummary)
                         }}
                         onPrev={handlePrev}

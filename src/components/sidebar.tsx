@@ -5,8 +5,7 @@ import { Button } from './ui/button'
 import Nav from './nav'
 import { cn } from '@/lib/utils'
 import { sidelinks } from '@/data/sidelinks'
-import ViteLogo from '@/assets/favicon.png'
-import { t } from 'i18next'
+ import { t } from 'i18next'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean

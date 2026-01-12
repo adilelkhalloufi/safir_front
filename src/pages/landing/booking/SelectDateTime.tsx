@@ -11,29 +11,29 @@ import { showNotification } from '@/utils'
 
 // Interface matching actual API response
 interface CombinedSlot {
-  start_time: string
-  end_time: string
-  start_datetime: string
-  end_datetime: string
-  services_breakdown: {
-    service_id: number
-    service_name: string
-    duration: number
     start_time: string
     end_time: string
-    staff_id: number
-    staff_name: string
-  }[]
-  available_staff: any[]
+    start_datetime: string
+    end_datetime: string
+    services_breakdown: {
+        service_id: number
+        service_name: string
+        duration: number
+        start_time: string
+        end_time: string
+        staff_id: number
+        staff_name: string
+    }[]
+    available_staff: any[]
 }
 
 interface AvailabilityResponse {
-  date: string
-  services: any[]
-  total_duration: number
-  individual_service_availability: any[]
-  combined_available_slots: CombinedSlot[]
-  combined_slots_count: number
+    date: string
+    services: any[]
+    total_duration: number
+    individual_service_availability: any[]
+    combined_available_slots: CombinedSlot[]
+    combined_slots_count: number
 }
 
 interface SelectDateTimeProps {
@@ -49,7 +49,7 @@ interface SelectDateTimeProps {
     onPrev: () => void
 }
 
- 
+
 
 export function SelectDateTime({
     selectedDate,
@@ -70,26 +70,26 @@ export function SelectDateTime({
         const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
         if (availableCapacity < personCount) {
             showNotification(
-                t('bookingWizard.selectDateTime.insufficientCapacity', { 
-                    needed: personCount, 
-                    available: availableCapacity 
+                t('bookingWizard.selectDateTime.insufficientCapacity', {
+                    needed: personCount,
+                    available: availableCapacity
                 })
             )
             return
         }
-        
+
         // Automatically proceed with staff assignment
         onSelectScenario({ slot, serviceId })
     }
 
- 
-    
+
+
     // Get individual service availability for tabs
     const individualServices = availability?.individual_service_availability || []
     const hasSlots = individualServices.length > 0
 
     // Check if all services have selections
-    const hasAllSelections = individualServices.length > 0 && individualServices.every((service: any) => 
+    const hasAllSelections = individualServices.length > 0 && individualServices.every((service: any) =>
         selectedScenario?.services?.some((s: any) => s.service_id === service.service_id)
     )
 
@@ -153,13 +153,13 @@ export function SelectDateTime({
                                                 {/* Compact Time Slots Grid */}
                                                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
                                                     {service.available_slots?.map((slot: any, index: number) => {
-                                                        const isSelected = selectedScenario?.services?.some((s: any) => 
+                                                        const isSelected = selectedScenario?.services?.some((s: any) =>
                                                             s.service_id === service.service_id && s.start_datetime === slot.start_datetime
                                                         )
                                                         // Get available capacity directly from slot
                                                         const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
                                                         const hasInsufficientCapacity = availableCapacity > 0 && availableCapacity < personCount
-                                                        
+
                                                         return (
                                                             <button
                                                                 key={`${slot.start_datetime}-${index}`}
@@ -189,7 +189,7 @@ export function SelectDateTime({
                                                                         'text-[9px] mt-0.5 max-h-12 overflow-y-auto',
                                                                         isSelected ? 'text-amber-600' : 'text-gray-500'
                                                                     )}>
-                                                                        {slot.available_staff.map((staff: any, idx: number) => (
+                                                                        {slot.available_staff.map((staff: any) => (
                                                                             <div key={staff.staff_id} className="truncate">
                                                                                 {staff.staff_name}
                                                                             </div>

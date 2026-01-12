@@ -9,7 +9,6 @@ import { toast } from '@/components/ui/use-toast';
 import { setPageTitle, handleErrorResponse } from '@/utils';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ServiceType } from '@/interfaces/models';
 
 export default function TypeServicesEdit() {
     const { t } = useTranslation();
@@ -20,7 +19,7 @@ export default function TypeServicesEdit() {
     useEffect(() => {
         setPageTitle(t('typeServices.editTitle', 'Edit Service Type'));
     }, [t]);
-    const { data: serviceType, isLoading } = useQuery<ServiceType>({
+    const { data: serviceType, isLoading } = useQuery<any>({
         queryKey: ['serviceType', id],
 
         queryFn: async () => {

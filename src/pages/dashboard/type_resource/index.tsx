@@ -1,4 +1,4 @@
-import { GetServiceTypeColumns, ServiceType } from './columns';
+import { GetServiceTypeColumns } from './columns';
 import { TypesDataTable } from './data-table';
 import { useEffect, useMemo, useState } from 'react';
 import http from '@/utils/http';
@@ -12,7 +12,7 @@ import { setPageTitle } from '@/utils';
 
 export default function TypeServicesIndex() {
     const { t } = useTranslation();
-    const [data, setData] = useState<ServiceType[]>([]);
+    const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
@@ -40,11 +40,11 @@ export default function TypeServicesIndex() {
             });
     };
 
-    const handleView = (ressourceType: ServiceType) => {
+    const handleView = (ressourceType: any) => {
         navigate(webRoutes.typeResources.view.replace(':id', ressourceType.id.toString()));
     };
 
-    const handleEdit = (ressourceType: ServiceType) => {
+    const handleEdit = (ressourceType: any) => {
         navigate(webRoutes.typeResources.edit.replace(':id', ressourceType.id.toString()));
     };
 

@@ -3,7 +3,6 @@ import type {
     Service,
     Staff,
     AvailabilityScenario,
-    Gender as APIGender,
 } from '../../interfaces/models/booking';
 import type { Step, CustomerInfo } from '../../pages/landing/booking/types';
 
@@ -13,7 +12,7 @@ export interface BookingState {
     selectedServiceDetails: Service[];
     selectedStaff: Record<number, Staff>;
     personCount: number;
-    selectedGender: APIGender | undefined;
+    selectedGender: any | undefined;
     selectedDate: string | undefined; // Store as ISO string for Redux serialization
     selectedScenario: AvailabilityScenario | null;
     selectedTimeSlots: Record<number, AvailabilityScenario>;
@@ -60,7 +59,7 @@ export const bookingSlice = createSlice({
         toggleService: (state, action: PayloadAction<{ serviceId: number; service: Service }>) => {
             const { serviceId, service } = action.payload;
             const index = state.selectedServices.indexOf(serviceId);
-            
+
             if (index > -1) {
                 state.selectedServices.splice(index, 1);
                 state.selectedServiceDetails = state.selectedServiceDetails.filter(s => s.id !== serviceId);
@@ -73,7 +72,7 @@ export const bookingSlice = createSlice({
         setPersonCount: (state, action: PayloadAction<number>) => {
             state.personCount = action.payload;
         },
-        setSelectedGender: (state, action: PayloadAction<APIGender | undefined>) => {
+        setSelectedGender: (state, action: PayloadAction<any | undefined>) => {
             state.selectedGender = action.payload;
         },
         setSelectedDate: (state, action: PayloadAction<Date | string | undefined>) => {

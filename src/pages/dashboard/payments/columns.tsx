@@ -1,15 +1,16 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, RefreshCw } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { Eye, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 
 export interface Payment {
@@ -40,10 +41,7 @@ export interface Payment {
   updated_at: string;
 }
 
-interface PaymentColumnsProps {
-  onView?: (payment: Payment) => void;
-  onRefund?: (payment: Payment) => void;
-}
+
 
 const methodConfig: Record<string, { label: string; color: string }> = {
   card: { label: 'Card', color: 'bg-blue-100 text-blue-800' },
@@ -60,7 +58,10 @@ const statusConfig: Record<string, { label: string; variant: any }> = {
   refunded: { label: 'Refunded', variant: 'outline' },
 };
 
-
+interface PaymentColumnsProps {
+  onView: (payment: Payment) => void;
+  onRefund: (payment: Payment) => void;
+}
 
 export const GetPaymentColumns = ({ onView, onRefund }: PaymentColumnsProps): ColumnDef<Payment>[] => [
   {
@@ -130,37 +131,37 @@ export const GetPaymentColumns = ({ onView, onRefund }: PaymentColumnsProps): Co
       return <div className='text-sm'>{format(date, 'MMM dd, yyyy HH:mm')}</div>;
     },
   },
-  // {
-  //   id: 'actions',
-  //   cell: ({ row }) => {
-  //     const payment = row.original;
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const payment = row.original;
 
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant='ghost' className='h-8 w-8 p-0'>
-  //             <span className='sr-only'>Open menu</span>
-  //             <MoreHorizontal className='h-4 w-4' />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align='end'>
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           {onView && (
-  //             <DropdownMenuItem onClick={() => onView(payment)}>
-  //               <Eye className='mr-2 h-4 w-4' />
-  //               View Details
-  //             </DropdownMenuItem>
-  //           )}
-  //           <DropdownMenuSeparator />
-  //           {payment.status === 'completed' && onRefund && (
-  //             <DropdownMenuItem onClick={() => onRefund(payment)}>
-  //               <RefreshCw className='mr-2 h-4 w-4' />
-  //               Process Refund
-  //             </DropdownMenuItem>
-  //           )}
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='ghost' className='h-8 w-8 p-0'>
+              <span className='sr-only'>Open menu</span>
+              <MoreHorizontal className='h-4 w-4' />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {onView && (
+              <DropdownMenuItem onClick={() => onView(payment)}>
+                <Eye className='mr-2 h-4 w-4' />
+                View Details
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            {payment.status === 'completed' && onRefund && (
+              <DropdownMenuItem onClick={() => onRefund(payment)}>
+                <RefreshCw className='mr-2 h-4 w-4' />
+                Process Refund
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
 ];

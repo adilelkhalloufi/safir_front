@@ -9,7 +9,6 @@ import { toast } from '@/components/ui/use-toast';
 import { setPageTitle, handleErrorResponse } from '@/utils';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ServiceType } from '@/interfaces/models';
 
 export default function TypeServicesEdit() {
     const { t } = useTranslation();
@@ -20,9 +19,9 @@ export default function TypeServicesEdit() {
     useEffect(() => {
         setPageTitle(t('typeServices.editTitle', 'Edit Service Type'));
     }, [t]);
-     const { data: serviceType, isLoading } = useQuery<ServiceType>({
+    const { data: serviceType, isLoading } = useQuery<any>({
         queryKey: ['serviceType', id],
-      
+
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminServiceTypeById(parseInt(id!)));
             return response.data.data;
@@ -68,9 +67,9 @@ export default function TypeServicesEdit() {
                     error: t('typeServices.nameRequired', 'Name is required'),
                     placeholder: t('typeServices.namePlaceholder', 'e.g., Massage Services'),
                 },
-          
-              
-      
+
+
+
                 {
                     name: 'icon',
                     label: t('typeServices.icon', 'Icon'),
@@ -122,7 +121,7 @@ export default function TypeServicesEdit() {
             initialValues={{
                 name_fr: serviceType?.name.fr,
                 name_en: serviceType?.name.en,
-                 icon: serviceType?.icon,
+                icon: serviceType?.icon,
                 color: serviceType?.color,
                 is_active: serviceType?.is_active,
                 display_order: serviceType?.display_order,

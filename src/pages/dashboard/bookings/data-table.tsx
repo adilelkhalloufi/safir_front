@@ -19,7 +19,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import EmptyStateComponent from '@/components/custom/emptyState';
 import TableLoading from '@/components/skeleton/TableLoading';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,6 @@ export function BookingsDataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const table = useReactTable({
     data,
@@ -69,14 +67,6 @@ export function BookingsDataTable<TData, TValue>({
     },
   });
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-    if (value === 'all') {
-      table.getColumn('status')?.setFilterValue(undefined);
-    } else {
-      table.getColumn('status')?.setFilterValue(value);
-    }
-  };
 
   return (
     <div className='space-y-4'>

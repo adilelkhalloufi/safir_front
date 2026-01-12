@@ -19,16 +19,18 @@ export default function PaymentsAdd() {
     }, [t]);
 
     // Fetch clients for dropdown
-    const { data: clients = [] } = useQuery({
+    const { data: clientsResponse } = useQuery({
         queryKey: ['clients'],
         queryFn: () => http.get(apiRoutes.adminClients),
     });
+    const clients = clientsResponse?.data || [];
 
     // Fetch bookings for dropdown
-    const { data: bookings = [] } = useQuery({
+    const { data: bookingsResponse } = useQuery({
         queryKey: ['bookings'],
         queryFn: () => http.get(apiRoutes.adminBookings),
     });
+    const bookings = bookingsResponse?.data || [];
 
     const handleSubmit = (values: any) => {
         setLoading(true);
@@ -142,7 +144,7 @@ export default function PaymentsAdd() {
                 {
                     name: 'paid_at',
                     label: t('payments.paidAt', 'Paid At'),
-                    type: 'datetime-local',
+                    type: 'date',
                     placeholder: t('payments.selectPaidAt', 'Select payment date'),
                     width: 'half',
                 },

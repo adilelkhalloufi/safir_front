@@ -30,7 +30,7 @@ export interface Staff {
   id?: number
   user_id?: number
   name?: string
-  type_staff?: StaffType
+  type_staff?: any
   default_break_minutes?: number
   is_active?: boolean
   services?: Service[]
@@ -45,7 +45,7 @@ export interface HammamSession {
   id?: number
   date?: string
   time?: string
-  type_session?: Gender
+  type_session?: any
   capacity_total?: number
   capacity_served?: number
   capacity_autonomous?: number
@@ -68,7 +68,7 @@ export interface AvailabilityServiceDetail {
   room_id?: number
   room_name?: string
   hammam_session_id?: number
-  session_type?: Gender
+  session_type?: any
   available_capacity?: number
   price?: string
 }
@@ -102,7 +102,7 @@ export interface AvailabilityRequest {
   services?: BookingServiceRequest[]
   date?: string
   group_size?: number
-  gender?: Gender
+  any?: any
   preferred_staff_id?: number
 }
 
@@ -138,7 +138,7 @@ export interface BookingItem {
   room_id?: number
   room_name?: string
   hammam_session_id?: number
-  hammam_session_type?: Gender
+  hammam_session_type?: any
   price?: string
   order_index?: number
 }
@@ -146,7 +146,7 @@ export interface BookingItem {
 export interface Booking {
   id?: number
   client_id?: number
-  status?: BookingStatus
+  status?: any
   language?: string
   group_size?: number
   notes?: string
@@ -179,7 +179,7 @@ export interface CreateGuestBookingRequest {
   service_ids: number[]
   start_datetime: string
   group_size?: number
-  gender_preference?: 'female' | 'male' | 'mixed'
+  any_preference?: 'female' | 'male' | 'mixed'
   notes?: string
   language?: 'en' | 'fr'
 }
@@ -237,7 +237,7 @@ export interface AvailabilitySlotsRequest {
   start_date: string
   end_date: string
   group_size?: number
-  gender_preference?: 'female' | 'male' | 'mixed'
+  any_preference?: 'female' | 'male' | 'mixed'
 }
 
 export interface AvailabilitySlotsResponse {

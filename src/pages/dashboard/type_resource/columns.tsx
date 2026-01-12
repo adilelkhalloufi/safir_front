@@ -3,16 +3,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { IconDotsVertical, IconEdit, IconEye } from '@tabler/icons-react';
-import { ServiceType } from '@/interfaces/models';
 
 
 
 interface GetColumnsProps {
-    onView: (serviceType: ServiceType) => void;
-    onEdit: (serviceType: ServiceType) => void;
+    onView: (serviceType: any) => void;
+    onEdit: (serviceType: any) => void;
 }
 
-export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): ColumnDef<ServiceType>[] => [
+export const GetServiceTypeColumns = ({ onView, onEdit }: GetColumnsProps): ColumnDef<any>[] => [
     {
         accessorKey: 'id',
         header: 'ID',

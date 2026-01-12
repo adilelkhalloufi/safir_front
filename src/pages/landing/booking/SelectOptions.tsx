@@ -37,7 +37,7 @@ export function SelectOptions({
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
 
-    const hasHammam = selectedServices.some(s => s.type_service === 'hammam')
+    const hasHammam = selectedServices.some((s: any) => s.type_service === 'hammam')
 
     const handleStaffSelect = (serviceId: number, staffId: number) => {
         onSelectStaff({ ...staffSelections, [serviceId]: staffId })

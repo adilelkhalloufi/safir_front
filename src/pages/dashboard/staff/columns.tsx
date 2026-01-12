@@ -78,6 +78,7 @@ export const GetStaffColumns = ({
         );
       },
       filterFn: (row, columnId, filterValue) => {
+        console.log('Filtering staff with value:', columnId);
         const staff = row.original;
         const firstName = staff.user?.first_name?.toLowerCase() || '';
         const lastName = staff.user?.last_name?.toLowerCase() || '';
@@ -105,6 +106,7 @@ export const GetStaffColumns = ({
         );
       },
       filterFn: (row, columnId, filterValue) => {
+        console.log('Filtering type with value:', columnId);
         const typeStaffId = row.original.type_staff?.id;
         return typeStaffId === filterValue;
       },

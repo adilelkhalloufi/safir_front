@@ -272,7 +272,7 @@ export default function BookingsAdd() {
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {staff.filter(s => s.id).map((s: Staff) => (
+                                                    {staff.filter((s: Staff) => s.id).map((s: Staff) => (
                                                         <SelectItem key={s.id!} value={s.id!.toString()}>
                                                             {s.name}
                                                         </SelectItem>

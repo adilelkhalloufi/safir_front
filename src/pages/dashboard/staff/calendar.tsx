@@ -48,7 +48,7 @@ export default function StaffCalendar() {
   });
 
   // Fetch specific day schedule
-  const { data: dayData, isLoading: isLoadingDay } = useQuery({
+  const { data: dayData } = useQuery({
     queryKey: ['calendar', 'day', selectedDay],
     queryFn: () => http.get(`${apiRoutes.calendarDay}?day=${selectedDay}`).then(res => res.data?.data),
     enabled: selectedDay !== null,
@@ -195,9 +195,8 @@ export default function StaffCalendar() {
           return (
             <Card
               key={day.number}
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                hasStaff ? 'hover:border-primary' : 'opacity-60'
-              }`}
+              className={`cursor-pointer transition-all hover:shadow-md ${hasStaff ? 'hover:border-primary' : 'opacity-60'
+                }`}
               onClick={() => hasStaff && setSelectedDay(day.number)}
             >
               <CardHeader>

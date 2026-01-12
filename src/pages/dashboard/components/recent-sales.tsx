@@ -1,9 +1,8 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { OrderSale } from '@/interfaces/models/admin'
 
- 
 
-export function RecentSales({ recent_orders = [] }: { recent_orders?: OrderSale[] }) {
+
+export function RecentSales({ recent_orders = [] }: { recent_orders?: any[] }) {
   // If no orders, display a message
   if (!recent_orders || recent_orders.length === 0) {
     return <div className="text-center py-4 text-muted-foreground">Aucune commande récente disponible</div>
