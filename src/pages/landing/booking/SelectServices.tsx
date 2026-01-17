@@ -266,6 +266,9 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                 <CheckCircle2 className="h-5 w-5 text-[#E09900]" />
                                 {t('bookingWizard.selectServices.selectedServices', 'Selected Services')} ({selected.length})
                             </CardTitle>
+                            <p className="text-xs text-muted-foreground">
+                                {t('bookingWizard.selectServices.quantityNote', 'Note: The quantity indicates the number of persons for each service (max 4). Services will be scheduled sequentially in the order selected to avoid time conflicts.')}
+                            </p>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-3">

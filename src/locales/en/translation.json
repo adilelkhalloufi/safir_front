@@ -433,6 +433,11 @@
       },
       "selected": "{{count}} service selected",
       "selected_plural": "{{count}} services selected",
+      "selectedServices": "Selected Services",
+      "quantityNote": "Note: The quantity indicates the number of persons for each service (max 4). Services will be scheduled sequentially in the order selected to avoid time conflicts.",
+      "search": "Search services...",
+      "allServices": "All Services",
+      "noResults": "No services found",
       "continue": "Continue"
     },
     "selectPersonCount": {
