@@ -11,7 +11,6 @@ export function Progress({ step }: ProgressProps) {
     const { t } = useTranslation()
     const labels = [
         t('bookingWizard.progress.services'),
-        t('bookingWizard.progress.persons'),
         t('bookingWizard.progress.options'),
         t('bookingWizard.progress.dateTime'),
         t('bookingWizard.progress.contact'),

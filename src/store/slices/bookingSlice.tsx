@@ -11,7 +11,7 @@ export interface BookingState {
     selectedServices: number[];
     selectedServiceDetails: Service[];
     selectedStaff: Record<number, Staff>;
-    personCount: number;
+    personCounts: Record<number, number>; // serviceId -> person count
     selectedGender: any | undefined;
     selectedDate: string | undefined; // Store as ISO string for Redux serialization
     selectedScenario: AvailabilityScenario | null;
@@ -25,7 +25,7 @@ const initialState: BookingState = {
     selectedServices: [],
     selectedServiceDetails: [],
     selectedStaff: {},
-    personCount: 1,
+    personCounts: {},
     selectedGender: undefined,
     selectedDate: undefined,
     selectedScenario: null,
@@ -64,13 +64,17 @@ export const bookingSlice = createSlice({
                 state.selectedServices.splice(index, 1);
                 state.selectedServiceDetails = state.selectedServiceDetails.filter(s => s.id !== serviceId);
                 delete state.selectedStaff[serviceId];
+                state.personCounts = { ...state.personCounts };
+                delete state.personCounts[serviceId];
             } else {
                 state.selectedServices.push(serviceId);
                 state.selectedServiceDetails.push(service);
+                state.personCounts = { ...state.personCounts, [serviceId]: 1 }; // Default to 1 person
             }
         },
-        setPersonCount: (state, action: PayloadAction<number>) => {
-            state.personCount = action.payload;
+        setServicePersonCount: (state, action: PayloadAction<{ serviceId: number; count: number }>) => {
+            const { serviceId, count } = action.payload;
+            state.personCounts = { ...state.personCounts, [serviceId]: count };
         },
         setSelectedGender: (state, action: PayloadAction<any | undefined>) => {
             state.selectedGender = action.payload;
@@ -119,7 +123,7 @@ export const {
     nextStep,
     prevStep,
     toggleService,
-    setPersonCount,
+    setServicePersonCount,
     setSelectedGender,
     setSelectedDate,
     setSelectedScenario,

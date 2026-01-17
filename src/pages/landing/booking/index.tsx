@@ -5,15 +5,10 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 
-import { showNotification, NotificationType } from '../../../utils'
-import { defaultHttp } from '../../../utils/http'
-import { apiRoutes } from '../../../routes/api'
-import type { RootState, AppDispatch } from '../../../store'
 import {
     nextStep,
     prevStep,
     toggleService,
-    setPersonCount,
     setSelectedGender,
     setSelectedDate,
     setSelectedScenario,
@@ -32,12 +27,16 @@ import type {
 
 } from '../../../interfaces/models/booking'
 import { Progress } from './Progress'
+
+import { Review } from './Review'
+import { AppDispatch, RootState } from '@/store'
+import { defaultHttp } from '@/utils/http'
+import { apiRoutes } from '@/routes/api'
+import { NotificationType, showNotification } from '@/utils'
 import { SelectServices } from './SelectServices'
-import { SelectPersonCount } from './SelectPersonCount'
 import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
 import { CustomerDetails } from './CustomerDetails'
-import { Review } from './Review'
 
 export default function BookingWizard() {
     const { i18n, t } = useTranslation()
@@ -49,7 +48,7 @@ export default function BookingWizard() {
         selectedServices,
         selectedServiceDetails,
         selectedStaff,
-        personCount,
+        personCounts,
         selectedGender,
         selectedDate,
         selectedScenario,
@@ -69,15 +68,16 @@ export default function BookingWizard() {
 
     // Fetch availability slots from API
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
-        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null, personCount, selectedGender],
+        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null, personCounts, selectedGender],
         queryFn: async () => {
             if (!selectedDate || selectedServices.length === 0) return null
 
             const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
+            const maxPersonCount = Math.max(...selectedServices.map(id => personCounts[id] || 1), 1)
             const requestData: AvailabilitySlotsRequest = {
                 service_ids: selectedServices,
                 date: format(dateObj, 'yyyy-MM-dd'),
-                group_size: personCount,
+                group_size: maxPersonCount,
                 ...(selectedGender && { gender_preference: selectedGender as 'female' | 'male' | 'mixed' })
             }
 
@@ -142,7 +142,7 @@ export default function BookingWizard() {
         if (selectedDate && selectedServices.length > 0) {
             refetchAvailability()
         }
-    }, [selectedDate, selectedServices, personCount, selectedGender, refetchAvailability])
+    }, [selectedDate, selectedServices, personCounts, selectedGender, refetchAvailability])
 
     // Loading state
     if (servicesLoading) {
@@ -186,18 +186,8 @@ export default function BookingWizard() {
                     />
                 )}
 
-                {/* Step 1: Select Person Count */}
+                {/* Step 1: Select Gender Preference (for Hammam services) */}
                 {step === 1 && (
-                    <SelectPersonCount
-                        count={personCount}
-                        onSelect={(count) => dispatch(setPersonCount(count))}
-                        onNext={handleNext}
-                        onPrev={handlePrev}
-                    />
-                )}
-
-                {/* Step 2: Select Gender Preference (for Hammam services) */}
-                {step === 2 && (
                     <SelectOptions
                         selectedServices={selectedServiceDetails}
                         staff={[]} // Empty - staff is auto-assigned by API
@@ -210,15 +200,15 @@ export default function BookingWizard() {
                     />
                 )}
 
-                {/* Step 3: Select Date & Time */}
-                {step === 3 && (
+                {/* Step 2: Select Date & Time */}
+                {step === 2 && (
                     <SelectDateTime
                         selectedDate={selectedDate ? (typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate) : undefined}
                         onSelectDate={(date) => dispatch(setSelectedDate(date))}
                         availability={availability}
                         isLoading={availabilityLoading}
                         selectedScenario={selectedScenario}
-                        personCount={personCount}
+                        personCount={Math.max(...Object.values(personCounts), 1)} // Use max person count for availability
                         selectedServices={selectedServiceDetails}
                         onSelectScenario={(selection: any) => {
                             if (selection?.slot && selection?.serviceId) {
@@ -227,11 +217,12 @@ export default function BookingWizard() {
                                 // Find the selected service details
                                 const selectedService = selectedServiceDetails.find(s => s.id === serviceId)
 
-                                // Automatically assign staff based on personCount
+                                // Automatically assign staff based on personCount for this service
+                                const servicePersonCount = personCounts[serviceId] || 1
                                 let assignedStaff: any[] = []
                                 if (slot.available_staff && slot.available_staff.length > 0) {
-                                    // Select the required number of staff (up to personCount)
-                                    const numberOfStaffNeeded = Math.min(personCount, slot.available_staff.length)
+                                    // Select the required number of staff (up to servicePersonCount)
+                                    const numberOfStaffNeeded = Math.min(servicePersonCount, slot.available_staff.length)
                                     assignedStaff = slot.available_staff.slice(0, numberOfStaffNeeded)
 
                                     // Store the selected staff members
@@ -268,8 +259,9 @@ export default function BookingWizard() {
                                 updatedServices.forEach((service: any) => {
                                     const svc = selectedServiceDetails.find(s => s.id === service.service_id)
                                     if (svc) {
+                                        const svcPersonCount = personCounts[service.service_id] || 1
                                         const svcPrice = typeof svc.price === 'string' ? parseFloat(svc.price) : (svc.price || 0)
-                                        totalPrice += svcPrice * personCount
+                                        totalPrice += svcPrice * svcPersonCount
                                         totalDuration += svc.duration_minutes || svc.duration || 60
                                     }
                                 })
@@ -295,8 +287,8 @@ export default function BookingWizard() {
                     />
                 )}
 
-                {/* Step 4: Customer Details */}
-                {step === 4 && (
+                {/* Step 3: Customer Details */}
+                {step === 3 && (
                     <CustomerDetails
                         customerInfo={customerInfo}
                         onUpdateCustomer={(field, value) => {
@@ -311,21 +303,12 @@ export default function BookingWizard() {
                     />
                 )}
 
-                {/* Step 5: Guarantee Payment */}
-                {/* {step === 5 && selectedScenario && (
-                    <Guarantee
-                        totalPrice={selectedScenario.total_price}
-                        onNext={handleNext}
-                        onPrev={handlePrev}
-                    />
-                )} */}
-
-                {/* Step 5 (6): Review & Confirm */}
-                {step === 5 && selectedScenario && (
+                {/* Step 4: Review & Confirm */}
+                {step === 4 && selectedScenario && (
                     <Review
                         selectedServices={selectedServiceDetails}
                         selectedStaff={selectedStaff}
-                        personCount={personCount}
+                        personCount={Math.max(...Object.values(personCounts), 1)} // Use max for display
                         selectedScenario={selectedScenario}
                         selectedDate={selectedDate}
                         customerInfo={customerInfo}
