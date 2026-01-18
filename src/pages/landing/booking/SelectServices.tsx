@@ -8,9 +8,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Clock, ChevronRight, Search, DollarSign } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { Service } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import IconDisplay from '@/components/custom/IconDisplay'
+import { Service } from '@/interfaces/models/service'
 
 
 interface SelectServicesProps {

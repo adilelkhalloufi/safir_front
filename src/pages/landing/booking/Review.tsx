@@ -5,18 +5,18 @@ import { CheckCircle2, Calendar, Clock, Users, Sparkles, Loader2 } from 'lucide-
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
-import type { Service, Staff, AvailabilityScenario } from '@/interfaces/models/booking'
+import type { Service } from '@/interfaces/models/service'
+import type { AvailabilityScenario } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import type { CustomerInfo } from './types'
 
 interface ReviewProps {
     selectedServices: Service[]
-    selectedStaff: { [key: number]: Staff }
     personCount: number
-    selectedScenario: AvailabilityScenario | any
     selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
-    genderSelections: Record<number, string>
+    anyPreferences: Record<number, 'female' | 'male' | 'mixed'>
+    selectedTimeSlots: Record<number, AvailabilityScenario>
     isSubmitting: boolean
     onConfirm: (bookingSummary: any) => void
     onPrev: () => void
@@ -25,17 +25,20 @@ interface ReviewProps {
 export function Review({
     selectedServices,
     personCount,
-    selectedScenario,
     selectedDate,
     customerInfo,
-    genderSelections,
+    anyPreferences,
+    selectedTimeSlots,
     isSubmitting,
     onConfirm,
     onPrev
 }: ReviewProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
-    const totalPrice = selectedScenario?.total_price || 0
+    const totalPrice = Object.values(selectedTimeSlots).reduce((sum, scenario) => {
+        const price = typeof scenario.total_price === 'string' ? parseFloat(scenario.total_price) : scenario.total_price || 0;
+        return sum + price;
+    }, 0);
 
     // Format date to YYYY-MM-DD for backend
     const formattedDate = selectedDate
@@ -45,7 +48,8 @@ export function Review({
     // Prepare booking summary object matching backend validation structure
     const bookingSummary = {
         services: selectedServices.map(service => {
-            const serviceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+            const scenario = selectedTimeSlots[service.id];
+            const serviceDetails = scenario?.services?.find((s: any) => s.service_id === service.id)
             return {
                 id: service.id,
                 name: getLocalizedValue(service.name, currentLang),
@@ -70,10 +74,11 @@ export function Review({
         },
         totalPrice: totalPrice,
         totalStaffAssigned: selectedServices.reduce((total, service) => {
-            const serviceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+            const scenario = selectedTimeSlots[service.id];
+            const serviceDetails = scenario?.services?.find((s: any) => s.service_id === service.id)
             return total + (serviceDetails?.staff_count || 0)
         }, 0),
-        genderSelections: genderSelections,
+        anyPreferences: anyPreferences,
         language: currentLang
     }
 

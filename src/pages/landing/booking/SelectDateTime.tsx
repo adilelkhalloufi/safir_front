@@ -66,12 +66,14 @@ export function SelectDateTime({
 
     // Handler for slot selection - automatically assigns staff based on personCount
     const handleSlotClick = (slot: any, serviceId: number) => {
+        const service = selectedServices?.find(s => s.id === serviceId)
+        const requiredCount = service?.quntity || 1
         // Check if there's enough capacity using the slot's available_capacity
         const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
-        if (availableCapacity < personCount) {
+        if (availableCapacity < requiredCount) {
             showNotification(
                 t('bookingWizard.selectDateTime.insufficientCapacity', {
-                    needed: personCount,
+                    needed: requiredCount,
                     available: availableCapacity
                 })
             )

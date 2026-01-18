@@ -10,20 +10,17 @@ import {
     prevStep,
     toggleService,
     setSelectedDate,
-    setSelectedScenario,
     updateCustomerInfo,
-    setSelectedStaffMembers,
     resetBooking,
-    setServiceGenderSelection,
+    setServiceAnyPreference,
 } from '../../../store/slices/bookingSlice'
 import type {
     Service,
-
+} from '../../../interfaces/models/service'
+import type {
     CreateGuestBookingRequest,
-
     GuestBookingResponse,
     AvailabilitySlotsRequest,
-
 } from '../../../interfaces/models/booking'
 import { Progress } from './Progress'
 
@@ -46,14 +43,20 @@ export default function BookingWizard() {
     const {
         step,
         selectedServices,
-        selectedServiceDetails,
-        selectedStaff,
-        personCounts,
-        genderSelections,
         selectedDate,
-        selectedScenario,
+        selectedTimeSlots,
         customerInfo
     } = useSelector((state: RootState) => state.booking)
+
+    // Compute derived values
+    const selectedServiceIds = selectedServices.map(s => s.id)
+    const anyPreferences = selectedServices.reduce((acc, s) => {
+        if (s.preferred_gender) {
+            const pref = s.preferred_gender === 'femme' ? 'female' : s.preferred_gender === 'homme' ? 'male' : 'mixed'
+            acc[s.id] = pref
+        }
+        return acc
+    }, {} as Record<number, 'female' | 'male' | 'mixed'>)
 
     // Fetch services from API
     const { data: servicesData, isLoading: servicesLoading } = useQuery({
@@ -68,16 +71,16 @@ export default function BookingWizard() {
 
     // Fetch availability slots from API
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
-        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null, personCounts, genderSelections],
+        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null],
         queryFn: async () => {
             if (!selectedDate || selectedServices.length === 0) return null
 
             const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
             const requestData: AvailabilitySlotsRequest = {
-                services: selectedServices.map(serviceId => ({
-                    service_id: serviceId,
-                    group_size: personCounts[serviceId] || 1,
-                    ...(genderSelections[serviceId] && { any_preference: genderSelections[serviceId] as 'female' | 'male' | 'mixed' })
+                services: selectedServices.map(service => ({
+                    service_id: service.id,
+                    group_size: service.quntity || 1,
+                    ...(service.preferred_gender && { any_preference: service.preferred_gender })
                 })),
                 start_date: format(dateObj, 'yyyy-MM-dd'),
                 end_date: format(dateObj, 'yyyy-MM-dd')
@@ -144,7 +147,7 @@ export default function BookingWizard() {
         if (selectedDate && selectedServices.length > 0) {
             refetchAvailability()
         }
-    }, [selectedDate, selectedServices, personCounts, genderSelections, refetchAvailability])
+    }, [selectedDate, selectedServices, refetchAvailability])
 
     // Loading state
     if (servicesLoading) {
@@ -180,7 +183,7 @@ export default function BookingWizard() {
                         {step === 0 && (
                             <SelectServices
                                 services={services}
-                                selected={selectedServices}
+                                selected={selectedServiceIds}
                                 onToggle={(serviceId, service) => {
                                     dispatch(toggleService({ serviceId, service }))
                                 }}
@@ -195,12 +198,12 @@ export default function BookingWizard() {
                         {/* Step 1: Select Options */}
                         {step === 1 && (
                             <SelectOptions
-                                selectedServices={selectedServiceDetails}
+                                selectedServices={selectedServices}
                                 staff={[]} // Empty - staff is auto-assigned by API
                                 staffSelections={{}} // Empty - no manual staff selection
                                 onSelectStaff={() => { }} // No-op - staff auto-assigned
-                                genderSelections={genderSelections}
-                                onSelectGender={(serviceId, gender) => dispatch(setServiceGenderSelection({ serviceId, gender }))}
+                                anyPreferences={anyPreferences}
+                                onSelectGender={(serviceId, preference) => dispatch(setServiceAnyPreference({ serviceId, preference }))}
                                 onNext={handleNext}
                                 onPrev={handlePrev}
                             />
@@ -213,18 +216,18 @@ export default function BookingWizard() {
                                 onSelectDate={(date) => dispatch(setSelectedDate(date))}
                                 availability={availability}
                                 isLoading={availabilityLoading}
-                                selectedScenario={selectedScenario}
-                                personCount={Math.max(...Object.values(personCounts), 1)} // Use max person count for availability
-                                selectedServices={selectedServiceDetails}
+                                selectedScenario={selectedServices}
+                                personCount={Math.max(...selectedServices.map(s => s.quntity || 1), 1)}
+                                selectedServices={selectedServices}
                                 onSelectScenario={(selection: any) => {
                                     if (selection?.slot && selection?.serviceId) {
                                         const { slot, serviceId } = selection
 
                                         // Find the selected service details
-                                        const selectedService = selectedServiceDetails.find(s => s.id === serviceId)
+                                        const selectedService = selectedServices.find(s => s.id === serviceId)
 
                                         // Automatically assign staff based on personCount for this service
-                                        const servicePersonCount = personCounts[serviceId] || 1
+                                        const servicePersonCount = selectedService?.quntity || 1
                                         let assignedStaff: any[] = []
                                         if (slot.available_staff && slot.available_staff.length > 0) {
                                             // Select the required number of staff (up to servicePersonCount)
@@ -263,12 +266,12 @@ export default function BookingWizard() {
                                         let latestEnd = slot.end_datetime
 
                                         updatedServices.forEach((service: any) => {
-                                            const svc = selectedServiceDetails.find(s => s.id === service.service_id)
+                                            const svc = selectedServices.find(s => s.id === service.service_id)
                                             if (svc) {
-                                                const svcPersonCount = personCounts[service.service_id] || 1
+                                                const svcPersonCount = svc.quntity || 1
                                                 const svcPrice = typeof svc.price === 'string' ? parseFloat(svc.price) : (svc.price || 0)
                                                 totalPrice += svcPrice * svcPersonCount
-                                                totalDuration += svc.duration_minutes || svc.duration || 60
+                                                totalDuration += (svc.duration_minutes || svc.duration || 60) * svcPersonCount
                                             }
                                         })
 
@@ -310,15 +313,14 @@ export default function BookingWizard() {
                         )}
 
                         {/* Step 4: Review & Confirm */}
-                        {step === 4 && selectedScenario && (
+                        {step === 4 && (
                             <Review
-                                selectedServices={selectedServiceDetails}
-                                selectedStaff={selectedStaff}
-                                personCount={Math.max(...Object.values(personCounts), 1)} // Use max for display
-                                selectedScenario={selectedScenario}
+                                selectedServices={selectedServices}
+                                personCount={Math.max(...selectedServices.map(s => s.quntity || 1), 1)} // Use max for display
                                 selectedDate={selectedDate}
                                 customerInfo={customerInfo}
-                                genderSelections={genderSelections}
+                                anyPreferences={anyPreferences}
+                                selectedTimeSlots={selectedTimeSlots}
                                 isSubmitting={createBookingMutation.isPending}
                                 onConfirm={(bookingSummary) => {
 
@@ -332,11 +334,8 @@ export default function BookingWizard() {
 
                     </div>
                     <SelectedServicesBasket
-                        selectedServices={selectedServiceDetails}
-                        selected={selectedServices}
-                        onToggle={(serviceId, service) => {
-                            dispatch(toggleService({ serviceId, service }))
-                        }}
+                        selectedServices={selectedServices}
+                        selected={selectedServiceIds}
                     />
                 </div>
             </div>

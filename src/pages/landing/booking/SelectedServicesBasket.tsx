@@ -2,30 +2,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, Clock, DollarSign, Minus, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { Service } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
-import { useDispatch, useSelector } from 'react-redux'
-import type { RootState, AppDispatch } from '@/store'
-import { setServicePersonCount } from '@/store/slices/bookingSlice'
+import { useDispatch } from 'react-redux'
+import type { AppDispatch } from '@/store'
+import { setServicePersonCount, toggleService } from '@/store/slices/bookingSlice'
+import { Service } from '@/interfaces/models/service'
 
 interface SelectedServicesBasketProps {
     selectedServices: Service[]
     selected: number[]
-    onToggle: (id: number, service: Service) => void
+
 }
 
-export function SelectedServicesBasket({ selectedServices, selected, onToggle }: SelectedServicesBasketProps) {
+export function SelectedServicesBasket({ selectedServices, selected }: SelectedServicesBasketProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
     const dispatch = useDispatch<AppDispatch>()
-    const personCounts = useSelector((state: RootState) => state.booking.personCounts)
 
     const totalPrice = selectedServices.reduce((sum, s: any) => {
-        const count = personCounts?.[s.id] || 1
+        const count = s.quntity || 1
         return sum + (s.price || 0) * count
     }, 0)
     const totalDuration = selectedServices.reduce((sum, s: any) => {
-        const count = personCounts?.[s.id] || 1
+        const count = s.quntity || 1
         return sum + (s.duration_minutes || s.duration || 0) * count
     }, 0)
 
@@ -52,11 +51,11 @@ export function SelectedServicesBasket({ selectedServices, selected, onToggle }:
                                     <div className="flex flex-col gap-2 mt-1">
                                         <div className='flex flex-row items-center gap-4'>
                                             <Clock className="h-3 w-3 text-green-600" />
-                                            <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0) * (personCounts?.[svc.id] || 1)} min</span>
+                                            <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0) * (svc.quntity || 1)} min</span>
                                         </div>
                                         <div className='flex flex-row items-center gap-4'>
                                             <DollarSign className="h-3 w-3 text-[#E09900]" />
-                                            <span className="text-xs font-semibold text-[#E09900]">{(svc.price || 0) * (personCounts?.[svc.id] || 1)}</span>
+                                            <span className="text-xs font-semibold text-[#E09900]">{(svc.price || 0) * (svc.quntity || 1)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -67,9 +66,9 @@ export function SelectedServicesBasket({ selectedServices, selected, onToggle }:
                                         size="sm"
                                         variant="outline"
                                         className="h-6 w-6 p-0"
-                                        disabled={(personCounts?.[svc.id] || 1) <= 1}
+                                        disabled={(svc.quntity || 1) <= 1}
                                         onClick={() => {
-                                            const currentCount = personCounts?.[svc.id] || 1
+                                            const currentCount = svc.quntity || 1
                                             if (currentCount > 1) {
                                                 dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount - 1 }))
                                             }
@@ -78,15 +77,15 @@ export function SelectedServicesBasket({ selectedServices, selected, onToggle }:
                                         <Minus className="h-3 w-3" />
                                     </Button>
                                     <span className="text-sm font-medium min-w-[20px] text-center">
-                                        {personCounts?.[svc.id] || 1}
+                                        {svc.quntity || 1}
                                     </span>
                                     <Button
                                         size="sm"
                                         variant="outline"
                                         className="h-6 w-6 p-0"
-                                        disabled={(personCounts?.[svc.id] || 1) >= 4}
+                                        disabled={(svc.quntity || 1) >= 4}
                                         onClick={() => {
-                                            const currentCount = personCounts?.[svc.id] || 1
+                                            const currentCount = svc.quntity || 1
                                             if (currentCount < 4) {
                                                 dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount + 1 }))
                                             }
@@ -97,7 +96,7 @@ export function SelectedServicesBasket({ selectedServices, selected, onToggle }:
                                 </div>
 
                                 <button
-                                    onClick={() => onToggle(svc.id, svc)}
+                                    onClick={() => dispatch(toggleService({ serviceId: svc.id, service: svc }))}
                                     className="rounded-full hover:bg-red-100 p-1"
                                 >
                                     <X className="h-3 w-3 text-red-500" />

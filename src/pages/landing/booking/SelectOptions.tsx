@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Sparkles, Scissors, Droplets } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { Service, Staff } from '@/interfaces/models/booking'
+import type { Service } from '@/interfaces/models/service'
+import type { Staff } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 
 interface SelectOptionsProps {
@@ -12,8 +13,8 @@ interface SelectOptionsProps {
     staffSelections: any
     // Record<number, number>
     onSelectStaff: (selections: Record<number, number>) => void
-    genderSelections: Record<number, string> // serviceId -> gender
-    onSelectGender: (serviceId: number, gender: string) => void
+    anyPreferences: Record<number, 'female' | 'male' | 'mixed'> // serviceId -> preference
+    onSelectGender: (serviceId: number, preference: 'female' | 'male' | 'mixed') => void
     onNext: () => void
     onPrev: () => void
 }
@@ -29,7 +30,7 @@ export function SelectOptions({
     staff,
     staffSelections,
     onSelectStaff,
-    genderSelections,
+    anyPreferences,
     onSelectGender,
     onNext,
     onPrev
@@ -81,7 +82,7 @@ export function SelectOptions({
                                                     onClick={() => onSelectGender(service.id, g.id)}
                                                     className={cn(
                                                         'flex-1 rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all',
-                                                        genderSelections[service.id] === g.id
+                                                        (anyPreferences[service.id] || 'mixed') === g.id
                                                             ? 'border-[#E09900] bg-[#E09900] text-white'
                                                             : 'border-[#E09900]/30 bg-white text-[#020F44] hover:border-[#E09900]'
                                                     )}
