@@ -33,10 +33,10 @@ export default function ServicesPage() {
   // Fetch services
   const { data: services = [], isLoading } = useQuery<Service[]>({
     queryKey: ['services'],
-    queryFn: () => http.get(apiRoutes.adminServices).then(res => res.data?.data),
+    queryFn: () => http.get(apiRoutes.adminServices).then(res => Array.isArray(res.data?.data) ? res.data?.data : []),
   });
 
- 
+
 
   // Delete service mutation
   const deleteMutation = useMutation({
@@ -156,7 +156,7 @@ export default function ServicesPage() {
         </CardContent>
       </Card>
 
- 
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>

@@ -16,7 +16,7 @@ interface ReviewProps {
     selectedScenario: AvailabilityScenario | any
     selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
-    selectedGender?: 'femme' | 'homme' | 'mixte'
+    genderSelections: Record<number, string>
     isSubmitting: boolean
     onConfirm: (bookingSummary: any) => void
     onPrev: () => void
@@ -28,7 +28,7 @@ export function Review({
     selectedScenario,
     selectedDate,
     customerInfo,
-    selectedGender,
+    genderSelections,
     isSubmitting,
     onConfirm,
     onPrev
@@ -73,7 +73,7 @@ export function Review({
             const serviceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
             return total + (serviceDetails?.staff_count || 0)
         }, 0),
-        gender: selectedGender,
+        genderSelections: genderSelections,
         language: currentLang
     }
 
@@ -112,7 +112,6 @@ export function Review({
                                 <span className="font-medium">{t('bookingWizard.review.guests')}:</span>
                                 <span className="text-muted-foreground">
                                     {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
-                                    {selectedGender && ` • ${selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}`}
                                 </span>
                             </div>
                             {selectedScenario?.start_datetime && (
@@ -193,6 +192,13 @@ export function Review({
                                             <div className="text-right ml-4">
                                                 <p className="font-semibold">{service.price} $</p>
                                                 <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
+                                                {genderSelections[service.id] && (
+                                                    <p className="text-xs text-amber-600 mt-1">
+                                                        {genderSelections[service.id] === 'female' ? t('bookingWizard.selectOptions.genderFemale') :
+                                                            genderSelections[service.id] === 'male' ? t('bookingWizard.selectOptions.genderMale') :
+                                                                t('bookingWizard.selectOptions.genderMixed')}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         {displayDate && (
@@ -222,14 +228,6 @@ export function Review({
                             <p className="text-sm text-muted-foreground">
                                 {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
                             </p>
-                            {selectedGender && (
-                                <>
-                                    <span className="text-muted-foreground">•</span>
-                                    <p className="text-sm text-muted-foreground">
-                                        {selectedGender === 'femme' ? t('bookingWizard.selectOptions.genderFemale') : selectedGender === 'homme' ? t('bookingWizard.selectOptions.genderMale') : t('bookingWizard.selectOptions.genderMixed')}
-                                    </p>
-                                </>
-                            )}
                         </div>
                     </div>
 

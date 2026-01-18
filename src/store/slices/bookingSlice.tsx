@@ -12,7 +12,7 @@ export interface BookingState {
     selectedServiceDetails: Service[];
     selectedStaff: Record<number, Staff>;
     personCounts: Record<number, number>; // serviceId -> person count
-    selectedGender: any | undefined;
+    genderSelections: Record<number, string>; // serviceId -> gender preference
     selectedDate: string | undefined; // Store as ISO string for Redux serialization
     selectedScenario: AvailabilityScenario | null;
     selectedTimeSlots: Record<number, AvailabilityScenario>;
@@ -26,7 +26,7 @@ const initialState: BookingState = {
     selectedServiceDetails: [],
     selectedStaff: {},
     personCounts: {},
-    selectedGender: undefined,
+    genderSelections: {}, // serviceId -> gender preference
     selectedDate: undefined,
     selectedScenario: null,
     selectedTimeSlots: {},
@@ -76,8 +76,9 @@ export const bookingSlice = createSlice({
             const { serviceId, count } = action.payload;
             state.personCounts = { ...state.personCounts, [serviceId]: count };
         },
-        setSelectedGender: (state, action: PayloadAction<any | undefined>) => {
-            state.selectedGender = action.payload;
+        setServiceGenderSelection: (state, action: PayloadAction<{ serviceId: number; gender: string }>) => {
+            const { serviceId, gender } = action.payload;
+            state.genderSelections = { ...state.genderSelections, [serviceId]: gender };
         },
         setSelectedDate: (state, action: PayloadAction<Date | string | undefined>) => {
             // Convert Date to ISO string for serialization
@@ -124,7 +125,7 @@ export const {
     prevStep,
     toggleService,
     setServicePersonCount,
-    setSelectedGender,
+    setServiceGenderSelection,
     setSelectedDate,
     setSelectedScenario,
     setSelectedTimeSlot,

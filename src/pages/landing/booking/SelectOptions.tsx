@@ -12,8 +12,8 @@ interface SelectOptionsProps {
     staffSelections: any
     // Record<number, number>
     onSelectStaff: (selections: Record<number, number>) => void
-    gender: string
-    onSelectGender: (gender: string) => void
+    genderSelections: Record<number, string> // serviceId -> gender
+    onSelectGender: (serviceId: number, gender: string) => void
     onNext: () => void
     onPrev: () => void
 }
@@ -29,15 +29,13 @@ export function SelectOptions({
     staff,
     staffSelections,
     onSelectStaff,
-    gender,
+    genderSelections,
     onSelectGender,
     onNext,
     onPrev
 }: SelectOptionsProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
-
-    const hasHammam = selectedServices.some((s: any) => s.type_service === 'hammam')
 
     const handleStaffSelect = (serviceId: number, staffId: number) => {
         onSelectStaff({ ...staffSelections, [serviceId]: staffId })
@@ -51,31 +49,6 @@ export function SelectOptions({
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
-                    {hasHammam && (
-                        <div className="rounded-xl border-2 border-[#E09900]/30 bg-orange-50/50 p-4">
-                            <div className="mb-3 font-semibold text-[#020F44]">{t('bookingWizard.selectOptions.genderTitle')}</div>
-                            <div className="flex gap-2">
-                                {[
-                                    { id: 'female', label: t('bookingWizard.selectOptions.genderFemale') },
-                                    { id: 'male', label: t('bookingWizard.selectOptions.genderMale') },
-                                    { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed') }
-                                ].map((g) => (
-                                    <button
-                                        key={g.id}
-                                        onClick={() => onSelectGender(g.id)}
-                                        className={cn(
-                                            'flex-1 rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all',
-                                            gender === g.id
-                                                ? 'border-[#E09900] bg-[#E09900] text-white'
-                                                : 'border-[#E09900]/30 bg-white text-[#020F44] hover:border-[#E09900]'
-                                        )}
-                                    >
-                                        {g.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {selectedServices.map((service: any) => {
                         const Icon = SERVICE_ICONS[service.type_service] || Sparkles
@@ -92,6 +65,33 @@ export function SelectOptions({
                                         <div className="text-sm text-muted-foreground">{service.duration_minutes} min • {service.price} $</div>
                                     </div>
                                 </div>
+
+                                {/* Gender Selection for services with sessions */}
+                                {service.has_sessions && (
+                                    <div className="mb-4 rounded-lg border-2 border-[#E09900]/30 bg-orange-50/50 p-3">
+                                        <div className="mb-2 text-sm font-medium text-[#020F44]">{t('bookingWizard.selectOptions.genderTitle')}</div>
+                                        <div className="flex gap-2">
+                                            {[
+                                                { id: 'female', label: t('bookingWizard.selectOptions.genderFemale') },
+                                                { id: 'male', label: t('bookingWizard.selectOptions.genderMale') },
+                                                { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed') }
+                                            ].map((g) => (
+                                                <button
+                                                    key={g.id}
+                                                    onClick={() => onSelectGender(service.id, g.id)}
+                                                    className={cn(
+                                                        'flex-1 rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all',
+                                                        genderSelections[service.id] === g.id
+                                                            ? 'border-[#E09900] bg-[#E09900] text-white'
+                                                            : 'border-[#E09900]/30 bg-white text-[#020F44] hover:border-[#E09900]'
+                                                    )}
+                                                >
+                                                    {g.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {serviceStaff.length > 0 && (
                                     <div>

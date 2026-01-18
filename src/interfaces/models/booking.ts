@@ -231,14 +231,18 @@ export interface TransformedSlot {
   session_type?: string
   available_capacity?: number
 }
-
-export interface AvailabilitySlotsRequest {
-  service_ids: number[]
-  start_date: string
-  end_date: string
+export interface ServiceRequestAvalilabilitySearch {
+  service_id?: number
   group_size?: number
   any_preference?: 'female' | 'male' | 'mixed'
+
+
 }
+export interface AvailabilitySlotsRequest {
+  services: ServiceRequestAvalilabilitySearch[]
+  start_date: string
+  end_date: string
+ }
 
 export interface AvailabilitySlotsResponse {
   success: boolean
