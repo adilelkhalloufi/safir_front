@@ -16,7 +16,7 @@ interface ReviewProps {
     selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
     anyPreferences: Record<number, 'female' | 'male' | 'mixed'>
-    selectedTimeSlots: Record<number, AvailabilityScenario>
+    selectedTimeSlot: AvailabilityScenario | null
     isSubmitting: boolean
     onConfirm: (bookingSummary: any) => void
     onPrev: () => void
@@ -28,7 +28,7 @@ export function Review({
     selectedDate,
     customerInfo,
     anyPreferences,
-    selectedTimeSlots,
+    selectedTimeSlot,
     isSubmitting,
     onConfirm,
     onPrev
@@ -119,13 +119,13 @@ export function Review({
                                     {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
                                 </span>
                             </div>
-                            {selectedScenario?.start_datetime && (
+                            {selectedTimeSlot?.start_datetime && (
                                 <div className="flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-amber-600" />
                                     <span className="font-medium">{t('bookingWizard.review.bookingTime')}:</span>
                                     <span className="text-muted-foreground">
-                                        {format(new Date(selectedScenario.start_datetime.replace(' ', 'T')), 'HH:mm')}
-                                        {selectedScenario.end_datetime && ` - ${format(new Date(selectedScenario.end_datetime.replace(' ', 'T')), 'HH:mm')}`}
+                                        {format(new Date(selectedTimeSlot.start_datetime.replace(' ', 'T')), 'HH:mm')}
+                                        {selectedTimeSlot.end_datetime && ` - ${format(new Date(selectedTimeSlot.end_datetime.replace(' ', 'T')), 'HH:mm')}`}
                                     </span>
                                 </div>
                             )}
@@ -140,7 +140,7 @@ export function Review({
                         </div>
                         <div className="space-y-4">
                             {selectedServices.map((service: any) => {
-                                const selectedServiceDetails = selectedScenario?.services?.find((s: any) => s.service_id === service.id)
+                                const selectedServiceDetails = selectedTimeSlot?.services?.find((s: any) => s.service_id === service.id)
 
                                 // Display the date and time from the selected slot
                                 let displayDate = null

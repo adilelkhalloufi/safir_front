@@ -7,7 +7,7 @@ export interface BookingState {
     step: Step;
     selectedServices: Service[];
     selectedDate: string | undefined;
-    selectedTimeSlots: Record<number, AvailabilityScenario>;
+    selectedTimeSlot: AvailabilityScenario | null;
     customerInfo: CustomerInfo;
 }
 
@@ -15,7 +15,7 @@ const initialState: BookingState = {
     step: 0,
     selectedServices: [],
     selectedDate: undefined,
-    selectedTimeSlots: {},
+    selectedTimeSlot: null,
     customerInfo: {
         name: '',
         email: '',
@@ -82,9 +82,8 @@ export const bookingSlice = createSlice({
                 state.selectedDate = action.payload;
             }
         },
-        setSelectedTimeSlot: (state, action: PayloadAction<{ serviceId: number; scenario: AvailabilityScenario }>) => {
-            const { serviceId, scenario } = action.payload;
-            state.selectedTimeSlots[serviceId] = scenario;
+        setSelectedTimeSlot: (state, action: PayloadAction<AvailabilityScenario | null>) => {
+            state.selectedTimeSlot = action.payload;
         },
         updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
             const { field, value } = action.payload;

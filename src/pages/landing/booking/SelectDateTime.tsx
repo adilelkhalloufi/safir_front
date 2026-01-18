@@ -1,13 +1,12 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Loader2, CheckCircle2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { AvailabilityScenario, Service } from '@/interfaces/models/booking'
 
 import { showNotification } from '@/utils'
+import { Service } from '@/interfaces/models/service'
 
 // Interface matching actual API response
 interface CombinedSlot {
@@ -41,10 +40,9 @@ interface SelectDateTimeProps {
     onSelectDate: (date: Date | undefined) => void
     availability: AvailabilityResponse | null
     isLoading: boolean
-    selectedScenario: AvailabilityScenario | null
-    onSelectScenario: (slot: any) => void
+    selectedTimeSlot: AvailabilityScenario | null
+    onSelectTimeSlot: (timeSlot: AvailabilityScenario | null) => void
     selectedServices?: Service[]
-    personCount: number
     onNext: () => void | null
     onPrev: () => void
 }
@@ -56,44 +54,68 @@ export function SelectDateTime({
     onSelectDate,
     availability,
     isLoading,
-    selectedScenario,
-    onSelectScenario,
-    personCount,
+    selectedTimeSlot,
+    onSelectTimeSlot,
+    selectedServices,
     onNext,
     onPrev
 }: SelectDateTimeProps) {
     const { t } = useTranslation()
 
-    // Handler for slot selection - automatically assigns staff based on personCount
-    const handleSlotClick = (slot: any, serviceId: number) => {
-        const service = selectedServices?.find(s => s.id === serviceId)
-        const requiredCount = service?.quntity || 1
-        // Check if there's enough capacity using the slot's available_capacity
-        const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
-        if (availableCapacity < requiredCount) {
+    // Handler for combined slot selection
+    const handleSlotClick = (slot: CombinedSlot) => {
+        // Check if there's enough capacity for all services
+        const maxPersonCount = Math.max(...(selectedServices?.map(s => s.quntity || 1) || [1]))
+        const availableCapacity = slot.available_staff?.length || 0
+        if (availableCapacity < maxPersonCount) {
             showNotification(
                 t('bookingWizard.selectDateTime.insufficientCapacity', {
-                    needed: requiredCount,
+                    needed: maxPersonCount,
                     available: availableCapacity
                 })
             )
             return
         }
 
-        // Automatically proceed with staff assignment
-        onSelectScenario({ slot, serviceId })
+        // Create the scenario with sequential service scheduling
+        const scenarioId = `combined-${slot.start_datetime.replace(/[^0-9]/g, '')}`
+        const datePart = slot.start_datetime.split(' ')[0]
+        const scenario = {
+            scenario_id: scenarioId,
+            start_datetime: slot.start_datetime,
+            end_datetime: slot.end_datetime,
+            total_duration: slot.services_breakdown.reduce((sum, s) => sum + s.duration, 0),
+            total_price: selectedServices?.reduce((sum, s) => sum + (s.price || 0) * (s.quntity || 1), 0) || 0,
+            services: slot.services_breakdown.map((breakdown, index) => {
+                const service = selectedServices?.find(s => s.id === breakdown.service_id)
+                const personCount = service?.quntity || 1
+                // Assign staff based on person count
+                const assignedStaff = slot.available_staff?.slice(0, personCount) || []
+
+                return {
+                    service_id: breakdown.service_id,
+                    service_name: breakdown.service_name,
+                    start_datetime: `${datePart} ${breakdown.start_time}:00`,
+                    end_datetime: `${datePart} ${breakdown.end_time}:00`,
+                    duration: breakdown.duration,
+                    assigned_staff: assignedStaff,
+                    staff_count: assignedStaff.length,
+                    available_staff: slot.available_staff || []
+                }
+            })
+        }
+
+        onSelectTimeSlot(scenario)
     }
 
 
 
-    // Get individual service availability for tabs
-    const individualServices = availability?.individual_service_availability || []
-    const hasSlots = individualServices.length > 0
+    // Get combined slots
+    const combinedSlots = availability?.combined_available_slots || []
+    const hasSlots = combinedSlots.length > 0
 
-    // Check if all services have selections
-    const hasAllSelections = individualServices.length > 0 && individualServices.every((service: any) =>
-        selectedScenario?.services?.some((s: any) => s.service_id === service.service_id)
-    )
+    // Check if a combined scenario is selected
+    const hasSelection = !!selectedTimeSlot
 
     return (
         <Card className="border-none shadow-xl bg-white/80 backdrop-blur">
@@ -128,104 +150,89 @@ export function SelectDateTime({
                                     <p className="text-sm text-muted-foreground mt-2">{t('bookingWizard.selectDateTime.selectAnother')}</p>
                                 </div>
                             ) : (
-                                <Tabs defaultValue={individualServices[0]?.service_id?.toString()} className="w-full">
-                                    <TabsList className="grid w-full mb-4" style={{ gridTemplateColumns: `repeat(${individualServices.length}, minmax(0, 1fr))` }}>
-                                        {individualServices.map((service: any) => (
-                                            <TabsTrigger
-                                                key={service.service_id}
-                                                value={service.service_id.toString()}
-                                                className="text-xs sm:text-sm px-2"
-                                            >
-                                                {service.service_name}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
+                                <div className="space-y-4">
+                                    {/* Combined Services Info */}
+                                    <div className="bg-gradient-to-r from-amber-50 to-rose-50 p-4 rounded-lg border border-amber-200">
+                                        <div className="flex items-center justify-between text-sm mb-2">
+                                            <span className="font-medium text-amber-900">
+                                                {t('bookingWizard.selectDateTime.sequentialBooking', 'Sequential Booking')}
+                                            </span>
+                                            <span className="text-amber-700">
+                                                {combinedSlots.length} {t('bookingWizard.selectDateTime.availableSlots', 'available slots')}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-amber-700">
+                                            {t('bookingWizard.selectDateTime.sequentialNote', 'Services will be scheduled sequentially in the order selected to avoid time conflicts.')}
+                                        </p>
+                                    </div>
 
-                                    {individualServices.map((service: any) => (
-                                        <TabsContent key={service.service_id} value={service.service_id.toString()}>
-                                            <div className="space-y-3">
-                                                {/* Compact Service Info */}
-                                                <div className="bg-gradient-to-r from-amber-50 to-rose-50 p-3 rounded-lg border border-amber-200">
-                                                    <div className="flex items-center justify-between text-sm">
-                                                        <span className="font-medium text-amber-900">{service.duration} min</span>
-                                                        <span className="text-amber-700">{service.slots_count} slots</span>
+                                    {/* Combined Time Slots Grid */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                        {combinedSlots.map((slot: CombinedSlot, index: number) => {
+                                            const isSelected = selectedTimeSlot?.scenario_id === `combined-${slot.start_datetime.replace(/[^0-9]/g, '')}`
+                                            const maxPersonCount = Math.max(...(selectedServices?.map(s => s.quntity || 1) || [1]))
+                                            const availableCapacity = slot.available_staff?.length || 0
+                                            const hasInsufficientCapacity = availableCapacity > 0 && availableCapacity < maxPersonCount
+
+                                            return (
+                                                <button
+                                                    key={`${slot.start_datetime}-${index}`}
+                                                    onClick={() => handleSlotClick(slot)}
+                                                    className={cn(
+                                                        'relative rounded-lg border-2 p-3 text-center transition-all duration-200',
+                                                        hasInsufficientCapacity && 'opacity-60 border-red-200',
+                                                        isSelected
+                                                            ? 'border-amber-500 bg-gradient-to-br from-amber-100 to-rose-100 shadow-md'
+                                                            : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50'
+                                                    )}
+                                                >
+                                                    {isSelected && (
+                                                        <CheckCircle2 className="absolute -top-1 -right-1 h-4 w-4 text-amber-600 bg-white rounded-full shadow-sm" />
+                                                    )}
+
+                                                    <div className={cn(
+                                                        'font-bold text-sm mb-1',
+                                                        isSelected ? 'text-amber-600' : 'text-gray-700'
+                                                    )}>
+                                                        {slot.start_time} - {slot.end_time}
                                                     </div>
-                                                </div>
 
-                                                {/* Compact Time Slots Grid */}
-                                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-                                                    {service.available_slots?.map((slot: any, index: number) => {
-                                                        const isSelected = selectedScenario?.services?.some((s: any) =>
-                                                            s.service_id === service.service_id && s.start_datetime === slot.start_datetime
-                                                        )
-                                                        // Get available capacity directly from slot
-                                                        const availableCapacity = slot.available_capacity || slot.available_staff_count || 0
-                                                        const hasInsufficientCapacity = availableCapacity > 0 && availableCapacity < personCount
+                                                    {/* Services breakdown */}
+                                                    <div className={cn(
+                                                        'text-[10px] space-y-0.5 mb-2',
+                                                        isSelected ? 'text-amber-600' : 'text-gray-500'
+                                                    )}>
+                                                        {slot.services_breakdown.map((service, idx) => (
+                                                            <div key={idx} className="truncate">
+                                                                {service.service_name} ({service.start_time})
+                                                            </div>
+                                                        ))}
+                                                    </div>
 
-                                                        return (
-                                                            <button
-                                                                key={`${slot.start_datetime}-${index}`}
-                                                                onClick={() => handleSlotClick(slot, service.service_id)}
-                                                                className={cn(
-                                                                    'relative rounded-lg border-2 p-2 text-center transition-all duration-200',
-                                                                    hasInsufficientCapacity && 'opacity-60 border-red-200',
-                                                                    isSelected
-                                                                        ? 'border-amber-500 bg-gradient-to-br from-amber-100 to-rose-100 shadow-md'
-                                                                        : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50'
-                                                                )}
-                                                            >
-                                                                {isSelected && (
-                                                                    <CheckCircle2 className="absolute -top-1 -right-1 h-4 w-4 text-amber-600 bg-white rounded-full shadow-sm" />
-                                                                )}
+                                                    {/* Staff info */}
+                                                    {slot.available_staff && slot.available_staff.length > 0 && (
+                                                        <div className={cn(
+                                                            'text-[9px] mb-1',
+                                                            isSelected ? 'text-amber-600' : 'text-gray-500'
+                                                        )}>
+                                                            {slot.available_staff.length} {t('bookingWizard.selectDateTime.staffAvailable', 'staff available')}
+                                                        </div>
+                                                    )}
 
-                                                                <div className={cn(
-                                                                    'font-bold text-sm',
-                                                                    isSelected ? 'text-amber-600' : 'text-gray-700'
-                                                                )}>
-                                                                    {slot.start_time}
-                                                                </div>
-
-                                                                {/* Display all staff names */}
-                                                                {slot.available_staff && slot.available_staff.length > 0 && (
-                                                                    <div className={cn(
-                                                                        'text-[9px] mt-0.5 max-h-12 overflow-y-auto',
-                                                                        isSelected ? 'text-amber-600' : 'text-gray-500'
-                                                                    )}>
-                                                                        {slot.available_staff.map((staff: any) => (
-                                                                            <div key={staff.staff_id} className="truncate">
-                                                                                {staff.staff_name}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Fallback to single staff name if available_staff is not present */}
-                                                                {(!slot.available_staff || slot.available_staff.length === 0) && slot.staff_name && (
-                                                                    <div className={cn(
-                                                                        'text-[10px] mt-0.5',
-                                                                        isSelected ? 'text-amber-600' : 'text-gray-400'
-                                                                    )}>
-                                                                        {slot.staff_name}
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Capacity indicator */}
-                                                                {availableCapacity > 0 && (
-                                                                    <div className={cn(
-                                                                        'text-[9px] mt-0.5 font-medium',
-                                                                        hasInsufficientCapacity ? 'text-red-600' : 'text-gray-500'
-                                                                    )}>
-                                                                        {availableCapacity} {t('bookingWizard.selectDateTime.places')}
-                                                                    </div>
-                                                                )}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
+                                                    {/* Capacity indicator */}
+                                                    {availableCapacity > 0 && (
+                                                        <div className={cn(
+                                                            'text-[9px] font-medium',
+                                                            hasInsufficientCapacity ? 'text-red-600' : 'text-gray-500'
+                                                        )}>
+                                                            {availableCapacity} {t('bookingWizard.selectDateTime.places')}
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
                             )}
                         </div>
                     )}
@@ -233,7 +240,7 @@ export function SelectDateTime({
                 <div className="mt-6 flex justify-between">
                     <Button variant="outline" onClick={onPrev} size="lg">{t('bookingWizard.selectDateTime.back')}</Button>
                     <Button
-                        disabled={!selectedDate || !hasAllSelections}
+                        disabled={!selectedDate || !hasSelection}
                         onClick={() => onNext() as any}
                         size="lg"
                         className="bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-700 hover:to-rose-700"

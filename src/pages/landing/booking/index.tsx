@@ -10,6 +10,7 @@ import {
     prevStep,
     toggleService,
     setSelectedDate,
+    setSelectedTimeSlot,
     updateCustomerInfo,
     resetBooking,
     setServiceAnyPreference,
@@ -44,7 +45,7 @@ export default function BookingWizard() {
         step,
         selectedServices,
         selectedDate,
-        selectedTimeSlots,
+        selectedTimeSlot,
         customerInfo
     } = useSelector((state: RootState) => state.booking)
 
@@ -216,79 +217,11 @@ export default function BookingWizard() {
                                 onSelectDate={(date) => dispatch(setSelectedDate(date))}
                                 availability={availability}
                                 isLoading={availabilityLoading}
-                                selectedScenario={selectedServices}
-                                personCount={Math.max(...selectedServices.map(s => s.quntity || 1), 1)}
+                                selectedTimeSlot={selectedTimeSlot}
                                 selectedServices={selectedServices}
-                                onSelectScenario={(selection: any) => {
-                                    if (selection?.slot && selection?.serviceId) {
-                                        const { slot, serviceId } = selection
-
-                                        // Find the selected service details
-                                        const selectedService = selectedServices.find(s => s.id === serviceId)
-
-                                        // Automatically assign staff based on personCount for this service
-                                        const servicePersonCount = selectedService?.quntity || 1
-                                        let assignedStaff: any[] = []
-                                        if (slot.available_staff && slot.available_staff.length > 0) {
-                                            // Select the required number of staff (up to servicePersonCount)
-                                            const numberOfStaffNeeded = Math.min(servicePersonCount, slot.available_staff.length)
-                                            assignedStaff = slot.available_staff.slice(0, numberOfStaffNeeded)
-
-                                            // Store the selected staff members
-                                            dispatch(setSelectedStaffMembers({
-                                                serviceId,
-                                                staffMembers: assignedStaff
-                                            }))
-                                        }
-
-                                        // Get existing services array or create new one
-                                        const existingServices = selectedScenario?.services || []
-
-                                        // Remove any previous selection for this service and add new one
-                                        const updatedServices = [
-                                            ...existingServices.filter((s: any) => s.service_id !== serviceId),
-                                            {
-                                                service_id: serviceId,
-                                                service_name: typeof selectedService?.name === 'string' ? selectedService.name : selectedService?.name?.[currentLang] || selectedService?.name?.fr || '',
-                                                order_index: existingServices.length,
-                                                start_datetime: slot.start_datetime,
-                                                end_datetime: slot.end_datetime,
-                                                assigned_staff: assignedStaff,
-                                                staff_count: assignedStaff.length,
-                                                available_staff: slot.available_staff || []
-                                            }
-                                        ]
-
-                                        // Calculate total price and duration
-                                        let totalPrice = 0
-                                        let totalDuration = 0
-                                        let earliestStart = slot.start_datetime
-                                        let latestEnd = slot.end_datetime
-
-                                        updatedServices.forEach((service: any) => {
-                                            const svc = selectedServices.find(s => s.id === service.service_id)
-                                            if (svc) {
-                                                const svcPersonCount = svc.quntity || 1
-                                                const svcPrice = typeof svc.price === 'string' ? parseFloat(svc.price) : (svc.price || 0)
-                                                totalPrice += svcPrice * svcPersonCount
-                                                totalDuration += (svc.duration_minutes || svc.duration || 60) * svcPersonCount
-                                            }
-                                        })
-
-                                        dispatch(setSelectedScenario({
-                                            scenario_id: `multi-slot-${Date.now()}`,
-                                            start_datetime: earliestStart,
-                                            end_datetime: latestEnd,
-                                            total_duration: totalDuration,
-                                            total_price: totalPrice,
-                                            services: updatedServices
-                                        }))
-                                    } else {
-                                        dispatch(setSelectedScenario(null))
-                                    }
-                                }}
+                                onSelectTimeSlot={(timeSlot) => dispatch(setSelectedTimeSlot(timeSlot))}
                                 onNext={() => {
-                                    if (selectedDate && selectedScenario) {
+                                    if (selectedDate && selectedTimeSlot) {
                                         handleNext()
                                     }
                                 }}
@@ -320,7 +253,7 @@ export default function BookingWizard() {
                                 selectedDate={selectedDate}
                                 customerInfo={customerInfo}
                                 anyPreferences={anyPreferences}
-                                selectedTimeSlots={selectedTimeSlots}
+                                selectedTimeSlot={selectedTimeSlot}
                                 isSubmitting={createBookingMutation.isPending}
                                 onConfirm={(bookingSummary) => {
 
