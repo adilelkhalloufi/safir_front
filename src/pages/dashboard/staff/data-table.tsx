@@ -54,7 +54,7 @@ export function StaffDataTable<TData, TValue>({
 
   // Removed serviceTypes query - now passed as prop
 
- 
+
   const table = useReactTable({
     data,
     columns,
@@ -95,13 +95,13 @@ export function StaffDataTable<TData, TValue>({
           }
           className='max-w-sm'
         />
-         <Select value={typeFilter} onValueChange={handleTypeFilter}>
+        <Select value={typeFilter} onValueChange={handleTypeFilter}>
           <SelectTrigger className='w-[200px]'>
             <SelectValue placeholder={t('staff.filterByType', 'Filter by type')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='all'>{t('common.all', 'All')}</SelectItem>
-            {serviceTypes && serviceTypes.map((type: any) => (
+            {Array.isArray(serviceTypes) && serviceTypes.map((type: any) => (
               <SelectItem key={type.id} value={type.id.toString()}>
                 {type.name?.fr || type.name?.en || type.name}
               </SelectItem>

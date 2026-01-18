@@ -21,7 +21,7 @@ export default function StaffIndex() {
   // Fetch service types from API
   const { data: serviceTypes = [] } = useQuery({
     queryKey: ['serviceTypes'],
-    queryFn: () => http.get(apiRoutes.adminServiceTypes).then(res => res.data?.data),
+    queryFn: () => http.get(apiRoutes.adminServiceTypes).then(res => Array.isArray(res.data?.data) ? res.data?.data : []),
   });
 
   useEffect(() => {

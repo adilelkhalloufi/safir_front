@@ -8,6 +8,7 @@ import { TopNav } from '../top-nav'
 import Sidebar from '../sidebar'
 import useIsCollapsed from '@/hooks/use-is-collapsed'
 import { LangToggle } from '../landing/lang-toggle'
+import { UserNav } from '../user-nav'
 
 
 const Layout = () => {
@@ -53,6 +54,7 @@ const Layout = () => {
               {/* <Search /> */}
               <ThemeSwitch />
               <LangToggle />
+              <UserNav />
 
             </div>
           </LayoutSh.Header>
