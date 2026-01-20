@@ -248,7 +248,12 @@ export default function ViewService() {
                   {service.staffs.map((staff: any) => (
                     <div
                       key={staff.id}
-                      className='rounded-lg border p-4 hover:bg-accent/50 transition-colors'
+                      className='rounded-lg border p-4 hover:bg-accent/50 transition-colors hover:cursor-pointer'
+                      onClick={() => {
+                        // send it to view detail staff
+                        navigate(webRoutes.staff.view.replace(':id', staff.id.toString()));
+                      
+                      }}
                     >
                       <div className='grid gap-4 md:grid-cols-4'>
                         <div>

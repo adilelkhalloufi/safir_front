@@ -86,9 +86,8 @@ export interface ServiceRequestAvalilabilitySearch {
 }
 export interface AvailabilitySlotsRequest {
   services: ServiceRequestAvalilabilitySearch[]
-  start_date: string
-  end_date: string
- }
+  date: string
+  }
 
  
 

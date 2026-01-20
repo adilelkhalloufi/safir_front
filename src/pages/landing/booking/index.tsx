@@ -37,9 +37,8 @@ import { CustomerDetails } from './CustomerDetails'
 import { SelectedServicesBasket } from './SelectedServicesBasket'
 
 export default function BookingWizard() {
-    const { i18n, t } = useTranslation()
-    const currentLang = (i18n.language || 'fr') as 'en' | 'fr'
-
+    const {  t } = useTranslation()
+ 
     const dispatch = useDispatch<AppDispatch>()
     const {
         step,
@@ -53,8 +52,7 @@ export default function BookingWizard() {
     const selectedServiceIds = selectedServices.map(s => s.id)
     const anyPreferences = selectedServices.reduce((acc, s) => {
         if (s.preferred_gender) {
-            const pref = s.preferred_gender === 'femme' ? 'female' : s.preferred_gender === 'homme' ? 'male' : 'mixed'
-            acc[s.id] = pref
+             acc[s.id] = s.preferred_gender
         }
         return acc
     }, {} as Record<number, 'female' | 'male' | 'mixed'>)
@@ -70,10 +68,12 @@ export default function BookingWizard() {
 
     // Staff is auto-assigned by the API, no need to fetch
 
-    // Fetch availability slots from API
+    // Fetch availability slots from API (fetch only when date changes)
     const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
-        queryKey: ['availability', selectedServices, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null],
+        // Only depend on the selected date so the query runs when date changes
+        queryKey: ['availability', selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null],
         queryFn: async () => {
+            // If no services selected, nothing to request — return null without calling API
             if (!selectedDate || selectedServices.length === 0) return null
 
             const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
@@ -83,14 +83,14 @@ export default function BookingWizard() {
                     group_size: service.quntity || 1,
                     ...(service.preferred_gender && { any_preference: service.preferred_gender })
                 })),
-                start_date: format(dateObj, 'yyyy-MM-dd'),
-                end_date: format(dateObj, 'yyyy-MM-dd')
+                date: format(dateObj, 'yyyy-MM-dd'),
             }
 
             const response = await defaultHttp.post(apiRoutes.availability, requestData)
             return response.data.data
         },
-        enabled: !!selectedDate && selectedServices.length > 0,
+        // Enabled only by presence of a date — changing other local state won't re-run the query automatically
+        enabled: !!selectedDate,
         retry: false
     })
     // Create guest booking mutation
@@ -143,12 +143,8 @@ export default function BookingWizard() {
     const handleNext = () => dispatch(nextStep())
     const handlePrev = () => dispatch(prevStep())
 
-    // Refetch availability when params change
-    useEffect(() => {
-        if (selectedDate && selectedServices.length > 0) {
-            refetchAvailability()
-        }
-    }, [selectedDate, selectedServices, refetchAvailability])
+    // Only fetch availability when `selectedDate` changes. React Query triggers refetch when the date in the query key changes.
+    // We avoid refetching when other local state (like `selectedServices`) changes.
 
     // Loading state
     if (servicesLoading) {
@@ -219,7 +215,7 @@ export default function BookingWizard() {
                                 isLoading={availabilityLoading}
                                 selectedTimeSlot={selectedTimeSlot}
                                 selectedServices={selectedServices}
-                                onSelectTimeSlot={(timeSlot) => dispatch(setSelectedTimeSlot(timeSlot))}
+                                onSelectTimeSlot={(timeSlot) => dispatch(   (timeSlot))}
                                 onNext={() => {
                                     if (selectedDate && selectedTimeSlot) {
                                         handleNext()

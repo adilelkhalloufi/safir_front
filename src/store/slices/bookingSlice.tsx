@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Service, Gender } from '../../interfaces/models/service';
-import type { AvailabilityScenario } from '../../interfaces/models/booking';
+import type { Service  } from '../../interfaces/models/service';
 import type { Step, CustomerInfo } from '../../pages/landing/booking/types';
 
 export interface BookingState {
     step: Step;
     selectedServices: Service[];
     selectedDate: string | undefined;
-    selectedTimeSlot: AvailabilityScenario | null;
+    selectedTimeSlot: any | null;
     customerInfo: CustomerInfo;
 }
 
@@ -65,12 +64,8 @@ export const bookingSlice = createSlice({
             const { serviceId, preference } = action.payload;
             const service = state.selectedServices.find(s => s.id === serviceId);
             if (service) {
-                const genderMap: Record<'female' | 'male' | 'mixed', Gender> = {
-                    female: 'femme',
-                    male: 'homme',
-                    mixed: 'mixte'
-                };
-                service.preferred_gender = genderMap[preference];
+               
+                service.preferred_gender = preference;
             }
         },
 

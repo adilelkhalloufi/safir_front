@@ -1,6 +1,6 @@
 // Service model types (extended from booking.ts)
 
- export type Gender = 'femme' | 'homme' | 'mixte';
+ export type Gender = 'female' | 'male' | 'mixed';
 
 export interface ServiceTypeObject {
   id: number;
