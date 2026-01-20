@@ -247,9 +247,7 @@ export function SelectDateTime({
                             {slots.length === 0 ? (
                               <div className='rounded-lg border-2 border-gray-200 bg-gray-50 p-4 text-center'>
                                 <p className='text-muted-foreground'>
-                                  {t(
-                                    'bookingWizard.selectDateTime.noSlotsForService'
-                                  )}
+                                  {svc?.message || t('bookingWizard.selectDateTime.noSlotsForService')}
                                 </p>
                               </div>
                             ) : (

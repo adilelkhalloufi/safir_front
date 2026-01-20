@@ -11,6 +11,19 @@ export const injectStore = (_store: Store) => {
 };
 
 export const defaultHttp = axios.create();
+
+defaultHttp.interceptors.request.use(
+  (config) => {
+    config.params = {
+      ...config.params,
+      lang: currentLang,
+    };
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 const http = axios.create();
 const currentLang = i18next.language || 'fr';
 
