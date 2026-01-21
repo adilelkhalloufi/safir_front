@@ -180,12 +180,14 @@ export default function AddService() {
     },
     {
       group: t('services.slots', 'Service Slots'),
+ 
       fields: [
         {
           name: 'slots',
           label: t('services.slotsTable', 'Slots'),
           type: 'table',
           required: false,
+          showIf: (data) => data.has_sessions === 1,
           columns: [
             {
               name: 'slot_time',

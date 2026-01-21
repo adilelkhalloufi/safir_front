@@ -236,6 +236,7 @@ export default function EditService() {
           label: t('services.slotsTable', 'Slots'),
           type: 'table',
           required: false,
+          showIf: (data) => data.has_sessions === 1,
           columns: [
             {
               name: 'slot_time',

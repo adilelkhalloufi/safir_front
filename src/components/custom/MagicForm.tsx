@@ -36,6 +36,7 @@ export interface MagicFormFieldProps {
   columns?: MagicFormFieldProps[]; // For table type
   disabled?: boolean; // Add this line
   returnFullObject?: boolean; // Add this line
+  showIf?: (data: any) => boolean; // Conditional rendering
 }
 
 export interface MagicFormGroupProps {
@@ -318,7 +319,8 @@ const MagicForm = memo(({
       </div>
     );
   }, [handleTableChange]);
-  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false }: MagicFormFieldProps) => {
+  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false, showIf }: MagicFormFieldProps) => {
+    if (showIf && !showIf(formData)) return null;
     const widthClass = width === "full" ? "w-full" : width === "half" ? "w-1/2" : width === "third" ? "w-1/3" : "";
     return (
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
