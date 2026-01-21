@@ -76,7 +76,7 @@ export function SelectOptions({
                                                 { id: 'female', label: t('bookingWizard.selectOptions.genderFemale') },
                                                 { id: 'male', label: t('bookingWizard.selectOptions.genderMale') },
                                                 { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed') }
-                                            ].map((g) => (
+                                            ].map((g : any) => (
                                                 <button
                                                     key={g.id}
                                                     onClick={() => onSelectGender(service.id, g.id)}

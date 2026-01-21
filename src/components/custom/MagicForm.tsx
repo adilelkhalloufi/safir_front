@@ -31,6 +31,7 @@ export interface MagicFormFieldProps {
   group?: string; // Updated to string
   groupTitle?: string;
   autocomplete?: boolean;
+  multiSelect?: boolean;
   width?: "full" | "half" | "third" | "auto";
   columns?: MagicFormFieldProps[]; // For table type
   disabled?: boolean; // Add this line
@@ -270,6 +271,7 @@ const MagicForm = memo(({
             defaultValue={row[col.name]}
             placeholder={col.placeholder || "Select"}
             autocomplete={col.autocomplete}
+            multiSelect={col.multiSelect}
             onSelectionChange={(value) => {
               // Pass the value directly to handleTableChange
               handleTableChange(name, rowIndex, col.name, value);
@@ -316,7 +318,7 @@ const MagicForm = memo(({
       </div>
     );
   }, [handleTableChange]);
-  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false }: MagicFormFieldProps) => {
+  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false }: MagicFormFieldProps) => {
     const widthClass = width === "full" ? "w-full" : width === "half" ? "w-1/2" : width === "third" ? "w-1/3" : "";
     return (
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
@@ -341,12 +343,13 @@ const MagicForm = memo(({
             defaultValue={formData[name]}
             placeholder={placeholder || `Select ${label || name}`}
             autocomplete={autocomplete}
+            multiSelect={multiSelect}
             onSelectionChange={(value) => {
               // Update formData immediately when selection changes
-              const newValue = value || null;
+              const newValue = value || (multiSelect ? [] : null);
               setFormData((prev: any) => ({ ...prev, [name]: newValue }));
               // Clear error when valid value is selected
-              if (newValue) {
+              if (multiSelect ? (newValue && newValue.length > 0) : newValue) {
                 setErrors((prev: any) => ({ ...prev, [name]: undefined }));
               }
             }}

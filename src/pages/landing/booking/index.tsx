@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -29,7 +28,7 @@ import { Review } from './Review'
 import { AppDispatch, RootState } from '@/store'
 import { defaultHttp } from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
-import { NotificationType, showNotification } from '@/utils'
+import { handleErrorResponse, NotificationType, showNotification } from '@/utils'
 import { SelectServices } from './SelectServices'
 import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
@@ -65,16 +64,14 @@ export default function BookingWizard() {
             return response.data.data as Service[]
         }
     })
-
-    // Staff is auto-assigned by the API, no need to fetch
-
+    
     // Fetch availability slots from API (fetch only when date changes)
-    const { data: availabilityData, isLoading: availabilityLoading, refetch: refetchAvailability } = useQuery({
+    const { data: availabilityData, isLoading: availabilityLoading } = useQuery({
         // Only depend on the selected date so the query runs when date changes
         queryKey: ['availability', selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null],
         queryFn: async () => {
-            // If no services selected, nothing to request — return null without calling API
-            if (!selectedDate || selectedServices.length === 0) return null
+            // If no services selected, nothing to request — return empty array
+            if (!selectedDate || selectedServices.length === 0) return []
 
             const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
             const requestData: AvailabilitySlotsRequest = {
@@ -86,8 +83,13 @@ export default function BookingWizard() {
                 date: format(dateObj, 'yyyy-MM-dd'),
             }
 
-            const response = await defaultHttp.post(apiRoutes.availability, requestData)
-            return response.data.data
+            try {
+                const res = await defaultHttp.post(apiRoutes.availability, requestData)
+                return res.data.data
+            } catch (error) {
+                handleErrorResponse(error)
+                return []
+            }
         },
         // Enabled only by presence of a date — changing other local state won't re-run the query automatically
         enabled: !!selectedDate,
@@ -115,29 +117,7 @@ export default function BookingWizard() {
         }
     })
 
-    // // Confirm booking mutation
-    // const confirmBookingMutation = useMutation({
-    //     mutationFn: async ({ bookingId, confirmData }: { bookingId: number, confirmData: ConfirmBookingRequest }) => {
-    //         const response = await defaultHttp.post(apiRoutes.confirmGuestBooking(bookingId), confirmData)
-    //         return response.data as GuestBookingResponse
-    //     },
-    //     onSuccess: (data) => {
-    //         showNotification(
-    //             `${t('bookingWizard.bookingConfirmed')} ${data.data.booking_reference}`,
-    //             NotificationType.SUCCESS
-    //         )
-    //         // Reset wizard after a delay to show success
-    //         setTimeout(() => {
-    //             dispatch(resetBooking())
-    //         }, 3000)
-    //     },
-    //     onError: (error: any) => {
-    //         showNotification(
-    //             error?.response?.data?.message || t('bookingWizard.bookingConfirmError'),
-    //             NotificationType.ERROR
-    //         )
-    //     }
-    // })
+   
 
     // Navigation handlers
     const handleNext = () => dispatch(nextStep())
@@ -215,7 +195,7 @@ export default function BookingWizard() {
                                 isLoading={availabilityLoading}
                                 selectedTimeSlot={selectedTimeSlot}
                                 selectedServices={selectedServices}
-                                onSelectTimeSlot={(timeSlot) => dispatch(   (timeSlot))}
+                                onSelectTimeSlot={(timeSlot) => dispatch(setSelectedTimeSlot(timeSlot))}
                                 onNext={() => {
                                     if (selectedDate && selectedTimeSlot) {
                                         handleNext()

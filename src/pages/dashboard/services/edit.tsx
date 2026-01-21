@@ -51,6 +51,10 @@ export default function EditService() {
       return {
         is_active: 1,
         requirements: [],
+        buffer_minutes: 0,
+        requires_health_form: 0,
+        has_sessions: 0,
+        slots: [],
       };
     }
 
@@ -59,14 +63,28 @@ export default function EditService() {
       name_en: serviceData.name?.en || '',
       type_service_id: serviceData.type?.id?.toString() || '',
       duration_minutes: serviceData.duration_minutes || '',
+      buffer_minutes: serviceData.buffer_minutes || 0,
       price: serviceData.price || '',
       description_fr: serviceData.description?.fr || '',
       description_en: serviceData.description?.en || '',
       is_active: serviceData.is_active ? 1 : 0,
+      requires_health_form: serviceData.requires_health_form ? 1 : 0,
+      has_sessions: serviceData.has_sessions ? 1 : 0,
       requirements: serviceData.requirements?.map((req: any) => ({
         resource_id: req.resource_id?.toString() || req.resource?.id?.toString() || '',
         quantity: req.quantity || 1,
         is_required: req.is_required ? 1 : 0,
+      })) || [],
+      slots: serviceData.slots?.map((slot: any) => ({
+        slot_time: slot.slot_time || '',
+        is_active: slot.is_active ? 1 : 0,
+        default_capacity: slot.default_capacity || 0,
+        gender: slot.gender || '',
+        days_of_week: slot.days_of_week || [],
+        capacity_total: slot.capacity_total || 0,
+        capacity_staff: slot.capacity_staff || 0,
+        capacity_self: slot.capacity_self || 0,
+        max_scrubbers: slot.max_scrubbers || 0,
       })) || [],
     };
   }, [serviceData]);
@@ -132,13 +150,30 @@ export default function EditService() {
           placeholder: '30',
         },
         {
+          name: 'buffer_minutes',
+          label: t('services.bufferMinutes', 'Buffer Minutes'),
+          type: 'number',
+          required: false,
+          placeholder: '0',
+        },
+        {
           name: 'price',
           label: t('services.price', 'Price'),
           type: 'number',
           required: true,
           placeholder: '0.00',
         },
-           {
+        {
+          name: 'requires_health_form',
+          label: t('services.requiresHealthForm', 'Requires Health Form'),
+          type: 'checkbox',
+        },
+        {
+          name: 'has_sessions',
+          label: t('services.hasSessions', 'Has Sessions'),
+          type: 'checkbox',
+        },
+        {
           name: 'is_active',
           label: t('services.isActive', 'Active Service'),
           type: 'checkbox',
@@ -155,7 +190,6 @@ export default function EditService() {
           type: 'textarea',
           placeholder: t('services.descriptionPlaceholder', 'Describe the service...'),
         },
-     
       ],
     },
     {
@@ -194,7 +228,94 @@ export default function EditService() {
         },
       ],
     },
-   
+    {
+      group: t('services.slots', 'Service Slots'),
+      fields: [
+        {
+          name: 'slots',
+          label: t('services.slotsTable', 'Slots'),
+          type: 'table',
+          required: false,
+          columns: [
+            {
+              name: 'slot_time',
+              label: t('services.slotTime', 'Slot Time'),
+              type: 'text',
+              required: true,
+              placeholder: '09:00',
+            },
+            {
+              name: 'is_active',
+              label: t('services.isActive', 'Is Active'),
+              type: 'checkbox',
+              required: true,
+            },
+            {
+              name: 'default_capacity',
+              label: t('services.defaultCapacity', 'Default Capacity'),
+              type: 'number',
+              required: true,
+              placeholder: '1',
+            },
+            {
+              name: 'gender',
+              label: t('services.gender', 'Gender'),
+              type: 'select',
+              required: false,
+              options: [
+                { value: 'male', name: t('services.male', 'Male') },
+                { value: 'female', name: t('services.female', 'Female') },
+                { value: 'other', name: t('services.other', 'Other') },
+              ],
+            },
+            {
+              name: 'days_of_week',
+              label: t('services.daysOfWeek', 'Days of Week'),
+              type: 'select',
+              multiSelect: true,
+              required: true,
+              options: [
+                { value: 0, name: t('services.sunday', 'Sunday') },
+                { value: 1, name: t('services.monday', 'Monday') },
+                { value: 2, name: t('services.tuesday', 'Tuesday') },
+                { value: 3, name: t('services.wednesday', 'Wednesday') },
+                { value: 4, name: t('services.thursday', 'Thursday') },
+                { value: 5, name: t('services.friday', 'Friday') },
+                { value: 6, name: t('services.saturday', 'Saturday') },
+              ],
+            },
+            {
+              name: 'capacity_total',
+              label: t('services.capacityTotal', 'Total Capacity'),
+              type: 'number',
+              required: false,
+              placeholder: '0',
+            },
+            {
+              name: 'capacity_staff',
+              label: t('services.capacityStaff', 'Staff Capacity'),
+              type: 'number',
+              required: false,
+              placeholder: '0',
+            },
+            {
+              name: 'capacity_self',
+              label: t('services.capacitySelf', 'Self Capacity'),
+              type: 'number',
+              required: false,
+              placeholder: '0',
+            },
+            {
+              name: 'max_scrubbers',
+              label: t('services.maxScrubbers', 'Max Scrubbers'),
+              type: 'number',
+              required: false,
+              placeholder: '0',
+            },
+          ],
+        },
+      ],
+    },
   ];
 
   if (isLoading) {

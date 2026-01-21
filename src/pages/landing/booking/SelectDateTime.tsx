@@ -63,14 +63,6 @@ export function SelectDateTime({
 }: SelectDateTimeProps) {
   const { t, i18n } = useTranslation()
 
-  // Per-service slot selection state
- 
-  // Clear selections when date or selected services change
-  useEffect(() => {
-    selectedTimeSlot({})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, selectedServices])
-
   const handleServiceSlotClick = (service: Service, slot: any) => {
         const personCount = service.quntity || 1
         const availableCapacity = slot.available_capacity || 0
@@ -104,7 +96,7 @@ export function SelectDateTime({
         ...selectedTimeSlot,
         [service.id]: slot,
         }
-        selectedTimeSlot(newSelections)
+        onSelectTimeSlot(newSelections)
 
         // Build scenario from current selections
         const selectedServicesList = selectedServices || []
@@ -150,7 +142,7 @@ export function SelectDateTime({
       services,
     }
 
-    onSelectTimeSlot(scenario)
+    // Note: scenario is built but not stored in state, used in Review
   }
 
   // Per-service availability
@@ -163,7 +155,7 @@ export function SelectDateTime({
   // Check if every selected service has a chosen slot
   const hasSelection =
     (selectedServices || []).length > 0 &&
-    (selectedServices || []).every((s) => !!selectedTimeSlot[s.id])
+    (selectedServices || []).every((s) => !!selectedTimeSlot?.[s.id])
 
   return (
     <Card className='border-none bg-white/80 shadow-xl backdrop-blur'>
@@ -254,7 +246,7 @@ export function SelectDateTime({
                               <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
                                 {slots.map((slot: any) => {
                                   const isSelected =
-                                    selectedSlots[service.id]?.slot_id ===
+                                    selectedTimeSlot?.[service.id]?.slot_id ===
                                     slot.slot_id
                                   const personCount = service.quntity || 1
                                   const insufficient =

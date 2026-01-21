@@ -16,7 +16,7 @@ interface ReviewProps {
     selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
     anyPreferences: Record<number, 'female' | 'male' | 'mixed'>
-    selectedTimeSlot: AvailabilityScenario | null
+    selectedTimeSlot: Record<number, any> | null
     isSubmitting: boolean
     onConfirm: (bookingSummary: any) => void
     onPrev: () => void
@@ -35,6 +35,7 @@ export function Review({
 }: ReviewProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
+    const selectedTimeSlots = selectedTimeSlot || {}
     const totalPrice = Object.values(selectedTimeSlots).reduce((sum, scenario) => {
         const price = typeof scenario.total_price === 'string' ? parseFloat(scenario.total_price) : scenario.total_price || 0;
         return sum + price;

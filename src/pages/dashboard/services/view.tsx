@@ -22,6 +22,8 @@ import {
   IconUsers,
   IconMail,
   IconPhone,
+  IconUsersGroup,
+  IconGenderFemale,
 } from '@tabler/icons-react'
 import ViewLoading from '@/components/skeleton/ViewLoading'
 
@@ -143,11 +145,47 @@ export default function ViewService() {
                 </div>
                 <div>
                   <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.bufferMinutes', 'Buffer Minutes')}
+                  </p>
+                  <div className='mt-1 flex items-center gap-2'>
+                    <IconClock className='h-4 w-4 text-muted-foreground' />
+                    <p className='text-base'>
+                      {service?.buffer_minutes || 0}{' '}
+                      {t('common.minutes', 'minutes')}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
                     {t('services.price', 'Price')}
                   </p>
                   <div className='mt-1 flex items-center gap-2'>
                     <IconCurrencyEuro className='h-4 w-4 text-muted-foreground' />
                     <p className='text-base font-semibold'>{service?.price}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.requiresHealthForm', 'Requires Health Form')}
+                  </p>
+                  <div className='mt-1'>
+                    <Badge
+                      variant={service?.requires_health_form ? 'default' : 'secondary'}
+                    >
+                      {service?.requires_health_form ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.hasSessions', 'Has Sessions')}
+                  </p>
+                  <div className='mt-1'>
+                    <Badge
+                      variant={service?.has_sessions ? 'default' : 'secondary'}
+                    >
+                      {service?.has_sessions ? 'Yes' : 'No'}
+                    </Badge>
                   </div>
                 </div>
                 <div className='md:col-span-2'>
@@ -231,6 +269,8 @@ export default function ViewService() {
             </Card>
           )}
 
+   
+
           {/* Staff Members Card */}
           {service?.staffs && service?.staffs.length > 0 && (
             <Card>
@@ -301,7 +341,79 @@ export default function ViewService() {
               </CardContent>
             </Card>
           )}
-
+                {/* Slots Card */}
+                {service?.has_sessions && service?.slots && service?.slots.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className='flex items-center gap-2'>
+                        <IconClock className='h-5 w-5' />
+                        {t('services.slots', 'Service Slots')}
+                      </CardTitle>
+                      <CardDescription>
+                        {t('services.slotsDescription', 'Available time slots for this service')}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='  flex flex-row gap-4 w-full'>
+                        {(() => {
+                          const days = [
+                            { label: 'Sunday', icon: <span title='Sunday'>S</span> },
+                            { label: 'Monday', icon: <span title='Monday'>M</span> },
+                            { label: 'Tuesday', icon: <span title='Tuesday'>T</span> },
+                            { label: 'Wednesday', icon: <span title='Wednesday'>W</span> },
+                            { label: 'Thursday', icon: <span title='Thursday'>T</span> },
+                            { label: 'Friday', icon: <span title='Friday'>F</span> },
+                            { label: 'Saturday', icon: <span title='Saturday'>S</span> },
+                          ];
+                          // Group slots by day
+                          const groupedSlots: { [key: number]: any[] } = {};
+                          service.slots.forEach((slot: any) => {
+                            if (slot.days_of_week && Array.isArray(slot.days_of_week)) {
+                              slot.days_of_week.forEach((day: number) => {
+                                if (!groupedSlots[day]) groupedSlots[day] = [];
+                                groupedSlots[day].push(slot);
+                              });
+                            }
+                          });
+                          return Object.keys(groupedSlots)
+                            .sort((a, b) => parseInt(a) - parseInt(b))
+                            .map((dayKey) => {
+                              const dayIndex = parseInt(dayKey);
+                              const daySlots = groupedSlots[dayIndex];
+                              return (
+                                <div key={dayIndex} className='flex flex-col  space-y-2'>
+                                  <div className='flex items-center gap-2 mb-2'>
+                                    {days[dayIndex]?.icon}
+                                    <span className='text-xs text-muted-foreground'>{t(`services.${days[dayIndex]?.label.toLowerCase()}`, days[dayIndex]?.label)}</span>
+                                  </div>
+                                  <div className='flex flex-col flex-wrap gap-2'>
+                                    {daySlots.map((slot: any, index: number) => (
+                                      <div
+                                        key={slot.id || index}
+                                        className='rounded-lg border p-2 bg-gray-50 flex flex-col  min-w-[90px]'
+                                      >
+                                        <span className='font-semibold flex items-center gap-1'>
+                                          <IconClock className='h-4 w-4' />
+                                          {slot.slot_time}
+                                        </span>
+                                        <span className='text-xs flex items-center gap-1'>
+                                          <IconGenderFemale className='h-4 w-4' />
+                                          {slot.gender || 'Any'}
+                                          </span>
+                                        <span className='text-xs flex items-center gap-1'>
+                                          <IconUsersGroup className='h-4 w-4'/>
+                                          {slot.default_capacity}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            });
+                        })()}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
           {/* Type Details Card */}
           {service?.type && (
             <Card>
