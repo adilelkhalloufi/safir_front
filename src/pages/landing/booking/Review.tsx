@@ -6,8 +6,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
 import type { Service } from '@/interfaces/models/service'
-import type { AvailabilityScenario } from '@/interfaces/models/booking'
-import { getLocalizedValue } from '@/interfaces/models/booking'
+ import { getLocalizedValue } from '@/interfaces/models/booking'
 import type { CustomerInfo } from './types'
 
 interface ReviewProps {
@@ -16,11 +15,11 @@ interface ReviewProps {
     selectedDate: Date | string | undefined
     customerInfo: CustomerInfo
     anyPreferences: Record<number, 'female' | 'male' | 'mixed'>
-    selectedTimeSlot: Record<number, any> | null
     isSubmitting: boolean
     onConfirm: (bookingSummary: any) => void
     onPrev: () => void
 }
+
 
 export function Review({
     selectedServices,
@@ -28,15 +27,38 @@ export function Review({
     selectedDate,
     customerInfo,
     anyPreferences,
-    selectedTimeSlot,
-    isSubmitting,
+     isSubmitting,
     onConfirm,
     onPrev
 }: ReviewProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
-    const selectedTimeSlots = selectedTimeSlot || {}
-    const totalPrice = Object.values(selectedTimeSlots).reduce((sum, scenario) => {
+
+    // Build a per-service selection mapping from each service's `slot`.
+    const computedSelectedTimeSlots = Object.fromEntries(
+        selectedServices
+            .map((service: any) => {
+                const slot = service.slot
+                if (!slot) return null
+                const qty = service.quntity || personCount || 1
+                const assigned_staff = (slot.available_staff || []).slice(0, qty).map((st: any) => ({ staff_id: st.staff_id, staff_name: st.staff_name }))
+                return [service.id, {
+                    services: [{
+                        service_id: service.id,
+                        start_datetime: slot.start_datetime,
+                        end_datetime: slot.end_datetime,
+                        assigned_staff,
+                        staff_count: assigned_staff.length
+                    }],
+                    start_datetime: slot.start_datetime,
+                    end_datetime: slot.end_datetime,
+                    total_price: (typeof service.price === 'string' ? parseFloat(service.price) : service.price) * qty
+                }]
+            })
+            .filter(Boolean) as any
+    )
+
+    const totalPrice = Object.values(computedSelectedTimeSlots).reduce((sum: number, scenario: any) => {
         const price = typeof scenario.total_price === 'string' ? parseFloat(scenario.total_price) : scenario.total_price || 0;
         return sum + price;
     }, 0);
@@ -46,16 +68,23 @@ export function Review({
         ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd')
         : ''
 
+    // Combined start/end computed from all selected service slots
+    const pickedSlotsArr = Object.values(computedSelectedTimeSlots).filter(Boolean) as any[]
+    const combinedStart = pickedSlotsArr.length ? pickedSlotsArr.map(s => s.start_datetime).reduce((a: string, b: string) => (a < b ? a : b)) : null
+    const combinedEnd = pickedSlotsArr.length ? pickedSlotsArr.map(s => s.end_datetime).reduce((a: string, b: string) => (a > b ? a : b)) : null
+
     // Prepare booking summary object matching backend validation structure
     const bookingSummary = {
-        services: selectedServices.map(service => {
-            const scenario = selectedTimeSlots[service.id];
+        services: selectedServices
+            .filter((service: any) => (service.has_sessions ? true : !!service.selected))
+            .map(service => {
+            const scenario = computedSelectedTimeSlots[service.id];
             const serviceDetails = scenario?.services?.find((s: any) => s.service_id === service.id)
             return {
                 id: service.id,
                 name: getLocalizedValue(service.name, currentLang),
                 price: typeof service.price === 'string' ? parseFloat(service.price) : service.price,
-                duration: service.duration_minutes || service.duration || 60,
+                duration: service.duration_minutes || service.duration_minutes || 60,
                 start_datetime: serviceDetails?.start_datetime || '',
                 end_datetime: serviceDetails?.end_datetime || '',
                 assigned_staff: (serviceDetails?.assigned_staff || []).map((staff: any) => ({
@@ -75,7 +104,7 @@ export function Review({
         },
         totalPrice: totalPrice,
         totalStaffAssigned: selectedServices.reduce((total, service) => {
-            const scenario = selectedTimeSlots[service.id];
+            const scenario = computedSelectedTimeSlots[service.id];
             const serviceDetails = scenario?.services?.find((s: any) => s.service_id === service.id)
             return total + (serviceDetails?.staff_count || 0)
         }, 0),
@@ -120,13 +149,13 @@ export function Review({
                                     {personCount} {personCount > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
                                 </span>
                             </div>
-                            {selectedTimeSlot?.start_datetime && (
+                            {combinedStart && (
                                 <div className="flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-amber-600" />
                                     <span className="font-medium">{t('bookingWizard.review.bookingTime')}:</span>
                                     <span className="text-muted-foreground">
-                                        {format(new Date(selectedTimeSlot.start_datetime.replace(' ', 'T')), 'HH:mm')}
-                                        {selectedTimeSlot.end_datetime && ` - ${format(new Date(selectedTimeSlot.end_datetime.replace(' ', 'T')), 'HH:mm')}`}
+                                        {format(new Date(combinedStart.replace(' ', 'T')), 'HH:mm')}
+                                        {combinedEnd && ` - ${format(new Date(combinedEnd.replace(' ', 'T')), 'HH:mm')}`}
                                     </span>
                                 </div>
                             )}
@@ -140,8 +169,20 @@ export function Review({
                             <h3 className="font-semibold">{t('bookingWizard.review.servicesTitle')}</h3>
                         </div>
                         <div className="space-y-4">
-                            {selectedServices.map((service: any) => {
-                                const selectedServiceDetails = selectedTimeSlot?.services?.find((s: any) => s.service_id === service.id)
+                            {selectedServices.map((service: Service) => {
+                                const scenario = computedSelectedTimeSlots[service.id];
+                                let selectedServiceDetails = scenario?.services?.find((s: any) => s.service_id === service.id)
+                                if (!selectedServiceDetails && service.slot) {
+                                    const slot = service.slot
+                                    const qty = service.quntity || personCount || 1
+                                    const assigned_staff = (slot.available_staff || []).slice(0, qty).map((st: any) => ({ staff_id: st.staff_id, staff_name: st.staff_name }))
+                                    selectedServiceDetails = {
+                                        start_datetime: slot.start_datetime,
+                                        end_datetime: slot.end_datetime,
+                                        assigned_staff,
+                                        staff_count: assigned_staff.length
+                                    }
+                                }
 
                                 // Display the date and time from the selected slot
                                 let displayDate = null
@@ -198,10 +239,10 @@ export function Review({
                                             <div className="text-right ml-4">
                                                 <p className="font-semibold">{service.price} $</p>
                                                 <p className="text-sm text-muted-foreground">{service.duration_minutes} min</p>
-                                                {genderSelections[service.id] && (
+                                                {anyPreferences[service.id] && (
                                                     <p className="text-xs text-amber-600 mt-1">
-                                                        {genderSelections[service.id] === 'female' ? t('bookingWizard.selectOptions.genderFemale') :
-                                                            genderSelections[service.id] === 'male' ? t('bookingWizard.selectOptions.genderMale') :
+                                                        {anyPreferences[service.id] === 'female' ? t('bookingWizard.selectOptions.genderFemale') :
+                                                            anyPreferences[service.id] === 'male' ? t('bookingWizard.selectOptions.genderMale') :
                                                                 t('bookingWizard.selectOptions.genderMixed')}
                                                     </p>
                                                 )}

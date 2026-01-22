@@ -1,15 +1,16 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils'
-import { ChevronRight, Loader2, CheckCircle2 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
+import { ChevronRight, Loader2, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getLocalizedValue } from '@/interfaces/models/booking'
-
-import { showNotification } from '@/utils'
+import { showNotification, NotificationType } from '@/utils'
 import { Service } from '@/interfaces/models/service'
+import SlotTimeButton from './components/SlotTimeButton'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '@/store'
+import { setServiceSlot } from '@/store/slices/bookingSlice'  
 
 // Interface matching actual API response
 interface CombinedSlot {
@@ -43,107 +44,91 @@ interface SelectDateTimeProps {
   onSelectDate: (date: Date | undefined) => void
   availability: AvailabilityResponse | null
   isLoading: boolean
-  selectedTimeSlot: any | null
-  onSelectTimeSlot: (timeSlot: any | null) => void
   selectedServices?: Service[]
   onNext: () => void | null
   onPrev: () => void
-}
+} 
 
 export function SelectDateTime({
   selectedDate,
   onSelectDate,
   availability,
   isLoading,
-  selectedTimeSlot,
-  onSelectTimeSlot,
   selectedServices,
   onNext,
   onPrev,
 }: SelectDateTimeProps) {
   const { t, i18n } = useTranslation()
+  const dispatch = useDispatch<AppDispatch>()
 
   const handleServiceSlotClick = (service: Service, slot: any) => {
-        const personCount = service.quntity || 1
-        const availableCapacity = slot.available_capacity || 0
+    const personCount = service.quntity || 1
+    const availableCapacity = slot.available_capacity || 0
 
-        // Check capacity
-        if (availableCapacity < personCount) {
-        showNotification(
-            t('bookingWizard.selectDateTime.insufficientCapacity', {
-            needed: personCount,
-            available: availableCapacity,
-            })
-        )
-        return
-        }
-
-        // Check gender restriction
-        const genderRestriction = slot.gender_restriction
-        const servicePref = service.preferred_gender
-        const genderConflict =
-        servicePref &&
-        genderRestriction &&
-        servicePref !== 'mixed' &&
-        genderRestriction !== 'mixed' &&
-        servicePref !== genderRestriction
-        if (genderConflict) {
-        showNotification(t('bookingWizard.selectDateTime.genderConflict'))
-        return
-        }
-
-        const newSelections = {
-        ...selectedTimeSlot,
-        [service.id]: slot,
-        }
-        onSelectTimeSlot(newSelections)
-
-        // Build scenario from current selections
-        const selectedServicesList = selectedServices || []
-        const services = selectedServicesList.map((s) => {
-        const chosen = s.id === service.id ? slot : newSelections[s.id]
-        const assigned_staff = (chosen?.available_staff || [])
-            .slice(0, s.quntity || 1)
-            .map((st: any) => ({
-            staff_id: st.staff_id,
-            staff_name: st.staff_name,
-            }))
-
-        return {
-            service_id: s.id,
-            service_name: getLocalizedValue(s.name, (i18n.language || 'fr') as any),
-            start_datetime: chosen?.start_datetime || '',
-            end_datetime: chosen?.end_datetime || '',
-            duration: s.duration_minutes || 0,
-            assigned_staff: assigned_staff,
-            staff_count: assigned_staff.length,
-            available_staff: chosen?.available_staff || [],
-        }
-    })
-
-    const pickedSlots = Object.values(newSelections).filter(Boolean)
-    const allStart = pickedSlots.map((p: any) => p.start_datetime)
-    const allEnd = pickedSlots.map((p: any) => p.end_datetime)
-
-    const scenario = {
-      scenario_id: `persvc-${selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyyMMdd') : 'nodate'}-${Date.now()}`,
-      start_datetime: allStart.length
-        ? allStart.reduce((a: string, b: string) => (a < b ? a : b))
-        : '',
-      end_datetime: allEnd.length
-        ? allEnd.reduce((a: string, b: string) => (a > b ? a : b))
-        : '',
-      total_duration: services.reduce((sum, s) => sum + (s.duration || 0), 0),
-      total_price:
-        selectedServicesList.reduce(
-          (sum, s) => sum + (s.price || 0) * (s.quntity || 1),
-          0
-        ) || 0,
-      services,
+    // Check capacity
+    if (availableCapacity < personCount) {
+      showNotification(
+        t('bookingWizard.selectDateTime.insufficientCapacity', {
+          needed: personCount,
+          available: availableCapacity,
+        }),
+        NotificationType.ERROR
+      )
+      return
     }
 
-    // Note: scenario is built but not stored in state, used in Review
-  }
+    // Check overlap with already selected service slots
+    const parseRange = (s: any) => {
+      try {
+        if (s.start_datetime && s.end_datetime) {
+          const start = new Date(s.start_datetime.replace(' ', 'T'))
+          const end = new Date(s.end_datetime.replace(' ', 'T'))
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
+        }
+
+        if (selectedDate && s.start_time && s.end_time) {
+          // build from selected date
+          const dateStr = format(selectedDate, 'yyyy-MM-dd')
+          const startStr = `${dateStr}T${s.start_time}${s.start_time.includes(':') && s.start_time.split(':').length === 2 ? ':00' : ''}`
+          const endStr = `${dateStr}T${s.end_time}${s.end_time.includes(':') && s.end_time.split(':').length === 2 ? ':00' : ''}`
+          const start = new Date(startStr)
+          const end = new Date(endStr)
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
+        }
+      } catch (err) {
+        // ignore
+      }
+      return { start: null, end: null }
+    }
+
+    const candidate = parseRange(slot)
+    if (!candidate.start || !candidate.end) {
+      // Can't validate overlap, allow selection (but could warn)
+      dispatch(setServiceSlot({ serviceId: service.id, slot }))
+      return
+    }
+
+    // iterate other services with chosen slots
+    const hasOverlap = (selectedServices || []).some((s: any) => {
+      if (s.id === service.id) return false
+      const otherSlot = s.slot
+      if (!otherSlot) return false
+      const other = parseRange(otherSlot)
+      if (!other.start || !other.end) return false
+      // overlap if startA < endB && startB < endA
+      return candidate.start < other.end && other.start < candidate.end
+    })
+
+    if (hasOverlap) {
+      showNotification(t('bookingWizard.selectDateTime.slotOverlap', 'Selected time overlaps with another chosen service.'), NotificationType.ERROR)
+      return
+    }
+
+    // No overlap — update slot in booking slice
+    dispatch(setServiceSlot({ serviceId: service.id, slot }))
+
+   
+   }
 
   // Per-service availability
   const serviceAvailabilities = (availability?.combined_available_slots || []) as any[]
@@ -155,7 +140,7 @@ export function SelectDateTime({
   // Check if every selected service has a chosen slot
   const hasSelection =
     (selectedServices || []).length > 0 &&
-    (selectedServices || []).every((s) => !!selectedTimeSlot?.[s.id])
+    (selectedServices || []).every((s) => !!(s as any).slot)
 
   return (
     <Card className='border-none bg-white/80 shadow-xl backdrop-blur'>
@@ -227,11 +212,27 @@ export function SelectDateTime({
                                   {svc?.duration} min
                                 </p>
                               </div>
-                              <div className='text-sm text-amber-700'>
-                                {slots.length}{' '}
-                                {t(
-                                  'bookingWizard.selectDateTime.availableSlots',
-                                  'available slots'
+                              <div className='flex items-center gap-3'>
+                                <div className='text-sm text-amber-700'>
+                                  {slots.length}{' '}
+                                  {t(
+                                    'bookingWizard.selectDateTime.availableSlots',
+                                    'available slots'
+                                  )}
+                                </div>
+
+                                {/* Clear selected slot for this service */}
+                                {service.slot && (
+                                  <button
+                                    onClick={() => {
+                                      dispatch(setServiceSlot({ serviceId: service.id, slot: null }))
+                                      showNotification(t('bookingWizard.selectDateTime.slotCleared', 'Selection cleared'), NotificationType.SUCCESS)
+                                    }}
+                                    className='p-1 rounded-md text-red-600 hover:bg-red-50'
+                                    aria-label={t('bookingWizard.selectDateTime.clearSelection', 'Clear selection')}
+                                  >
+                                    <X className='h-4 w-4' />
+                                  </button>
                                 )}
                               </div>
                             </div>
@@ -245,103 +246,33 @@ export function SelectDateTime({
                             ) : (
                               <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
                                 {slots.map((slot: any) => {
-                                  const isSelected =
-                                    selectedTimeSlot?.[service.id]?.slot_id ===
-                                    slot.slot_id
+                                  const isSlotEqual = (a: any, b: any) => {
+                                    if (!a || !b) return false
+                                    // Prefer explicit slot_id when available
+                                    if (a.slot_id && b.slot_id) return a.slot_id === b.slot_id
+                                    // Fall back to full datetime comparison when slot_id is absent
+                                    if (a.start_datetime && b.start_datetime)
+                                      return a.start_datetime === b.start_datetime && a.end_datetime === b.end_datetime
+                                    // Final fallback: compare start/end times
+                                    return a.start_time === b.start_time && a.end_time === b.end_time
+                                  }
+
+                                  const isSelected = isSlotEqual(service.slot, slot)
                                   const personCount = service.quntity || 1
                                   const insufficient =
                                     (slot.available_capacity || 0) < personCount
-                                  const genderConflict =
-                                    service.preferred_gender &&
-                                    slot.gender_restriction &&
-                                    service.preferred_gender !== 'mixed' &&
-                                    slot.gender_restriction !== 'mixed' &&
-                                    service.preferred_gender !==
-                                      slot.gender_restriction
-                                  const disabled =
-                                    insufficient || genderConflict
+
+                                  const disabled = insufficient 
 
                                   return (
-                                    <button
+                                    <SlotTimeButton
                                       key={slot.slot_id}
-                                      onClick={() =>
-                                        handleServiceSlotClick(service, slot)
-                                      }
+                                      slot={slot}
+                                      isSelected={isSelected}
                                       disabled={disabled}
-                                      className={cn(
-                                        'relative rounded-lg border p-3 text-center transition-all duration-200',
-                                        isSelected
-                                          ? 'border-amber-500 bg-amber-50 shadow-sm'
-                                          : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50',
-                                        disabled &&
-                                          'cursor-not-allowed opacity-60'
-                                      )}
-                                    >
-                                      {isSelected && (
-                                        <CheckCircle2 className='absolute -right-1 -top-1 h-4 w-4 rounded-full bg-white text-amber-600 shadow-sm' />
-                                      )}
-
-                                      <div
-                                        className={cn(
-                                          'mb-1 text-sm font-bold',
-                                          isSelected
-                                            ? 'text-amber-600'
-                                            : 'text-gray-700'
-                                        )}
-                                      >
-                                        {slot.start_time} - {slot.end_time}
-                                      </div>
-
-                                      <div
-                                        className={cn(
-                                          'mb-2 text-[10px]',
-                                          isSelected
-                                            ? 'text-amber-600'
-                                            : 'text-gray-500'
-                                        )}
-                                      >
-                                        {slot.available_staff
-                                          ?.slice(0, 2)
-                                          .map((s: any) => s.staff_name)
-                                          .join(', ')}
-                                        {slot.available_staff &&
-                                        slot.available_staff.length > 2
-                                          ? ` +${slot.available_staff.length - 2}`
-                                          : ''}
-                                      </div>
-
-                                      {(slot.available_capacity || 0) > 0 && (
-                                        <div
-                                          className={cn(
-                                            'text-[9px] font-medium',
-                                            insufficient
-                                              ? 'text-red-600'
-                                              : 'text-gray-500'
-                                          )}
-                                        >
-                                          {slot.available_capacity}{' '}
-                                          {t(
-                                            'bookingWizard.selectDateTime.places'
-                                          )}
-                                        </div>
-                                      )}
-
-                                      {insufficient && (
-                                        <div className='mt-1 text-xs text-red-600'>
-                                          {t(
-                                            'bookingWizard.selectDateTime.insufficientCapacityShort'
-                                          )}
-                                        </div>
-                                      )}
-
-                                      {genderConflict && (
-                                        <div className='mt-1 text-xs text-red-600'>
-                                          {t(
-                                            'bookingWizard.selectDateTime.genderConflictShort'
-                                          )}
-                                        </div>
-                                      )}
-                                    </button>
+                                      insufficient={insufficient}
+                                      onClick={() => handleServiceSlotClick(service, slot)}
+                                    />
                                   )
                                 })}
                               </div>

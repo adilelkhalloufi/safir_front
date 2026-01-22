@@ -9,11 +9,10 @@ import {
     prevStep,
     toggleService,
     setSelectedDate,
-    setSelectedTimeSlot,
     updateCustomerInfo,
     resetBooking,
     setServiceAnyPreference,
-} from '../../../store/slices/bookingSlice'
+} from '../../../store/slices/bookingSlice' 
 import type {
     Service,
 } from '../../../interfaces/models/service'
@@ -193,11 +192,9 @@ export default function BookingWizard() {
                                 onSelectDate={(date) => dispatch(setSelectedDate(date))}
                                 availability={availability}
                                 isLoading={availabilityLoading}
-                                selectedTimeSlot={selectedTimeSlot}
                                 selectedServices={selectedServices}
-                                onSelectTimeSlot={(timeSlot) => dispatch(setSelectedTimeSlot(timeSlot))}
                                 onNext={() => {
-                                    if (selectedDate && selectedTimeSlot) {
+                                    if (selectedDate && selectedServices.every(s => !!(s as any).slot)) {
                                         handleNext()
                                     }
                                 }}

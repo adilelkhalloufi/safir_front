@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Service  } from '../../interfaces/models/service';
+import type { Service, ServiceSlot  } from '../../interfaces/models/service';
 import type { Step, CustomerInfo } from '../../pages/landing/booking/types';
 
 export interface BookingState {
@@ -80,10 +80,21 @@ export const bookingSlice = createSlice({
             // Clear time slots when date changes
             state.selectedTimeSlot = {};
         },
-        setSelectedTimeSlot: (state, action: PayloadAction<Record<number, any> | null>) => {
-            state.selectedTimeSlot = action.payload;
-        },
-        updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
+      
+       setServiceSlot: (state, action: PayloadAction<{ serviceId: number; slot: ServiceSlot | null }>) => {
+            const { serviceId, slot } = action.payload;
+            const service = state.selectedServices.find(s => s.id === serviceId);
+            if (service) {
+               
+                service.slot = slot as any;
+            }
+        },        setServiceSelected: (state, action: PayloadAction<{ serviceId: number; selected: boolean }>) => {
+            const { serviceId, selected } = action.payload;
+            const service = state.selectedServices.find(s => s.id === serviceId);
+            if (service) {
+                (service as any).selected = selected;
+            }
+        },        updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
             const { field, value } = action.payload;
             state.customerInfo[field] = value;
         },
@@ -101,7 +112,8 @@ export const {
     setServicePersonCount,
     setServiceAnyPreference,
     setSelectedDate,
-    setSelectedTimeSlot,
+    setServiceSlot,
+    setServiceSelected,
     updateCustomerInfo,
     resetBooking
 } = bookingSlice.actions;

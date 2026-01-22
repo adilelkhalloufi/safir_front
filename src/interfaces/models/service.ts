@@ -1,5 +1,7 @@
 // Service model types (extended from booking.ts)
 
+import { Staff } from "./booking";
+
  export type Gender = 'female' | 'male' | 'mixed';
 
 export interface ServiceTypeObject {
@@ -29,9 +31,23 @@ export interface Service {
   // Additional fields for booking context
   preferred_gender?: Gender;
   quntity?: number; // Note: 'quntity' is for person count in booking context
+  slot?: ServiceSlot; // Slot information for booking context
   
 }
 
+export interface ServiceSlot  {
+  slot_id?: number;
+  start_time?: string;
+  end_time?: string;
+  start_datetime?: string;
+  end_datetime?: string;
+  available_capacity?: number;
+  available_staff_count?: number;
+  available_staff?: Array<Staff>;
+  gender_restriction?: Gender;
+
+}
+ 
  
 
  
