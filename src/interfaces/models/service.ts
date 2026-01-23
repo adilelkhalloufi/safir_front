@@ -30,7 +30,7 @@ export interface Service {
   updated_at?: string;
   // Additional fields for booking context
   preferred_gender?: Gender;
-  quntity?: number; // Note: 'quntity' is for person count in booking context
+  quantity?: number; // Note: 'quantity' is for person count in booking context
   slot?: ServiceSlot; // Slot information for booking context
   
 }

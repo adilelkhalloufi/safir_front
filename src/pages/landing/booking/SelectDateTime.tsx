@@ -62,7 +62,7 @@ export function SelectDateTime({
   const dispatch = useDispatch<AppDispatch>()
 
   const handleServiceSlotClick = (service: Service, slot: any) => {
-    const personCount = service.quntity || 1
+    const personCount = service.quantity || 1
     const availableCapacity = slot.available_capacity || 0
 
     // Check capacity
@@ -258,7 +258,7 @@ export function SelectDateTime({
                                   }
 
                                   const isSelected = isSlotEqual(service.slot, slot)
-                                  const personCount = service.quntity || 1
+                                  const personCount = service.quantity || 1
                                   const insufficient =
                                     (slot.available_capacity || 0) < personCount
 

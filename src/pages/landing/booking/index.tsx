@@ -42,7 +42,6 @@ export default function BookingWizard() {
         step,
         selectedServices,
         selectedDate,
-        selectedTimeSlot,
         customerInfo
     } = useSelector((state: RootState) => state.booking)
 
@@ -76,7 +75,7 @@ export default function BookingWizard() {
             const requestData: AvailabilitySlotsRequest = {
                 services: selectedServices.map(service => ({
                     service_id: service.id,
-                    group_size: service.quntity || 1,
+                    group_size: service.quantity || 1,
                     ...(service.preferred_gender && { any_preference: service.preferred_gender })
                 })),
                 date: format(dateObj, 'yyyy-MM-dd'),
@@ -222,11 +221,9 @@ export default function BookingWizard() {
                         {step === 4 && (
                             <Review
                                 selectedServices={selectedServices}
-                                personCount={Math.max(...selectedServices.map(s => s.quntity || 1), 1)} // Use max for display
+                                serviceQuantity={Math.max(...selectedServices.map(s => s.quantity || 1), 1)} // Use max for display
                                 selectedDate={selectedDate}
                                 customerInfo={customerInfo}
-                                anyPreferences={anyPreferences}
-                                selectedTimeSlot={selectedTimeSlot}
                                 isSubmitting={createBookingMutation.isPending}
                                 onConfirm={(bookingSummary) => {
 
@@ -242,6 +239,7 @@ export default function BookingWizard() {
                     <SelectedServicesBasket
                         selectedServices={selectedServices}
                         selected={selectedServiceIds}
+                        step={step}
                     />
                 </div>
             </div>

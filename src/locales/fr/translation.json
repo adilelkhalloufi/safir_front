@@ -184,8 +184,15 @@
       "otherDates": "Autres dates disponibles:",
       "notEnough": "Insuffisant",
       "insufficientCapacity": "Ce créneau a seulement {{available}} places disponibles, mais vous avez besoin de {{needed}} places. Veuillez sélectionner un autre créneau.",
+      "slotOverlap": "L'heure sélectionnée chevauche avec un autre service choisi.",
+      "slotCleared": "Sélection effacée",
+      "clearSelection": "Effacer la sélection",
+      "noSlotsForService": "Aucun créneau disponible pour ce service",
       "back": "Retour",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "chooseStaff": "Choisissez votre personnel",
+      "chooseStaffDescription": "Sélectionnez le membre du personnel qui vous accompagnera"
+    
     },
     "customerDetails": {
       "title": "Vos coordonnées",
@@ -218,21 +225,7 @@
       "securedBy": "Paiement sécurisé par Square",
       "back": "Retour"
     },
-    "selectDateTime": {
-      "title": "Sélectionnez la date et l'heure",
-      "subtitle": "Choisissez votre créneau horaire",
-      "chooseDate": "Choisissez une date",
-      "selectDate": "Sélectionner une date",
-      "availableSlots": "Créneaux disponibles",
-      "noSlots": "Aucun créneau disponible",
-      "selectAnother": "Veuillez sélectionner une autre date",
-      "places": "places",
-      "insufficientCapacity": "Capacité insuffisante: {{needed}} requis, {{available}} disponibles",
-      "chooseStaff": "Choisissez votre personnel",
-      "chooseStaffDescription": "Sélectionnez le membre du personnel qui vous accompagnera",
-      "back": "Retour",
-      "continue": "Continuer"
-    },
+ 
     "review": {
       "title": "Récapitulatif de votre réservation",
       "subtitle": "Vérifiez les détails avant de confirmer",

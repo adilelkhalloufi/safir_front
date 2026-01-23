@@ -7,24 +7,25 @@ import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '@/store'
 import { setServicePersonCount, toggleService } from '@/store/slices/bookingSlice'
 import { Service } from '@/interfaces/models/service'
+import { IconTrash, IconTrashOff, IconUsersGroup } from '@tabler/icons-react'
 
 interface SelectedServicesBasketProps {
     selectedServices: Service[]
     selected: number[]
-
+    step: number
 }
 
-export function SelectedServicesBasket({ selectedServices, selected }: SelectedServicesBasketProps) {
+export function SelectedServicesBasket({ selectedServices, selected, step }: SelectedServicesBasketProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
     const dispatch = useDispatch<AppDispatch>()
 
     const totalPrice = selectedServices.reduce((sum, s: any) => {
-        const count = s.quntity || 1
+        const count = s.quantity || 1
         return sum + (s.price || 0) * count
     }, 0)
     const totalDuration = selectedServices.reduce((sum, s: any) => {
-        const count = s.quntity || 1
+        const count = s.quantity || 1
         return sum + (s.duration_minutes || s.duration || 0) * count
     }, 0)
 
@@ -51,24 +52,25 @@ export function SelectedServicesBasket({ selectedServices, selected }: SelectedS
                                     <div className="flex flex-col gap-2 mt-1">
                                         <div className='flex flex-row items-center gap-4'>
                                             <Clock className="h-3 w-3 text-green-600" />
-                                            <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0) * (svc.quntity || 1)} min</span>
+                                            <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0) * (svc.quantity || 1)} min</span>
                                         </div>
                                         <div className='flex flex-row items-center gap-4'>
                                             <DollarSign className="h-3 w-3 text-[#E09900]" />
-                                            <span className="text-xs font-semibold text-[#E09900]">{(svc.price || 0) * (svc.quntity || 1)}</span>
+                                            <span className="text-xs font-semibold text-[#E09900]">{(svc.price || 0) * (svc.quantity || 1)}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Person Count Controls */}
                                 <div className="flex items-center gap-1">
+                                    {step < 2 && (
                                     <Button
                                         size="sm"
                                         variant="outline"
                                         className="h-6 w-6 p-0"
-                                        disabled={(svc.quntity || 1) <= 1}
+                                        disabled={(svc.quantity || 1) <= 1}
                                         onClick={() => {
-                                            const currentCount = svc.quntity || 1
+                                            const currentCount = svc.quantity || 1
                                             if (currentCount > 1) {
                                                 dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount - 1 }))
                                             }
@@ -76,16 +78,21 @@ export function SelectedServicesBasket({ selectedServices, selected }: SelectedS
                                     >
                                         <Minus className="h-3 w-3" />
                                     </Button>
+                                    )}
+                                    {step >= 2 && (
+                                     <IconUsersGroup size={16} className="text-muted-foreground" />   
+                                    )}
                                     <span className="text-sm font-medium min-w-[20px] text-center">
-                                        {svc.quntity || 1}
+                                        {svc.quantity || 1}
                                     </span>
+                                    {step < 2 && (
                                     <Button
                                         size="sm"
                                         variant="outline"
                                         className="h-6 w-6 p-0"
-                                        disabled={(svc.quntity || 1) >= 4}
+                                        disabled={(svc.quantity || 1) >= 4}
                                         onClick={() => {
-                                            const currentCount = svc.quntity || 1
+                                            const currentCount = svc.quantity || 1
                                             if (currentCount < 4) {
                                                 dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount + 1 }))
                                             }
@@ -93,13 +100,15 @@ export function SelectedServicesBasket({ selectedServices, selected }: SelectedS
                                     >
                                         <Plus className="h-3 w-3" />
                                     </Button>
+                                    )}
                                 </div>
+
 
                                 <button
                                     onClick={() => dispatch(toggleService({ serviceId: svc.id, service: svc }))}
                                     className="rounded-full hover:bg-red-100 p-1"
                                 >
-                                    <X className="h-3 w-3 text-red-500" />
+                                     <IconTrash size={16} className="text-red-500" />
                                 </button>
                             </div>
                         ))}

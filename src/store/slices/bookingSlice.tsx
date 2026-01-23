@@ -6,7 +6,6 @@ export interface BookingState {
     step: Step;
     selectedServices: Service[];
     selectedDate: string | undefined;
-    selectedTimeSlot: Record<number, any> | null;
     customerInfo: CustomerInfo;
 }
 
@@ -14,7 +13,7 @@ const initialState: BookingState = {
     step: 0,
     selectedServices: [],
     selectedDate: undefined,
-    selectedTimeSlot: {},
+
     customerInfo: {
         name: '',
         email: '',
@@ -45,8 +44,7 @@ export const bookingSlice = createSlice({
             const index = state.selectedServices.findIndex(s => s.id === serviceId);
             if (index > -1) {
                 state.selectedServices.splice(index, 1);
-                delete state.selectedTimeSlot[serviceId];
-            } else {
+             } else {
                 const newService = { ...service };
                 if (newService.has_sessions && !newService.preferred_gender) {
                     newService.preferred_gender = 'mixed';
@@ -58,7 +56,7 @@ export const bookingSlice = createSlice({
             const { serviceId, count } = action.payload;
             const service = state.selectedServices.find(s => s.id === serviceId);
             if (service) {
-                service.quntity = count;
+                service.quantity = count;
             }
         },
         setServiceAnyPreference: (state, action: PayloadAction<{ serviceId: number; preference: 'female' | 'male' | 'mixed' }>) => {
@@ -77,8 +75,7 @@ export const bookingSlice = createSlice({
             } else {
                 state.selectedDate = action.payload;
             }
-            // Clear time slots when date changes
-            state.selectedTimeSlot = {};
+        
         },
       
        setServiceSlot: (state, action: PayloadAction<{ serviceId: number; slot: ServiceSlot | null }>) => {
