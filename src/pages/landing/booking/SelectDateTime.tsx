@@ -10,7 +10,7 @@ import { Service } from '@/interfaces/models/service'
 import SlotTimeButton from './components/SlotTimeButton'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/store'
-import { setServiceSlot } from '@/store/slices/bookingSlice'  
+import { setServiceSlot } from '@/store/slices/bookingSlice'
 
 // Interface matching actual API response
 interface CombinedSlot {
@@ -47,7 +47,7 @@ interface SelectDateTimeProps {
   selectedServices?: Service[]
   onNext: () => void | null
   onPrev: () => void
-} 
+}
 
 export function SelectDateTime({
   selectedDate,
@@ -127,8 +127,8 @@ export function SelectDateTime({
     // No overlap — update slot in booking slice
     dispatch(setServiceSlot({ serviceId: service.id, slot }))
 
-   
-   }
+
+  }
 
   // Per-service availability
   const serviceAvailabilities = (availability?.combined_available_slots || []) as any[]
@@ -162,6 +162,7 @@ export function SelectDateTime({
               label={t('bookingWizard.selectDateTime.selectDate')}
               defaultValue={selectedDate}
               onChange={(date) => onSelectDate(date as any)}
+
             />
           </div>
 
@@ -262,7 +263,7 @@ export function SelectDateTime({
                                   const insufficient =
                                     (slot.available_capacity || 0) < personCount
 
-                                  const disabled = insufficient 
+                                  const disabled = insufficient
 
                                   return (
                                     <SlotTimeButton

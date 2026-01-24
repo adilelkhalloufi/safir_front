@@ -15,7 +15,8 @@ import { useTranslation } from 'react-i18next'
 import type { Service } from '@/interfaces/models/service'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import { CustomerInfo } from './types'
- 
+import { IconUserFilled } from '@tabler/icons-react'
+
 interface ReviewProps {
   selectedServices: Service[]
   serviceQuantity: number
@@ -37,104 +38,72 @@ export function Review({
   const { i18n, t } = useTranslation()
   const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
 
-  // Build a per-service selection mapping from each service's `slot`.
-  const computedSelectedTimeSlots = Object.fromEntries(
-    selectedServices
-      .map((service: any) => {
-        const slot = service.slot
-        if (!slot) return null
-        const qty = service.quantity || service?.quantity || 1
-        const assigned_staff = (slot.available_staff || [])
-          .slice(0, qty)
-          .map((st: any) => ({
-            staff_id: st.staff_id,
-            staff_name: st.staff_name,
-          }))
-        return [
-          service.id,
-          {
-            services: [
-              {
-                service_id: service.id,
-                quantity: qty,
-                start_datetime: slot.start_datetime,
-                end_datetime: slot.end_datetime,
-                assigned_staff,
-                staff_count: assigned_staff.length,
-              },
-            ],
-            start_datetime: slot.start_datetime,
-            end_datetime: slot.end_datetime,
-            total_price:
-              (typeof service.price === 'string'
-                ? parseFloat(service.price)
-                : service.price) * qty,
-          },
-        ]
-      })
-      .filter(Boolean) as any
-  )
+  // Helper function to get service details from slot
+  const getServiceDetails = (service: any) => {
+    if (!service.slot) return null
 
-  const totalPrice = Object.values(computedSelectedTimeSlots).reduce(
-    (sum: number, scenario: any) => {
-      const price =
-        typeof scenario.total_price === 'string'
-          ? parseFloat(scenario.total_price)
-          : scenario.total_price || 0
-      return sum + price
-    },
-    0
-  )
+    const qty = service.quantity || 1
+    const assigned_staff = (service.slot.available_staff || [])
+      .slice(0, qty)
+      .map((st: any) => ({
+        staff_id: st.staff_id,
+        staff_name: st.staff_name,
+      }))
 
-  // Format date to YYYY-MM-DD for backend
+    return {
+      slot_id: service.slot.slot_id,
+      service_id: service.id,
+      quantity: qty,
+      start_datetime: service.slot.start_datetime,
+      end_datetime: service.slot.end_datetime,
+      assigned_staff,
+      staff_count: assigned_staff.length,
+      total_price: (typeof service.price === 'string' ? parseFloat(service.price) : service.price) * qty,
+    }
+  }
+
+  // Get all service details
+  const serviceDetails = selectedServices
+    .map(getServiceDetails)
+    .filter(Boolean) as any[]
+
+  // Calculate total price
+  const totalPrice = serviceDetails.reduce((sum, detail) => sum + detail.total_price, 0)
+
+  // Get combined time range
+  const timeRange = serviceDetails.length > 0 ? {
+    start: serviceDetails
+      .map(d => d.start_datetime)
+      .reduce((a, b) => a < b ? a : b),
+    end: serviceDetails
+      .map(d => d.end_datetime)
+      .reduce((a, b) => a > b ? a : b)
+  } : null
+
+  // Format date for backend
   const formattedDate = selectedDate
     ? format(
-        typeof selectedDate === 'string'
-          ? new Date(selectedDate)
-          : selectedDate,
-        'yyyy-MM-dd'
-      )
+      typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate,
+      'yyyy-MM-dd'
+    )
     : ''
 
-  // Combined start/end computed from all selected service slots
-  const pickedSlotsArr = Object.values(computedSelectedTimeSlots).filter(
-    Boolean
-  ) as any[]
-  const combinedStart = pickedSlotsArr.length
-    ? pickedSlotsArr
-        .map((s) => s.start_datetime)
-        .reduce((a: string, b: string) => (a < b ? a : b))
-    : null
-  const combinedEnd = pickedSlotsArr.length
-    ? pickedSlotsArr
-        .map((s) => s.end_datetime)
-        .reduce((a: string, b: string) => (a > b ? a : b))
-    : null
-
-  // Prepare booking summary object matching backend validation structure
+  // Prepare booking summary
   const bookingSummary = {
-    services: selectedServices.map((service) => {
-        const scenario = computedSelectedTimeSlots[service.id]
-        const serviceDetails = scenario?.services?.find(
-          (s: any) => s.service_id === service.id
-        )
-        const serviceObj: any = {
-          id: service.id,
-          quantity: service.quantity || 1,
-          start_datetime: serviceDetails?.start_datetime || '',
-          end_datetime: serviceDetails?.end_datetime || '',
-          assigned_staff: (serviceDetails?.assigned_staff || []).map(
-            (staff: any) => ({
-              staff_id: staff.staff_id,
-              staff_name: staff.staff_name,
-            })
-          ),
-        }
-        if (service.has_sessions) {
-          serviceObj.preferred_gender = service.preferred_gender
-        }
-        return serviceObj
-      }),
+    services: serviceDetails.map(detail => ({
+      id: detail.service_id,
+      slot_id: detail.slot_id,
+      quantity: detail.quantity,
+      start_datetime: detail.start_datetime,
+      end_datetime: detail.end_datetime,
+      assigned_staff: detail.assigned_staff.map((staff: any) => ({
+        staff_id: staff.staff_id,
+        staff_name: staff.staff_name,
+      })),
+      ...(selectedServices.find(s => s.id === detail.service_id)?.has_sessions && {
+        preferred_gender: selectedServices.find(s => s.id === detail.service_id)?.preferred_gender
+      })
+    })),
     date: formattedDate,
     customer: {
       name: customerInfo.name,
@@ -142,17 +111,10 @@ export function Review({
       phone: customerInfo.phone,
       notes: customerInfo.notes || '',
     },
-    totalPrice: totalPrice,
-    totalStaffAssigned: selectedServices.reduce((total, service) => {
-      const scenario = computedSelectedTimeSlots[service.id]
-      const serviceDetails = scenario?.services?.find(
-        (s: any) => s.service_id === service.id
-      )
-      return total + (serviceDetails?.staff_count || 0)
-    }, 0),
+    totalPrice,
+    totalStaffAssigned: serviceDetails.reduce((total, detail) => total + detail.staff_count, 0),
     language: currentLang,
   }
-
   return (
     <Card className='border-none bg-white/80 shadow-xl backdrop-blur'>
       <CardHeader>
@@ -196,23 +158,23 @@ export function Review({
                 <span className='font-medium'>
                   {t('bookingWizard.review.guests')}:
                 </span>
-                    {/* <span className='text-muted-foreground'>
+                {/* <span className='text-muted-foreground'>
                     {service?.quantity}{' '}
                     {service?.quantity > 1
                         ? t('bookingWizard.review.persons')
                         : t('bookingWizard.review.person')}
                     </span> */}
               </div>
-              {combinedStart && (
+              {timeRange && (
                 <div className='flex items-center gap-2'>
                   <Clock className='h-4 w-4 text-amber-600' />
                   <span className='font-medium'>
                     {t('bookingWizard.review.bookingTime')}:
                   </span>
                   <span className='text-muted-foreground'>
-                    {format(new Date(combinedStart.replace(' ', 'T')), 'HH:mm')}
-                    {combinedEnd &&
-                      ` - ${format(new Date(combinedEnd.replace(' ', 'T')), 'HH:mm')}`}
+                    {format(new Date(timeRange.start.replace(' ', 'T')), 'HH:mm')}
+                    {timeRange.end &&
+                      ` - ${format(new Date(timeRange.end.replace(' ', 'T')), 'HH:mm')}`}
                   </span>
                 </div>
               )}
@@ -229,63 +191,13 @@ export function Review({
             </div>
             <div className='space-y-4'>
               {selectedServices.map((service: Service) => {
-                const scenario = computedSelectedTimeSlots[service.id]
-                let selectedServiceDetails = scenario?.services?.find(
-                  (s: any) => s.service_id === service.id
-                )
-                if (!selectedServiceDetails && service.slot) {
-                  const slot = service.slot
-                  const qty = service.quantity || service?.quantity || 1
-                  const assigned_staff = (slot.available_staff || [])
-                    .slice(0, qty)
-                    .map((st: any) => ({
-                      staff_id: st.staff_id,
-                      staff_name: st.staff_name,
-                    }))
-                  selectedServiceDetails = {
-                    start_datetime: slot.start_datetime,
-                    end_datetime: slot.end_datetime,
-                    assigned_staff,
-                    staff_count: assigned_staff.length,
-                  }
-                }
+                const detail = serviceDetails.find(d => d.service_id === service.id)
 
-                // Display the date and time from the selected slot
-                let displayDate = null
-                let displayStartTime = null
-                let displayEndTime = null
+                if (!detail) return null
 
-                if (selectedServiceDetails?.start_datetime) {
-                  // Parse datetime string (format: "2026-01-09 19:00:00" or ISO string)
-                  const startDateStr =
-                    selectedServiceDetails.start_datetime.replace(' ', 'T')
-                  const startDate = new Date(startDateStr)
-
-                  if (!isNaN(startDate.getTime())) {
-                    displayDate = startDate
-                    displayStartTime = format(startDate, 'HH:mm')
-
-                    // Parse end datetime if available
-                    if (selectedServiceDetails.end_datetime) {
-                      const endDateStr =
-                        selectedServiceDetails.end_datetime.replace(' ', 'T')
-                      const endDate = new Date(endDateStr)
-                      if (!isNaN(endDate.getTime())) {
-                        displayEndTime = format(endDate, 'HH:mm')
-                      }
-                    }
-                  }
-                } else if (selectedDate) {
-                  // Fallback to selectedDate
-                  displayDate =
-                    typeof selectedDate === 'string'
-                      ? new Date(selectedDate)
-                      : selectedDate
-                }
-
-                // Get assigned staff members
-                const assignedStaff =
-                  selectedServiceDetails?.assigned_staff || []
+                // Parse datetime for display
+                const startDate = new Date(detail.start_datetime.replace(' ', 'T'))
+                const endDate = new Date(detail.end_datetime.replace(' ', 'T'))
 
                 return (
                   <div
@@ -297,32 +209,21 @@ export function Review({
                         <p className='text-lg font-medium'>
                           {getLocalizedValue(service.name, currentLang)}
                         </p>
-                        {/* Display all assigned staff */}
-                        {assignedStaff.length > 0 && (
+                        {/* Display assigned staff */}
+                        {detail.assigned_staff.length > 0 && (
                           <div className='mt-2 flex flex-wrap gap-2'>
-                            {assignedStaff.map((staff: any) => (
+                            {detail.assigned_staff.map((staff: any) => (
                               <div
                                 key={staff.staff_id}
                                 className='flex items-center gap-1.5 rounded-md bg-amber-100 px-2 py-1'
                               >
-                                <svg
-                                  xmlns='http://www.w3.org/2000/svg'
-                                  className='h-3.5 w-3.5 text-amber-700'
-                                  viewBox='0 0 20 20'
-                                  fill='currentColor'
-                                >
-                                  <path
-                                    fillRule='evenodd'
-                                    d='M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z'
-                                    clipRule='evenodd'
-                                  />
-                                </svg>
+
+                                <IconUserFilled className='h-3.5 w-3.5 text-amber-700' />
                                 <span className='text-sm font-medium text-amber-900'>
                                   {staff.staff_name}
                                 </span>
                               </div>
                             ))}
-                     
                           </div>
                         )}
                       </div>
@@ -337,38 +238,31 @@ export function Review({
                               ? t('bookingWizard.selectOptions.genderFemale')
                               : service.preferred_gender === 'male'
                                 ? t('bookingWizard.selectOptions.genderMale')
-                                : t('bookingWizard.selectOptions.genderMixed')} 
+                                : t('bookingWizard.selectOptions.genderMixed')}
                           </p>
                         )}
                       </div>
                     </div>
-                    {displayDate && (
-                      <div className='mt-2 space-y-1 rounded bg-amber-50 p-2 text-sm'>
-                        <div className='flex items-center gap-2'>
-                          <Calendar className='h-3.5 w-3.5 text-amber-600' />
-                          <p className='text-muted-foreground'>
-                            {format(displayDate, 'EEEE d MMMM yyyy', {
-                              locale: fr,
-                            })}
-                          </p>
-                        </div>
-                        {displayStartTime && displayEndTime && (
-                          <div className='flex items-center gap-2'>
-                            <Clock className='h-3.5 w-3.5 text-amber-600' />
-                            <p className='font-medium text-foreground'>
-                              {displayStartTime} - {displayEndTime}
-                            </p>
-                          </div>
-                        )}
-                        <div className='flex items-center gap-2'>
-                              <Users className='h-3.5 w-3.5 text-amber-600' />
-                              <p className='text-sm text-muted-foreground'>
-                                {service.quantity}{' '}
-                               
-                              </p>
-                            </div>
+                    <div className='mt-2 space-y-1 rounded bg-amber-50 p-2 text-sm'>
+                      <div className='flex items-center gap-2'>
+                        <Calendar className='h-3.5 w-3.5 text-amber-600' />
+                        <p className='text-muted-foreground'>
+                          {format(startDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                        </p>
                       </div>
-                    )}
+                      <div className='flex items-center gap-2'>
+                        <Clock className='h-3.5 w-3.5 text-amber-600' />
+                        <p className='font-medium text-foreground'>
+                          {format(startDate, 'HH:mm')} - {format(endDate, 'HH:mm')}
+                        </p>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <Users className='h-3.5 w-3.5 text-amber-600' />
+                        <p className='text-sm text-muted-foreground'>
+                          {detail.quantity} {detail.quantity > 1 ? t('bookingWizard.review.persons') : t('bookingWizard.review.person')}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )
               })}
@@ -406,20 +300,19 @@ export function Review({
           <div className='rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-rose-50 p-4'>
             <div className='space-y-2'>
               {/* Service breakdown */}
-              {selectedServices.map((service: Service) => (
-                <div key={service.id} className='flex justify-between text-sm'>
-                  <span className='text-gray-700'>
-                    {getLocalizedValue(service.name, currentLang)} ×{' '}
-                    {service?.quantity}
-                  </span>
-                  <span className='font-medium text-gray-900'>
-                    {(typeof service.price === 'string'
-                      ? parseFloat(service.price)
-                      : service.price) * (service?.quantity || 1)}{' '}
-                    $
-                  </span>
-                </div>
-              ))}
+              {serviceDetails.map((detail) => {
+                const service = selectedServices.find(s => s.id === detail.service_id)
+                return (
+                  <div key={detail.service_id} className='flex justify-between text-sm'>
+                    <span className='text-gray-700'>
+                      {service ? getLocalizedValue(service.name, currentLang) : 'Unknown Service'} × {detail.quantity}
+                    </span>
+                    <span className='font-medium text-gray-900'>
+                      {detail.total_price} $
+                    </span>
+                  </div>
+                )
+              })}
 
               {/* Total */}
               <div className='border-t border-amber-300 pt-2'>

@@ -31,35 +31,37 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
   const navigate = useNavigate();
 
   const events: BookingEvent[] = useMemo(() => {
-    return bookings.flatMap((booking) =>
-      booking.booking_items.map((item) => {
-        const serviceName = item.service?.name?.en || 'Unknown Service';
-        const staffName = item.staff
-          ? item.staff.user?.name || item.staff.user?.email || `Staff #${item.staff.id}`
-          : 'No Staff';
-        const clientName = booking.client?.name || booking.client?.email || 'Unknown Client';
-        const time = format(new Date(item.start_datetime), 'HH:mm');
-        const reference = booking.reference ? ` (${booking.reference})` : '';
+    return bookings
+      .filter((booking) => booking.status !== 'cancelled')
+      .flatMap((booking) =>
+        booking.booking_items.map((item) => {
+          const serviceName = item.service?.name?.en || 'Unknown Service';
+          const staffName = item.staff
+            ? item.staff.user?.name || item.staff.user?.email || `Staff #${item.staff.id}`
+            : 'No Staff';
+          const clientName = booking.client?.name || booking.client?.email || 'Unknown Client';
+          const time = format(new Date(item.start_datetime), 'HH:mm');
+          const reference = booking.reference ? ` (${booking.reference})` : '';
 
-        const title = `#${booking.id}${reference}\n${serviceName}\n${staffName} - ${clientName}\n${time}`;
+          const title = `#${booking.id}${reference}\n${serviceName}\n${staffName} - ${clientName}\n${time}`;
 
-        return {
-          title,
-          start: new Date(item.start_datetime),
-          end: new Date(item.end_datetime),
-          booking,
-          item,
-          resource: {
-            id: booking.id,
-            itemId: item.id,
-            service: item.service,
-            staff: item.staff,
-            client: booking.client,
-            time,
-          },
-        };
-      })
-    );
+          return {
+            title,
+            start: new Date(item.start_datetime),
+            end: new Date(item.end_datetime),
+            booking,
+            item,
+            resource: {
+              id: booking.id,
+              itemId: item.id,
+              service: item.service,
+              staff: item.staff,
+              client: booking.client,
+              time,
+            },
+          };
+        })
+      );
   }, [bookings]);
 
   const eventStyleGetter = (_event: BookingEvent) => {
