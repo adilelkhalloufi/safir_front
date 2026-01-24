@@ -74,7 +74,12 @@
     "cancelError": "Failed to cancel booking",
     "confirmCancel": "Confirm Cancellation",
     "noShowSuccess": "Booking marked as no-show",
-    "noShowError": "Failed to mark booking as no-show"
+    "noShowError": "Failed to mark booking as no-show",
+    "status_draft": "Draft",
+    "status_confirmed": "Confirmed",
+    "status_completed": "Completed",
+    "status_cancelled": "Cancelled",
+    "status_no-show": "No-show"
   },
   "clients": {
     "title": "Clients Management",
@@ -460,7 +465,7 @@
       "back": "Back",
       "continue": "Continue"
     },
-  
+
     "customerDetails": {
       "title": "Your contact information",
       "subtitle": "Enter your information to confirm the booking",

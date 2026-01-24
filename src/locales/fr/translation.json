@@ -74,7 +74,12 @@
     "cancelError": "Échec de l'annulation",
     "confirmCancel": "Confirmer l'annulation",
     "noShowSuccess": "Réservation marquée comme absent",
-    "noShowError": "Échec de la mise à jour"
+    "noShowError": "Échec de la mise à jour",
+    "status_draft": "Brouillon",
+    "status_confirmed": "Confirmé",
+    "status_completed": "Terminé",
+    "status_cancelled": "Annulé",
+    "status_no-show": "Absent"
   },
   "clients": {
     "title": "Gestion des clients",
@@ -192,7 +197,6 @@
       "continue": "Continuer",
       "chooseStaff": "Choisissez votre personnel",
       "chooseStaffDescription": "Sélectionnez le membre du personnel qui vous accompagnera"
-    
     },
     "customerDetails": {
       "title": "Vos coordonnées",
@@ -225,7 +229,7 @@
       "securedBy": "Paiement sécurisé par Square",
       "back": "Retour"
     },
- 
+
     "review": {
       "title": "Récapitulatif de votre réservation",
       "subtitle": "Vérifiez les détails avant de confirmer",

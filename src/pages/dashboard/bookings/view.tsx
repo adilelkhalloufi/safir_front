@@ -68,7 +68,7 @@ export default function BookingsView() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">
-                        {t('bookings.viewTitle', 'Booking Details')} #{booking.id}
+                        {t('bookings.viewTitle', 'Booking Details')} #{booking.id} ({booking.reference})
                     </h1>
                     <p className="text-muted-foreground">
                         {t('bookings.viewSubtitle', 'View booking information')}
@@ -78,9 +78,9 @@ export default function BookingsView() {
                     <Button variant="outline" onClick={() => navigate(webRoutes.bookings.index)}>
                         {t('common.back', 'Back')}
                     </Button>
-                    <Button onClick={() => navigate(webRoutes.bookings.edit.replace(':id', id!))}>
+                    {/* <Button onClick={() => navigate(webRoutes.bookings.edit.replace(':id', id!))}>
                         {t('common.edit', 'Edit')}
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 
@@ -189,13 +189,17 @@ export default function BookingsView() {
                                         {item.staff && (
                                             <span className="flex items-center gap-1">
                                                 <User className="h-4 w-4" />
-                                                {[item.staff.user?.first_name, item.staff.user?.last_name].filter(Boolean).join(' ') || item.staff.user?.email || `Staff #${item.staff.id}`} ({item.staff.specialization})
+                                                {item.staff.user?.name || item.staff.user?.email || `Staff #${item.staff.id}`} ({item.staff.specialization})
                                             </span>
                                         )}
+                                        <span className="flex items-center gap-1">
+                                            <Calendar className="h-4 w-4" />
+                                            {format(new Date(item.start_datetime), 'p')} - {format(new Date(item.end_datetime), 'p')}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-semibold">{item.price} DH</p>
+                                    <p className="font-semibold">{item.price} $</p>
                                 </div>
                             </div>
                         ))}
@@ -214,7 +218,7 @@ export default function BookingsView() {
                     <CardContent>
                         <div className="flex justify-between items-center">
                             <span className="text-lg font-medium">{t('bookings.totalPrice', 'Total Price')}</span>
-                            <span className="text-2xl font-bold">{booking.total_price} DH</span>
+                            <span className="text-2xl font-bold">{booking.total_price} $</span>
                         </div>
                     </CardContent>
                 </Card>

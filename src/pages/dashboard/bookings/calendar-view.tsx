@@ -3,9 +3,9 @@ import { Calendar, momentLocalizer, Views, Event } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Booking } from './columns';
-import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
+import { format } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
 
@@ -15,69 +15,55 @@ interface BookingCalendarViewProps {
 
 interface BookingEvent extends Event {
   booking: Booking;
-  status: string;
+  item: any;
 }
 
-const statusColors: Record<string, string> = {
-  draft: '#9CA3AF',
-  confirmed: '#10B981',
-  completed: '#3B82F6',
-  cancelled: '#EF4444',
-  'no-show': '#F97316',
+const generateRandomColor = () => {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 
 export default function BookingCalendarView({ bookings }: BookingCalendarViewProps) {
   const navigate = useNavigate();
 
   const events: BookingEvent[] = useMemo(() => {
-    return bookings.map((booking) => {
-      // Get unique services from booking items
-      const uniqueServices = Array.from(
-        new Map(
-          booking.booking_items.map((item) => [item.service.id, item.service])
-        ).values()
-      );
+    return bookings.flatMap((booking) =>
+      booking.booking_items.map((item) => {
+        const serviceName = item.service?.name?.en || 'Unknown Service';
+        const staffName = item.staff
+          ? item.staff.user?.name || item.staff.user?.email || `Staff #${item.staff.id}`
+          : 'No Staff';
+        const clientName = booking.client?.name || booking.client?.email || 'Unknown Client';
+        const time = format(new Date(item.start_datetime), 'HH:mm');
+        const reference = booking.reference ? ` (${booking.reference})` : '';
 
-      // Get all staff names
-      const staffNames = booking.booking_items
-        .filter((item) => item.staff)
-        .map((item) => {
-          const staff = item.staff!;
-          const name = staff.user?.name || staff.user?.email || `Staff #${staff.id}`;
-          return name;
-        })
-        .filter((name, index, self) => self.indexOf(name) === index); // unique names
+        const title = `#${booking.id}${reference}\n${serviceName}\n${staffName} - ${clientName}\n${time}`;
 
-      // Get client name
-      const clientName = [booking.client.name]
-        .filter(Boolean)
-        .join(' ') || booking.client.email;
-
-      // Build title with all info
-      const servicesText = uniqueServices.map((s) => s.name.en).join(', ');
-      const title = `#${booking.id} - ${clientName} (${booking.group_size}p) - ${servicesText}`;
-
-      const firstItem = booking.booking_items[0];
-
-      return {
-        title,
-        start: new Date(firstItem.start_datetime),
-        end: new Date(firstItem.end_datetime),
-        booking,
-        status: booking.status,
-        resource: {
-          id: booking.id,
-          client: booking.client,
-          groupSize: booking.group_size,
-          services: uniqueServices,
-          staffNames,
-        },
-      };
-    });
+        return {
+          title,
+          start: new Date(item.start_datetime),
+          end: new Date(item.end_datetime),
+          booking,
+          item,
+          resource: {
+            id: booking.id,
+            itemId: item.id,
+            service: item.service,
+            staff: item.staff,
+            client: booking.client,
+            time,
+          },
+        };
+      })
+    );
   }, [bookings]);
 
-  const eventStyleGetter = (event: BookingEvent) => {
-    const backgroundColor = statusColors[event.status] || '#9CA3AF';
+  const eventStyleGetter = (_event: BookingEvent) => {
+    const backgroundColor = generateRandomColor();
     return {
       style: {
         backgroundColor,
@@ -111,27 +97,19 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
         popup
         selectable
         tooltipAccessor={(event: BookingEvent) => {
-          const { client, groupSize, services, staffNames } = event.resource;
-          const clientName = [client.first_name, client.last_name]
-            .filter(Boolean)
-            .join(' ') || client.email;
-          const servicesText = services.map((s: any) => s.name.en).join(', ');
-          const staffText = staffNames.length > 0 ? ` | Staff: ${staffNames.join(', ')}` : '';
-          return `#${event.booking.id} | ${clientName} | ${client.phone} | Group: ${groupSize} | ${servicesText}${staffText}`;
+          const { service, staff, client, time } = event.resource;
+          const serviceName = service?.name?.en || 'Unknown Service';
+          const staffName = staff
+            ? staff.user?.name || staff.user?.email || `Staff #${staff.id}`
+            : 'No Staff';
+          const clientName = client?.name || client?.email || 'Unknown Client';
+          const reference = event.booking.reference ? ` (${event.booking.reference})` : '';
+          return `Booking #${event.booking.id}${reference} | ${serviceName} | ${staffName} | ${clientName} | ${time}`;
         }}
       />
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <div className="text-sm font-medium">Status Legend:</div>
-        {Object.entries(statusColors).map(([status, color]) => (
-          <Badge
-            key={status}
-            style={{ backgroundColor: color }}
-            className="text-white capitalize"
-          >
-            {status.replace('-', ' ')}
-          </Badge>
-        ))}
+        <div className="text-sm font-medium">Events are colored randomly for distinction.</div>
       </div>
     </div>
   );
