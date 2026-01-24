@@ -269,7 +269,7 @@ export default function ViewService() {
             </Card>
           )}
 
-   
+
 
           {/* Staff Members Card */}
           {service?.staffs && service?.staffs.length > 0 && (
@@ -292,7 +292,7 @@ export default function ViewService() {
                       onClick={() => {
                         // send it to view detail staff
                         navigate(webRoutes.staff.view.replace(':id', staff.id.toString()));
-                      
+
                       }}
                     >
                       <div className='grid gap-4 md:grid-cols-4'>
@@ -341,79 +341,94 @@ export default function ViewService() {
               </CardContent>
             </Card>
           )}
-                {/* Slots Card */}
-                {service?.has_sessions && service?.slots && service?.slots.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className='flex items-center gap-2'>
-                        <IconClock className='h-5 w-5' />
-                        {t('services.slots', 'Service Slots')}
-                      </CardTitle>
-                      <CardDescription>
-                        {t('services.slotsDescription', 'Available time slots for this service')}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className='  flex flex-row gap-4 w-full'>
-                        {(() => {
-                          const days = [
-                            { label: 'Sunday', icon: <span title='Sunday'>S</span> },
-                            { label: 'Monday', icon: <span title='Monday'>M</span> },
-                            { label: 'Tuesday', icon: <span title='Tuesday'>T</span> },
-                            { label: 'Wednesday', icon: <span title='Wednesday'>W</span> },
-                            { label: 'Thursday', icon: <span title='Thursday'>T</span> },
-                            { label: 'Friday', icon: <span title='Friday'>F</span> },
-                            { label: 'Saturday', icon: <span title='Saturday'>S</span> },
-                          ];
-                          // Group slots by day
-                          const groupedSlots: { [key: number]: any[] } = {};
-                          service.slots.forEach((slot: any) => {
-                            if (slot.days_of_week && Array.isArray(slot.days_of_week)) {
-                              slot.days_of_week.forEach((day: number) => {
-                                if (!groupedSlots[day]) groupedSlots[day] = [];
-                                groupedSlots[day].push(slot);
-                              });
-                            }
-                          });
-                          return Object.keys(groupedSlots)
-                            .sort((a, b) => parseInt(a) - parseInt(b))
-                            .map((dayKey) => {
-                              const dayIndex = parseInt(dayKey);
-                              const daySlots = groupedSlots[dayIndex];
-                              return (
-                                <div key={dayIndex} className='flex flex-col  space-y-2'>
-                                  <div className='flex items-center gap-2 mb-2'>
-                                    {days[dayIndex]?.icon}
-                                    <span className='text-xs text-muted-foreground'>{t(`services.${days[dayIndex]?.label.toLowerCase()}`, days[dayIndex]?.label)}</span>
+          {/* Slots Card */}
+          {service?.has_sessions && service?.slots && service?.slots.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <IconClock className='h-5 w-5' />
+                  {t('services.slots', 'Service Slots')}
+                </CardTitle>
+                <CardDescription>
+                  {t('services.slotsDescription', 'Available time slots for this service')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='  flex flex-row gap-4 w-full'>
+                  {(() => {
+                    const days = [
+                      { label: 'Sunday', icon: <span title='Sunday'>S</span> },
+                      { label: 'Monday', icon: <span title='Monday'>M</span> },
+                      { label: 'Tuesday', icon: <span title='Tuesday'>T</span> },
+                      { label: 'Wednesday', icon: <span title='Wednesday'>W</span> },
+                      { label: 'Thursday', icon: <span title='Thursday'>T</span> },
+                      { label: 'Friday', icon: <span title='Friday'>F</span> },
+                      { label: 'Saturday', icon: <span title='Saturday'>S</span> },
+                    ];
+                    // Group slots by day
+                    const groupedSlots: { [key: number]: any[] } = {};
+                    service.slots.forEach((slot: any) => {
+                      if (slot.days_of_week && Array.isArray(slot.days_of_week)) {
+                        slot.days_of_week.forEach((day: number) => {
+                          if (!groupedSlots[day]) groupedSlots[day] = [];
+                          groupedSlots[day].push(slot);
+                        });
+                      }
+                    });
+                    return Object.keys(groupedSlots)
+                      .sort((a, b) => parseInt(a) - parseInt(b))
+                      .map((dayKey) => {
+                        const dayIndex = parseInt(dayKey);
+                        const daySlots = groupedSlots[dayIndex];
+                        return (
+                          <div key={dayIndex} className='flex flex-col  space-y-2'>
+                            <div className='flex items-center gap-2 mb-2'>
+                              {days[dayIndex]?.icon}
+                              <span className='text-xs text-muted-foreground'>{t(`services.${days[dayIndex]?.label.toLowerCase()}`, days[dayIndex]?.label)}</span>
+                            </div>
+                            <div className='flex flex-col flex-wrap gap-2'>
+                              {daySlots.map((slot: any, index: number) => {
+                                const getGenderColor = (gender: string) => {
+                                  switch (gender?.toLowerCase()) {
+                                    case 'male':
+                                      return 'bg-blue-100 border-blue-300 text-blue-800'
+                                    case 'female':
+                                      return 'bg-pink-100 border-pink-300 text-pink-800'
+                                    case 'mixed':
+                                      return 'bg-orange-100 border-orange-300 text-orange-800'
+                                    default:
+                                      return 'bg-gray-100 border-gray-300 text-gray-800'
+                                  }
+                                }
+
+                                return (
+                                  <div
+                                    key={slot.id || index}
+                                    className={`rounded-lg border p-2 flex flex-col min-w-[90px] ${getGenderColor(slot.gender)}`}
+                                  >
+                                    <span className='font-semibold flex items-center gap-1'>
+                                      <IconClock className='h-4 w-4' />
+                                      {slot.slot_time}
+                                    </span>
+                                    <span className='text-xs flex items-center gap-1'>
+                                      <IconGenderFemale className='h-4 w-4' />
+                                      {slot.gender || 'Any'}
+                                    </span>
+                                    <span className='text-xs flex items-center gap-1'>
+                                      <IconUsersGroup className='h-4 w-4' />
+                                      {slot.default_capacity}</span>
                                   </div>
-                                  <div className='flex flex-col flex-wrap gap-2'>
-                                    {daySlots.map((slot: any, index: number) => (
-                                      <div
-                                        key={slot.id || index}
-                                        className='rounded-lg border p-2 bg-gray-50 flex flex-col  min-w-[90px]'
-                                      >
-                                        <span className='font-semibold flex items-center gap-1'>
-                                          <IconClock className='h-4 w-4' />
-                                          {slot.slot_time}
-                                        </span>
-                                        <span className='text-xs flex items-center gap-1'>
-                                          <IconGenderFemale className='h-4 w-4' />
-                                          {slot.gender || 'Any'}
-                                          </span>
-                                        <span className='text-xs flex items-center gap-1'>
-                                          <IconUsersGroup className='h-4 w-4'/>
-                                          {slot.default_capacity}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            });
-                        })()}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                                )
+                              })}
+                            </div>
+                          </div>
+                        );
+                      });
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           {/* Type Details Card */}
           {service?.type && (
             <Card>
