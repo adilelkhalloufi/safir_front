@@ -79,7 +79,17 @@
     "status_confirmed": "Confirmed",
     "status_completed": "Completed",
     "status_cancelled": "Cancelled",
-    "status_no-show": "No-show"
+    "status_no-show": "No-show",
+    "cancel": {
+      "confirmTitle": "Cancel Booking",
+      "confirmMessage": "Are you sure you want to cancel this booking?",
+      "confirmButton": "Cancel Booking",
+      "cancelling": "Cancelling...",
+      "successTitle": "Booking Cancelled",
+      "successMessage": "Your booking has been successfully cancelled.",
+      "errorTitle": "Cancellation Failed",
+      "errorMessage": "Failed to cancel booking"
+    }
   },
   "clients": {
     "title": "Clients Management",

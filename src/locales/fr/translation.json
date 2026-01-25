@@ -79,7 +79,17 @@
     "status_confirmed": "Confirmé",
     "status_completed": "Terminé",
     "status_cancelled": "Annulé",
-    "status_no-show": "Absent"
+    "status_no-show": "Absent",
+    "cancel": {
+      "confirmTitle": "Annuler la réservation",
+      "confirmMessage": "Êtes-vous sûr de vouloir annuler cette réservation ?",
+      "confirmButton": "Annuler la réservation",
+      "cancelling": "Annulation...",
+      "successTitle": "Réservation annulée",
+      "successMessage": "Votre réservation a bien été annulée.",
+      "errorTitle": "Échec de l'annulation",
+      "errorMessage": "Impossible d'annuler la réservation"
+    }
   },
   "clients": {
     "title": "Gestion des clients",

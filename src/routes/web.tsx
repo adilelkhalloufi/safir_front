@@ -8,6 +8,7 @@ export const webRoutes = {
   logout: '/logout',
   Dashboard: '/Dashbord',
   booking: '/booking',
+  cancelBooking: '/booking/:id/cancel',
 
   // Admin routes
   bookings: {

@@ -9,9 +9,15 @@ import Logout from '@/pages/auth/logout';
 import LandingPage from '@/pages/landing';
 
 
+
+
+
 const errorElement = <ErrorPage />;
 const fallbackElement = <ProgressBar />;
 
+const CancelBooking = loadable(() => import('../pages/cancelBooking'), {
+  fallback: fallbackElement,
+});
 
 const Dashboard = loadable(() => import('../pages/dashboard'), {
   fallback: fallbackElement,
@@ -193,7 +199,11 @@ export const browserRouter = createBrowserRouter([
     element: <LandingPage />,
     errorElement: errorElement,
   },
-
+  {
+    path: webRoutes.cancelBooking,
+    element: <CancelBooking />,
+    errorElement: errorElement,
+  },
 
   {
     path: webRoutes.login,
