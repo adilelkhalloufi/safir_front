@@ -39,10 +39,28 @@ export default function AddService() {
 
 
   const handleSubmit = (values: any) => {
- 
+    // Transform health_questions from table format to HealthQuestion format
+    const transformedValues = { ...values };
+
+    if (values.health_questions && Array.isArray(values.health_questions)) {
+      transformedValues.health_questions = values.health_questions.map((question: any, index: number) => ({
+        id: `question_${index + 1}`,
+        question: {
+          en: question.question_en,
+          fr: question.question_fr,
+        },
+        type: question.type,
+        required: question.required || false,
+        order: question.order || index + 1,
+        placeholder: question.placeholder_en || question.placeholder_fr ? {
+          en: question.placeholder_en || '',
+          fr: question.placeholder_fr || '',
+        } : undefined,
+      }));
+    }
 
     http
-      .post(apiRoutes.adminServices, values)
+      .post(apiRoutes.adminServices, transformedValues)
       .then(() => {
         toast({
           title: t('services.createSuccess', 'Service Created'),
@@ -52,8 +70,7 @@ export default function AddService() {
       })
       .catch((error) => {
         handleErrorResponse(error);
-      })
-
+      });
   };
 
   const formGroups: MagicFormGroupProps[] = [
@@ -111,8 +128,8 @@ export default function AddService() {
           required: true,
           placeholder: '0.00',
         },
-       
-      
+
+
         {
           name: 'description_fr',
           label: t('services.descriptionFr', 'Description (FR)'),
@@ -125,12 +142,12 @@ export default function AddService() {
           type: 'textarea',
           placeholder: t('services.descriptionPlaceholder', 'Describe the service...'),
         },
-          {
+        {
           name: 'is_active',
           label: t('services.isActive', 'Active Service'),
           type: 'checkbox',
         },
-         {
+        {
           name: 'requires_health_form',
           label: t('services.requiresHealthForm', 'Requires Health Form'),
           type: 'checkbox',
@@ -180,7 +197,7 @@ export default function AddService() {
     },
     {
       group: t('services.slots', 'Service Slots'),
- 
+
       fields: [
         {
           name: 'slots',
@@ -268,7 +285,78 @@ export default function AddService() {
         },
       ],
     },
-   
+    {
+      group: t('services.healthQuestions', 'Health Questions'),
+      fields: [
+        {
+          name: 'health_questions',
+          label: t('services.healthQuestionsList', 'Health Questions'),
+          type: 'table',
+          required: false,
+          showIf: (data) => data.requires_health_form === 1,
+          columns: [
+            {
+              name: 'question_en',
+              label: t('services.questionEn', 'Question (EN)'),
+              type: 'text',
+              required: true,
+              placeholder: t('services.questionEnPlaceholder', 'Enter question in English'),
+            },
+            {
+              name: 'question_fr',
+              label: t('services.questionFr', 'Question (FR)'),
+              type: 'text',
+              required: true,
+              placeholder: t('services.questionFrPlaceholder', 'Entrez la question en français'),
+            },
+            {
+              name: 'type',
+              label: t('services.fieldType', 'Field Type'),
+              type: 'select',
+              required: true,
+              options: [
+                { value: 'text', name: t('services.fieldTypeText', 'Text') },
+                { value: 'textarea', name: t('services.fieldTypeTextarea', 'Textarea') },
+                { value: 'select', name: t('services.fieldTypeSelect', 'Select') },
+                { value: 'radio', name: t('services.fieldTypeRadio', 'Radio') },
+                { value: 'checkbox', name: t('services.fieldTypeCheckbox', 'Checkbox') },
+                { value: 'number', name: t('services.fieldTypeNumber', 'Number') },
+                { value: 'date', name: t('services.fieldTypeDate', 'Date') },
+                { value: 'label', name: t('services.fieldTypeLabel', 'Label') },
+
+              ],
+            },
+            {
+              name: 'required',
+              label: t('services.isRequired', 'Required'),
+              type: 'checkbox',
+            },
+            {
+              name: 'order',
+              label: t('services.questionOrder', 'Order'),
+              type: 'number',
+              required: true,
+              placeholder: '1',
+            },
+            {
+              name: 'placeholder_en',
+              label: t('services.placeholderEn', 'Placeholder (EN)'),
+              type: 'text',
+              required: false,
+              placeholder: t('services.placeholderEnPlaceholder', 'Optional placeholder text'),
+            },
+            {
+              name: 'placeholder_fr',
+              label: t('services.placeholderFr', 'Placeholder (FR)'),
+              type: 'text',
+              required: false,
+              placeholder: t('services.placeholderFrPlaceholder', 'Texte d\'espace réservé optionnel'),
+            },
+          ],
+        },
+      ],
+    },
+
   ];
 
   return (

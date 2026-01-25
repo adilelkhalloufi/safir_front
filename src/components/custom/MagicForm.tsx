@@ -326,9 +326,7 @@ const MagicForm = memo(({
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
         <Label className="w-full">{label}</Label>
         {type === "label" ? (
-          <div className="p-2 bg-muted/30 rounded-md border min-h-9 flex items-center">
-            {formData[name] !== undefined && formData[name] !== null ? formData[name] : placeholder || "No data"}
-          </div>
+          <></>
         ) : type === "textarea" ? (
           <Textarea
             disabled={disabled}

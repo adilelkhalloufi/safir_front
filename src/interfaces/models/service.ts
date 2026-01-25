@@ -2,7 +2,42 @@
 
 import { Staff } from "./booking";
 
- export type Gender = 'female' | 'male' | 'mixed';
+export type Gender = 'female' | 'male' | 'mixed';
+
+export type HealthQuestionType = 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'number' | 'date';
+
+export interface HealthQuestionOption {
+  value: string;
+  label: {
+    en: string;
+    fr: string;
+  };
+}
+
+export interface HealthQuestion {
+  id: string; // Unique identifier for the question
+  question: {
+    en: string;
+    fr: string;
+  };
+  type: HealthQuestionType;
+  required: boolean;
+  order: number;
+  placeholder?: {
+    en: string;
+    fr: string;
+  };
+  options?: HealthQuestionOption[]; // For select and radio types
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+  helpText?: {
+    en: string;
+    fr: string;
+  };
+}
 
 export interface ServiceTypeObject {
   id: number;
@@ -28,6 +63,9 @@ export interface Service {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
+  
+  health_questions?: HealthQuestion[];  
+  staff?: Staff[];
   // Additional fields for booking context
   preferred_gender?: Gender;
   quantity?: number; // Note: 'quantity' is for person count in booking context

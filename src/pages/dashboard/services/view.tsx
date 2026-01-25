@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -10,9 +11,17 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import http from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
 import { webRoutes } from '@/routes/web'
+import HealthQuestionsForm from '@/components/custom/HealthQuestionsForm'
 import {
   IconArrowLeft,
   IconEdit,
@@ -24,6 +33,7 @@ import {
   IconPhone,
   IconUsersGroup,
   IconGenderFemale,
+  IconEye,
 } from '@tabler/icons-react'
 import ViewLoading from '@/components/skeleton/ViewLoading'
 
@@ -32,6 +42,7 @@ export default function ViewService() {
   const navigate = useNavigate()
   const { id } = useParams()
   const currentLang = i18n.language as 'fr' | 'en'
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const { data: service, isLoading } = useQuery({
     queryKey: ['service', id],
@@ -199,6 +210,8 @@ export default function ViewService() {
               </div>
             </CardContent>
           </Card>
+
+
 
           {/* Requirements Card */}
           {service?.requirements && service?.requirements.length > 0 && (
@@ -425,6 +438,134 @@ export default function ViewService() {
                         );
                       });
                   })()}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {/* Health Questions Card */}
+          {service?.requires_health_form && service?.health_questions && service?.health_questions.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className='flex items-center gap-2'>
+                      <IconPackage className='h-5 w-5' />
+                      {t('services.healthQuestions', 'Health Questions')}
+                    </CardTitle>
+                    <CardDescription>
+                      {t('services.healthQuestionsDescription', 'Questions asked to clients for health information')}
+                    </CardDescription>
+                  </div>
+                  <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <IconEye className="mr-2 h-4 w-4" />
+                        {t('services.previewForm', 'Preview Form')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{t('services.healthQuestions', 'Health Questions')} - {t('services.previewForm', 'Preview Form')}</DialogTitle>
+                      </DialogHeader>
+                      <HealthQuestionsForm
+                        healthQuestions={service.health_questions}
+                        onSubmit={() => { }}
+                        title={t('health.formTitle', 'Health Information')}
+                        buttonText={t('health.submit', 'Submit Health Information')}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  {service.health_questions
+                    .sort((a: any, b: any) => a.order - b.order)
+                    .map((question: any, index: number) => (
+                      <div
+                        key={question.id || index}
+                        className='rounded-lg border p-4'
+                      >
+                        <div className='grid gap-4 md:grid-cols-2'>
+                          <div className='md:col-span-2'>
+                            <p className='text-sm font-medium text-muted-foreground'>
+                              {t('services.question', 'Question')}
+                            </p>
+                            <div className='mt-1 space-y-1'>
+                              <p className='text-base font-medium'>
+                                EN: {question.question?.en}
+                              </p>
+                              <p className='text-base text-muted-foreground'>
+                                FR: {question.question?.fr}
+                              </p>
+                            </div>
+                          </div>
+                          <div>
+                            <p className='text-sm font-medium text-muted-foreground'>
+                              {t('services.fieldType', 'Field Type')}
+                            </p>
+                            <div className='mt-1'>
+                              <Badge variant='outline'>
+                                {question.type}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <p className='text-sm font-medium text-muted-foreground'>
+                              {t('services.isRequired', 'Required')}
+                            </p>
+                            <div className='mt-1'>
+                              <Badge
+                                variant={question.required ? 'default' : 'secondary'}
+                              >
+                                {question.required ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <p className='text-sm font-medium text-muted-foreground'>
+                              {t('services.questionOrder', 'Order')}
+                            </p>
+                            <p className='mt-1 text-base'>{question.order}</p>
+                          </div>
+                          {(question.placeholder?.en || question.placeholder?.fr) && (
+                            <div className='md:col-span-2'>
+                              <p className='text-sm font-medium text-muted-foreground'>
+                                {t('services.placeholder', 'Placeholder')}
+                              </p>
+                              <div className='mt-1 space-y-1'>
+                                {question.placeholder?.en && (
+                                  <p className='text-sm'>
+                                    EN: {question.placeholder.en}
+                                  </p>
+                                )}
+                                {question.placeholder?.fr && (
+                                  <p className='text-sm text-muted-foreground'>
+                                    FR: {question.placeholder.fr}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {question.type === 'select' || question.type === 'radio' ? (
+                            <div className='md:col-span-2'>
+                              <p className='text-sm font-medium text-muted-foreground'>
+                                {t('services.options', 'Options')}
+                              </p>
+                              <div className='mt-1 space-y-1'>
+                                {question.options?.map((option: any, optionIndex: number) => (
+                                  <div key={optionIndex} className='text-sm'>
+                                    <span className='font-medium'>{option.value}:</span>
+                                    <span className='ml-2'>EN: {option.label?.en}</span>
+                                    <span className='ml-4 text-muted-foreground'>FR: {option.label?.fr}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </CardContent>
             </Card>

@@ -228,7 +228,34 @@
     "updateSuccess": "Service updated successfully",
     "updateSuccessDesc": "Service details have been updated.",
     "saveError": "Error",
-    "saveErrorDesc": "Failed to save service. Please try again."
+    "saveErrorDesc": "Failed to save service. Please try again.",
+    "healthQuestions": "Health Questions",
+    "healthQuestionsList": "Health Questions",
+    "questionEn": "Question (EN)",
+    "questionFr": "Question (FR)",
+    "questionEnPlaceholder": "Enter question in English",
+    "questionFrPlaceholder": "Enter question in French",
+    "fieldType": "Field Type",
+    "fieldTypeText": "Text",
+    "fieldTypeTextarea": "Textarea",
+    "fieldTypeSelect": "Select",
+    "fieldTypeRadio": "Radio",
+    "fieldTypeCheckbox": "Checkbox",
+    "fieldTypeNumber": "Number",
+    "fieldTypeDate": "Date",
+    "questionOrder": "Order",
+    "placeholderEn": "Placeholder (EN)",
+    "placeholderFr": "Placeholder (FR)",
+    "placeholderEnPlaceholder": "Optional placeholder text",
+    "placeholderFrPlaceholder": "Optional placeholder text",
+    "requiresHealthForm": "Requires Health Form",
+    "healthQuestions": "Health Questions",
+    "healthQuestionsList": "Health Questions",
+    "healthQuestionsDescription": "Questions asked to clients for health information",
+    "question": "Question",
+    "placeholder": "Placeholder",
+    "options": "Options",
+    "previewForm": "Preview Form"
   },
   "resources": {
     "title": "Resources Management",
@@ -578,5 +605,15 @@
     "noStaff": "No staff scheduled",
     "more": "more",
     "services": "Services"
+  },
+  "health": {
+    "formTitle": "Health Information",
+    "submit": "Submit Health Information",
+    "noQuestions": "No health questions required for this service.",
+    "required": "This field is required",
+    "invalidNumber": "Please enter a valid number",
+    "minValue": "Minimum value is {{min}}",
+    "maxValue": "Maximum value is {{max}}",
+    "invalidFormat": "Invalid format"
   }
 }
