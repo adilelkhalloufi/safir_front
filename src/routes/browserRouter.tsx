@@ -190,7 +190,9 @@ const Login = loadable(() => import('../pages/auth/sign-in'), {
 
 
 
-
+const HealthFormClient = loadable(() => import('../pages/healthFormClient'), {
+  fallback: fallbackElement,
+});
 
 
 export const browserRouter = createBrowserRouter([
@@ -204,7 +206,11 @@ export const browserRouter = createBrowserRouter([
     element: <CancelBooking />,
     errorElement: errorElement,
   },
-
+  {
+    path: webRoutes.healthFormClient,
+    element: <HealthFormClient />,
+    errorElement: errorElement,
+  },
   {
     path: webRoutes.login,
     element: <Login />,

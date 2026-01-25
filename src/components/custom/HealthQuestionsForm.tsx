@@ -2,15 +2,17 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 import { HealthQuestion } from '@/interfaces/models/service';
-import { convertFormDataToHealthAnswers, validateHealthAnswers } from '@/utils/healthQuestions';
+import { convertFormDataToHealthAnswers } from '@/utils/healthQuestions';
 
 interface HealthQuestionsFormProps {
     healthQuestions: HealthQuestion[];
     initialAnswers?: Record<string, any>;
     onSubmit: (answers: Record<string, { question: string; value: any }>) => void;
+    onChange?: (answers: Record<string, { question: string; value: any }>) => void;
     loading?: boolean;
     title?: string;
     buttonText?: string;
+    showSubmitButton?: boolean;
 }
 
 /**
@@ -21,52 +23,58 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
     healthQuestions,
     initialAnswers = {},
     onSubmit,
+    onChange,
     loading = false,
     title,
     buttonText,
+    showSubmitButton = true,
 }) => {
     const { t, i18n } = useTranslation();
+
+    // Deep copy initialAnswers to prevent any shared references
+    const copiedInitialAnswers = useMemo(() => JSON.parse(JSON.stringify(initialAnswers)), [initialAnswers]);
 
     // Convert health questions to MagicForm format with current language
     const formGroups: MagicFormGroupProps[] = useMemo(() => {
         const currentLang = i18n.language as 'en' | 'fr';
+        const groups: MagicFormGroupProps[] = [];
 
-        return healthQuestions.map(question => ({
-            group: question.id,
-            hideGroupTitle: false,
-            fields: [{
-                name: question.id,
-                label: question.question[currentLang] || question.question.en,
-                type: question.type as any,
-                required: question.required,
-                placeholder: question.placeholder?.[currentLang] || question.placeholder?.en,
-                value: initialAnswers[question.id],
-                options: question.options?.map(option => ({
-                    value: option.value,
-                    name: option.label[currentLang] || option.label.en,
-                })),
-                helpText: question.helpText?.[currentLang] || question.helpText?.en,
-            }],
-            layout: {
-                type: 'vertical',
-            },
-            card: false,
-        }));
-    }, [healthQuestions, initialAnswers, i18n.language]);
+        // Deep copy health questions to prevent any shared references
+        const copiedHealthQuestions = JSON.parse(JSON.stringify(healthQuestions));
 
-    const handleSubmit = (formData: any) => {
-        // Validate answers
-        const errors = validateHealthAnswers(formData, healthQuestions);
+        // Add health questions as separate groups
+        copiedHealthQuestions.forEach((question: any) => {
+            groups.push({
+                group: question.id,
+                hideGroupTitle: false,
+                fields: [{
+                    name: question.id,
+                    label: question.question[currentLang] || question.question.en,
+                    type: question.type as any,
+                    required: question.required,
+                    placeholder: question.placeholder?.[currentLang] || question.placeholder?.en,
+                    value: copiedInitialAnswers[question.id],
+                    options: question.options?.map((option: any) => ({
+                        value: option.value,
+                        name: option.label[currentLang] || option.label.en,
+                    })),
+                }],
+                layout: {
+                    type: 'vertical',
+                },
+                card: false,
+            });
+        });
 
-        if (Object.keys(errors).length > 0) {
-            console.error('Validation errors:', errors);
-            // You might want to show these errors to the user
-            return;
-        }
+        return groups;
+    }, [healthQuestions, copiedInitialAnswers, i18n.language]);
 
-        // Convert form data to health answers format
+    const handleChange = (formData: any) => {
+        // Convert form data to health answers format and call onChange
         const answers = convertFormDataToHealthAnswers(formData, healthQuestions);
-        onSubmit(answers);
+        if (onChange) {
+            onChange(answers);
+        }
     };
 
     if (!healthQuestions || healthQuestions.length === 0) {
@@ -82,10 +90,16 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
     return (
         <MagicForm
             fields={formGroups}
-            onSubmit={handleSubmit}
+            onSubmit={(formData) => {
+                // Convert form data to health answers format
+                const answers = convertFormDataToHealthAnswers(formData, healthQuestions);
+                onSubmit(answers);
+            }}
+            onChange={handleChange}
             title={title || t('health.formTitle', 'Health Information')}
             button={buttonText || t('health.submit', 'Submit Health Information')}
-            initialValues={initialAnswers}
+            showButton={showSubmitButton}
+            initialValues={copiedInitialAnswers}
             loading={loading}
             returnType="object"
         />

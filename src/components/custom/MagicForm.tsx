@@ -60,6 +60,7 @@ export interface MagicFormProps {
   onSubmit: (data: any) => void;
   title?: string;
   button?: string;
+  showButton?: boolean;
   initialValues?: { [key: string]: any };
   loading?: boolean;
   modal?: boolean;
@@ -72,6 +73,7 @@ const MagicForm = memo(({
   onSubmit,
   title = "Form",
   button = "Submit",
+  showButton = true,
   initialValues,
   loading = false,
   modal = false,
@@ -578,24 +580,28 @@ const MagicForm = memo(({
               <DialogTitle>{title}</DialogTitle>
             </DialogHeader>
             {formContent}
-            <div className="mb-4 flex justify-end">
-              <Button onClick={handleSubmit} disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading ? "Loading..." : button}
-              </Button>
-            </div>
+            {showButton && button && (
+              <div className="mb-4 flex justify-end">
+                <Button onClick={handleSubmit} disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading ? "Loading..." : button}
+                </Button>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       ) : (
         <>
           <h1 className='m-2 text-3xl font-bold'>{title}</h1>
           {formContent}
-          <div className="mb-4 flex justify-end mt-5">
-            <Button onClick={handleSubmit} disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? "Loading..." : button}
-            </Button>
-          </div>
+          {showButton && button && (
+            <div className="mb-4 flex justify-end mt-5">
+              <Button onClick={handleSubmit} disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? "Loading..." : button}
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

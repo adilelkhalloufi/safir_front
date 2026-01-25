@@ -77,6 +77,7 @@ export const apiRoutes = {
   guestBookings: `${API_URL}/guest-bookings`,
   guestBookingById: (id: number) => `${API_URL}/guest-bookings/${id}`,
   confirmGuestBooking: (id: number) => `${API_URL}/guest-bookings/${id}/confirm`,
-  cancelGuestBooking: (id: number) => `${API_URL}/guest-bookings/${id}/cancel`,
+  cancelGuestBooking: (id: string) => `${API_URL}/guest-bookings/${id}/cancel`,
+  healthFormBooking: (id: string) => `${API_URL}/guest-bookings/${id}/health-form`,
   resources: `${API_URL}/resources/availability`,
 };
