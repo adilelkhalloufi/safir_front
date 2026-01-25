@@ -95,6 +95,9 @@ export default function EditService() {
         order: question.order || index + 1,
         placeholder_en: question.placeholder?.en || '',
         placeholder_fr: question.placeholder?.fr || '',
+        options_text: question.options?.map((option: any) =>
+          `${option.label?.en || ''}|${option.label?.fr || ''}|${option.value || ''}`
+        ).join('\n') || '',
       })) || [],
     };
   }, [serviceData]);
@@ -117,6 +120,16 @@ export default function EditService() {
           en: question.placeholder_en || '',
           fr: question.placeholder_fr || '',
         } : undefined,
+        options: question.options_text ? question.options_text.split('\n').filter((line: string) => line.trim()).map((line: string) => {
+          const parts = line.split('|').map(part => part.trim());
+          return {
+            label: {
+              en: parts[0] || '',
+              fr: parts[1] || parts[0] || '',
+            },
+            value: parts[2] || parts[0]?.toLowerCase().replace(/\s+/g, '_') || '',
+          };
+        }) : undefined,
       }));
     }
 
@@ -408,6 +421,14 @@ export default function EditService() {
               type: 'text',
               required: false,
               placeholder: t('services.placeholderFrPlaceholder', 'Optional placeholder text'),
+            },
+            {
+              name: 'options_text',
+              label: t('services.options', 'Options'),
+              type: 'textarea',
+              required: false,
+              showIf: (rowData) => rowData.type === 'select' || rowData.type === 'radio',
+              placeholder: t('services.optionsPlaceholder', 'Enter options one per line:\nLabel EN|Label FR|value\n\nExample:\nYes|Oui|yes\nNo|Non|no'),
             },
           ],
         },

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 import { HealthQuestion } from '@/interfaces/models/service';
-import { convertHealthQuestionsToMagicForm, convertFormDataToHealthAnswers, validateHealthAnswers } from '@/utils/healthQuestions';
+import { convertFormDataToHealthAnswers, validateHealthAnswers } from '@/utils/healthQuestions';
 
 interface HealthQuestionsFormProps {
     healthQuestions: HealthQuestion[];
@@ -32,7 +32,8 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
         const currentLang = i18n.language as 'en' | 'fr';
 
         return healthQuestions.map(question => ({
-            group: '',
+            group: question.id,
+            hideGroupTitle: false,
             fields: [{
                 name: question.id,
                 label: question.question[currentLang] || question.question.en,

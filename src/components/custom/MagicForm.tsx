@@ -41,6 +41,7 @@ export interface MagicFormFieldProps {
 
 export interface MagicFormGroupProps {
   group: string;
+  hideGroupTitle?: boolean;
   fields: MagicFormFieldProps[];
   layout?: {
     type: "horizontal" | "vertical" | "grid";
@@ -297,6 +298,28 @@ const MagicForm = memo(({
       );
     }
 
+    if (col.type === "radio") {
+      return (
+        <div className="flex flex-col gap-1">
+          {col.options?.map((option: any) => (
+            <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                disabled={col.disabled}
+                name={`${name}-${rowIndex}-${col.name}`}
+                value={option.value}
+                checked={row[col.name] === option.value}
+                onChange={(e) => handleTableChange(name, rowIndex, col.name, e.target.value)}
+                className="text-primary focus:ring-primary"
+              />
+              <span className="text-sm">{option.name}</span>
+            </label>
+          ))}
+          {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+        </div>
+      );
+    }
+
     // For color and time types, use specific input types
     const inputType = col.type === "color" ? "color" :
       col.type === "time" ? "time" :
@@ -319,12 +342,12 @@ const MagicForm = memo(({
       </div>
     );
   }, [handleTableChange]);
-  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false, showIf }: MagicFormFieldProps) => {
+  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false, showIf, required = false }: MagicFormFieldProps) => {
     if (showIf && !showIf(formData)) return null;
     const widthClass = width === "full" ? "w-full" : width === "half" ? "w-1/2" : width === "third" ? "w-1/3" : "";
     return (
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
-        <Label className="w-full">{label}</Label>
+        <Label className="w-full">{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>
         {type === "label" ? (
           <></>
         ) : type === "textarea" ? (
@@ -380,6 +403,23 @@ const MagicForm = memo(({
             checked={formData[name] === 1}
             onCheckedChange={(checked) => handleChange({ target: { checked, type: 'checkbox' } } as any, name)}
             className={errors[name] ? "border-red-500" : ""} />
+        ) : type === "radio" ? (
+          <div className="flex flex-col gap-2">
+            {options?.map((option: any) => (
+              <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  disabled={disabled}
+                  name={name}
+                  value={option.value}
+                  checked={formData[name] === option.value}
+                  onChange={(e) => handleChange(e, name)}
+                  className="text-primary focus:ring-primary"
+                />
+                <span className="text-sm">{option.name}</span>
+              </label>
+            ))}
+          </div>
         ) : type === "date" ? (
           <Input
             disabled={disabled}
@@ -424,7 +464,7 @@ const MagicForm = memo(({
               <TableHeader>
                 <TableRow>
                   {columns?.map(col => (
-                    <TableCell key={col.name}>{col.label}</TableCell>
+                    <TableCell key={col.name}>{col.label}{col.required && <span className="text-red-500 ml-1">*</span>}</TableCell>
                   ))}
                   <TableCell>Actions</TableCell>
                 </TableRow>
@@ -500,7 +540,9 @@ const MagicForm = memo(({
 
               const groupContent = (
                 <>
-                  <h3 className="text-lg font-bold mb-2">{group.group}</h3>
+                  {group.hideGroupTitle !== false && (
+                    <h3 className="text-lg font-bold mb-2">{group.group}</h3>
+                  )}
                   <div className={groupLayoutClass}>
                     {group.fields.map(renderField)}
                   </div>

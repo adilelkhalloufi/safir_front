@@ -255,7 +255,14 @@
     "question": "Question",
     "placeholder": "Placeholder",
     "options": "Options",
-    "previewForm": "Preview Form"
+    "previewForm": "Preview Form",
+    "optionsPlaceholder": "Enter options one per line:\nLabel EN|Label FR|value\n\nExample:\nYes|Oui|yes\nNo|Non|no",
+    "optionLabelEn": "Label (EN)",
+    "optionLabelFr": "Label (FR)",
+    "optionValue": "Value",
+    "optionLabelEnPlaceholder": "Enter option label in English",
+    "optionLabelFrPlaceholder": "Enter option label in French",
+    "optionValuePlaceholder": "option_value"
   },
   "resources": {
     "title": "Resources Management",

@@ -432,7 +432,14 @@
     "question": "Question",
     "placeholder": "Espace réservé",
     "options": "Options",
-    "previewForm": "Aperçu du formulaire"
+    "previewForm": "Aperçu du formulaire",
+    "optionsPlaceholder": "Entrez les options une par ligne :\nÉtiquette EN|Étiquette FR|valeur\n\nExemple :\nOui|Oui|yes\nNon|Non|no",
+    "optionLabelEn": "Étiquette (EN)",
+    "optionLabelFr": "Étiquette (FR)",
+    "optionValue": "Valeur",
+    "optionLabelEnPlaceholder": "Entrez l'étiquette de l'option en anglais",
+    "optionLabelFrPlaceholder": "Entrez l'étiquette de l'option en français",
+    "optionValuePlaceholder": "valeur_option"
   },
   "health": {
     "formTitle": "Informations de santé",

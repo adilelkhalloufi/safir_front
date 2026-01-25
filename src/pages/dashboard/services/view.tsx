@@ -12,6 +12,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -469,7 +477,10 @@ export default function ViewService() {
                       </DialogHeader>
                       <HealthQuestionsForm
                         healthQuestions={service.health_questions}
-                        onSubmit={() => { }}
+                        onSubmit={(values) => {
+                          console.log('Preview form submitted with values:', values);
+                          setPreviewOpen(false);
+                        }}
                         title={t('health.formTitle', 'Health Information')}
                         buttonText={t('health.submit', 'Submit Health Information')}
                       />
@@ -478,62 +489,48 @@ export default function ViewService() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className='space-y-4'>
-                  {service.health_questions
-                    .sort((a: any, b: any) => a.order - b.order)
-                    .map((question: any, index: number) => (
-                      <div
-                        key={question.id || index}
-                        className='rounded-lg border p-4'
-                      >
-                        <div className='grid gap-4 md:grid-cols-2'>
-                          <div className='md:col-span-2'>
-                            <p className='text-sm font-medium text-muted-foreground'>
-                              {t('services.question', 'Question')}
-                            </p>
-                            <div className='mt-1 space-y-1'>
-                              <p className='text-base font-medium'>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('services.question', 'Question')}</TableHead>
+                      <TableHead>{t('services.fieldType', 'Field Type')}</TableHead>
+                      <TableHead>{t('services.isRequired', 'Required')}</TableHead>
+                      <TableHead>{t('services.questionOrder', 'Order')}</TableHead>
+                      <TableHead>{t('services.placeholder', 'Placeholder')}</TableHead>
+                      <TableHead>{t('services.options', 'Options')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {service.health_questions
+                      .sort((a: any, b: any) => a.order - b.order)
+                      .map((question: any, index: number) => (
+                        <TableRow key={question.id || index}>
+                          <TableCell>
+                            <div className='space-y-1'>
+                              <p className='font-medium'>
                                 EN: {question.question?.en}
                               </p>
-                              <p className='text-base text-muted-foreground'>
+                              <p className='text-sm text-muted-foreground'>
                                 FR: {question.question?.fr}
                               </p>
                             </div>
-                          </div>
-                          <div>
-                            <p className='text-sm font-medium text-muted-foreground'>
-                              {t('services.fieldType', 'Field Type')}
-                            </p>
-                            <div className='mt-1'>
-                              <Badge variant='outline'>
-                                {question.type}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div>
-                            <p className='text-sm font-medium text-muted-foreground'>
-                              {t('services.isRequired', 'Required')}
-                            </p>
-                            <div className='mt-1'>
-                              <Badge
-                                variant={question.required ? 'default' : 'secondary'}
-                              >
-                                {question.required ? t('common.yes', 'Yes') : t('common.no', 'No')}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div>
-                            <p className='text-sm font-medium text-muted-foreground'>
-                              {t('services.questionOrder', 'Order')}
-                            </p>
-                            <p className='mt-1 text-base'>{question.order}</p>
-                          </div>
-                          {(question.placeholder?.en || question.placeholder?.fr) && (
-                            <div className='md:col-span-2'>
-                              <p className='text-sm font-medium text-muted-foreground'>
-                                {t('services.placeholder', 'Placeholder')}
-                              </p>
-                              <div className='mt-1 space-y-1'>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant='outline'>
+                              {question.type}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={question.required ? 'default' : 'secondary'}
+                            >
+                              {question.required ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{question.order}</TableCell>
+                          <TableCell>
+                            {(question.placeholder?.en || question.placeholder?.fr) ? (
+                              <div className='space-y-1'>
                                 {question.placeholder?.en && (
                                   <p className='text-sm'>
                                     EN: {question.placeholder.en}
@@ -545,14 +542,13 @@ export default function ViewService() {
                                   </p>
                                 )}
                               </div>
-                            </div>
-                          )}
-                          {question.type === 'select' || question.type === 'radio' ? (
-                            <div className='md:col-span-2'>
-                              <p className='text-sm font-medium text-muted-foreground'>
-                                {t('services.options', 'Options')}
-                              </p>
-                              <div className='mt-1 space-y-1'>
+                            ) : (
+                              <span className='text-muted-foreground'>-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {question.type === 'select' || question.type === 'radio' ? (
+                              <div className='space-y-1'>
                                 {question.options?.map((option: any, optionIndex: number) => (
                                   <div key={optionIndex} className='text-sm'>
                                     <span className='font-medium'>{option.value}:</span>
@@ -561,12 +557,14 @@ export default function ViewService() {
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                            ) : (
+                              <span className='text-muted-foreground'>-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           )}
