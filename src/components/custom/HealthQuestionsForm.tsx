@@ -7,7 +7,7 @@ import { convertFormDataToHealthAnswers, validateHealthAnswers } from '@/utils/h
 interface HealthQuestionsFormProps {
     healthQuestions: HealthQuestion[];
     initialAnswers?: Record<string, any>;
-    onSubmit: (answers: Record<string, any>) => void;
+    onSubmit: (answers: Record<string, { question: string; value: any }>) => void;
     loading?: boolean;
     title?: string;
     buttonText?: string;

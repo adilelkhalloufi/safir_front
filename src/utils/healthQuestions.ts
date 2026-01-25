@@ -62,17 +62,20 @@ export function convertHealthQuestionsToMagicForm(
  * Converts form data back to health question answers format
  * @param formData Form data from MagicForm submission
  * @param healthQuestions Original health questions array
- * @returns Formatted answers object
+ * @returns Formatted answers object with question text and value
  */
 export function convertFormDataToHealthAnswers(
   formData: Record<string, any>,
   healthQuestions: HealthQuestion[]
-): Record<string, any> {
-  const answers: Record<string, any> = {};
+): Record<string, { question: string; value: any }> {
+  const answers: Record<string, { question: string; value: any }> = {};
 
   healthQuestions.forEach(question => {
     if (formData.hasOwnProperty(question.id)) {
-      answers[question.id] = formData[question.id];
+      answers[question.id] = {
+        question: question.question.en || question.question.fr || 'Unknown question',
+        value: formData[question.id]
+      };
     }
   });
 
