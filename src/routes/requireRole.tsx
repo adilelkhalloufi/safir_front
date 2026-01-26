@@ -28,7 +28,7 @@ const RequireRole = ({ children, allowedRoles }: RequireRoleProps) => {
             return <Navigate to={webRoutes.staff.view.replace(':id', String(user?.profil?.id || ''))} replace />;
         }
         // Otherwise, redirect to dashboard or first accessible page
-        return <Navigate to={webRoutes.bookings} replace />;
+        return <Navigate to={webRoutes.bookings.index} replace />;
     }
 
     return children;

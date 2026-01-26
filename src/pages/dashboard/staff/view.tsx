@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
