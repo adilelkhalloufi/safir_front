@@ -66,15 +66,21 @@ export const GetStaffColumns = ({
           .toUpperCase();
 
         return (
-          <div className='flex items-center gap-3'>
-            <Avatar className='h-8 w-8'>
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className='font-medium'>{fullName}</div>
-              <div className='text-sm text-muted-foreground'>{staff.user?.email || 'N/A'}</div>
+          <Button
+            variant="ghost"
+            className="p-0 h-auto justify-start"
+            onClick={() => onView?.(staff)}
+          >
+            <div className='flex items-center gap-3'>
+              <Avatar className='h-8 w-8'>
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className='font-medium'>{fullName}</div>
+                <div className='text-sm text-muted-foreground'>{staff.user?.email || 'N/A'}</div>
+              </div>
             </div>
-          </div>
+          </Button>
         );
       },
       filterFn: (row, columnId, filterValue) => {

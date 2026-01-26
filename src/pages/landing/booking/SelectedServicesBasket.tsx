@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, DollarSign, Minus, Plus, X } from 'lucide-react'
+import { CheckCircle2, Clock, DollarSign, Minus, Plus} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '@/store'
 import { setServicePersonCount, toggleService } from '@/store/slices/bookingSlice'
 import { Service } from '@/interfaces/models/service'
-import { IconTrash, IconTrashOff, IconUsersGroup } from '@tabler/icons-react'
+import { IconTrash, IconUsersGroup } from '@tabler/icons-react'
 
 interface SelectedServicesBasketProps {
     selectedServices: Service[]

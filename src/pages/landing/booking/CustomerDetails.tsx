@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { CustomerInfo } from './types'
-import MagicForm, { MagicFormFieldProps, MagicFormGroupProps } from '@/components/custom/MagicForm'
+import MagicForm, {  MagicFormGroupProps } from '@/components/custom/MagicForm'
 
 interface CustomerDetailsProps {
     customerInfo: CustomerInfo

@@ -23,7 +23,6 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
     healthQuestions,
     initialAnswers = {},
     onSubmit,
-    onChange,
     loading = false,
     title,
     buttonText,
@@ -69,13 +68,7 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
         return groups;
     }, [healthQuestions, copiedInitialAnswers, i18n.language]);
 
-    const handleChange = (formData: any) => {
-        // Convert form data to health answers format and call onChange
-        const answers = convertFormDataToHealthAnswers(formData, healthQuestions);
-        if (onChange) {
-            onChange(answers);
-        }
-    };
+ 
 
     if (!healthQuestions || healthQuestions.length === 0) {
         return (

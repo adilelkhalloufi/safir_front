@@ -15,12 +15,7 @@ const CancelBooking = () => {
 
   const cancelMutation = useMutation({
     mutationFn: () => http.get(apiRoutes.cancelGuestBooking(id!)),
-    onSuccess: (data) => {
-      // Handle success
-    },
-    onError: (error: any) => {
-      // Handle error
-    },
+   
   });
 
   const handleCancel = () => {

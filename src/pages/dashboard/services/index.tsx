@@ -18,8 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Service } from '@/interfaces/models';
-import { useNavigate } from 'react-router-dom';
+ import { useNavigate } from 'react-router-dom';
+import { Service } from '@/interfaces/models/service';
 
 export default function ServicesPage() {
   const { t } = useTranslation();

@@ -8,7 +8,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
-import type { Service, Staff } from '@/interfaces/models';
+import {  Staff } from '@/interfaces/models';
 import { toast } from '@/components/ui/use-toast';
 import { setPageTitle } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Service } from '@/interfaces/models/service';
 
 const bookingFormSchema = z.object({
     service_ids: z.array(z.number()).min(1, 'At least one service is required'),

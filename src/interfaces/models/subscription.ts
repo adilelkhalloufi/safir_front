@@ -1,7 +1,8 @@
 // Subscription model types
 
-import { Service } from './booking';
+import { Service } from "./service";
 
+ 
 export type SubscriptionStatus = 'active' | 'expired' | 'suspended' | 'cancelled';
 
 export interface Subscription {

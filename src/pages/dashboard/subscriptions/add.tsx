@@ -8,7 +8,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
-import type { Service } from '@/interfaces/models';
 import { toast } from '@/components/ui/use-toast';
 import { setPageTitle } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
+import { Service } from '@/interfaces/models/service';
 
 const subscriptionFormSchema = z.object({
     name: z.string().min(3, 'Name must be at least 3 characters'),

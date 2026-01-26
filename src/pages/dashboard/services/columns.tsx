@@ -10,8 +10,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Service } from '@/interfaces/models';
-import i18next from '@/i18n';
+ import i18next from '@/i18n';
+import { Service } from '@/interfaces/models/service';
  
  
 
@@ -43,7 +43,15 @@ export const GetServiceColumns = ({
       const name = typeof service.name === 'string' 
         ? service.name 
         : service.name?.[currentLang] || service.name?.fr || service.name?.en || '';
-      return <div className='font-medium'>{name}</div>;
+      return (
+        <Button
+          variant="link"
+          className="p-0 h-auto font-medium"
+          onClick={() => onView?.(service)}
+        >
+          {name}
+        </Button>
+      );
     },
   },
   {
@@ -67,7 +75,7 @@ export const GetServiceColumns = ({
     header: 'Duration',
     cell: ({ row }) => {
       const service = row.original;
-      const duration = service.duration_minutes || service.duration || 0;
+      const duration = service.duration_minutes || 0;
       return <span>{duration} min</span>;
     },
   },
