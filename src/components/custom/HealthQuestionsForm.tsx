@@ -95,7 +95,6 @@ const HealthQuestionsForm: React.FC<HealthQuestionsFormProps> = ({
                 const answers = convertFormDataToHealthAnswers(formData, healthQuestions);
                 onSubmit(answers);
             }}
-            onChange={handleChange}
             title={title || t('health.formTitle', 'Health Information')}
             button={buttonText || t('health.submit', 'Submit Health Information')}
             showButton={showSubmitButton}

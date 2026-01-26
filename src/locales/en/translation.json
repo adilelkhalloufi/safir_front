@@ -628,11 +628,25 @@
     "bookingReference": "Booking Reference",
     "clientName": "Client Name",
     "totalPrice": "Total Price",
+    "servicesRequiringHealthForm": "Services Requiring Health Form",
     "groupSize": "Group Size",
     "required": "This field is required",
     "invalidNumber": "Please enter a valid number",
     "minValue": "Minimum value is {{min}}",
     "maxValue": "Maximum value is {{max}}",
-    "invalidFormat": "Invalid format"
+    "invalidFormat": "Invalid format",
+    "fillForms": "Fill Health Forms",
+    "submitAllForms": "Submit All Forms",
+    "termsAndConditions": "Terms and Conditions",
+    "email": "Email",
+    "name": "Name",
+    "phone": "Phone Number",
+    "postalCode": "Postal Code",
+    "acceptConditions": "I accept the Terms and Conditions",
+    "acceptMarketing": "Optional marketing communications",
+    "acceptConditionsQuestion": "I accept the Terms and Conditions",
+    "acceptMarketingQuestion": "Optional marketing communications",
+    "thankYou": "Thank You",
+    "thankYouMessage": "Thank you for your time and for completing the health forms. Our staff will review them shortly."
   }
 }

@@ -101,9 +101,18 @@ export const GetBookingColumns = ({
     {
       accessorKey: 'reference',
       header: 'ID',
-      cell: ({ row }) => (
-        <div className='font-medium'>#{row.getValue('reference')}</div>
-      ),
+      cell: ({ row }) => {
+        const booking = row.original;
+        return (
+          <Button
+            variant="link"
+            className="p-0 h-auto font-medium"
+            onClick={() => onView?.(booking)}
+          >
+            #{row.getValue('reference')}
+          </Button>
+        );
+      },
     },
     {
       accessorKey: 'booking_items',

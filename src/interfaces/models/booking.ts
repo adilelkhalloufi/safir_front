@@ -1,5 +1,7 @@
 import { Service } from "./service";
 
+// Re-export Service for other modules
+ 
 
 // Helper function to get localized value
 export function getLocalizedValue(value: string | { fr: string; en: string; ar?: string } | undefined, language: 'fr' | 'en' | 'ar' = 'fr'): string {

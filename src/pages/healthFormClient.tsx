@@ -1,35 +1,41 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { apiRoutes } from '@/routes/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+ import { Loader2, CheckCircle2 } from 'lucide-react';
 import http from '@/utils/http';
 import HeaderBooking from './landing/booking/HeaderBooking';
 import MagicForm from '@/components/custom/MagicForm';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback, memo } from 'react';
+
+const normalizeAnswerValue = (v: any) => {
+    if (v && typeof v === 'object' && 'question' in v && 'value' in v) return v.value;
+    return v;
+};
 
 const HealthFormClient = () => {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     // (common fields are stored per-service in MagicForm answers)
 
     // State to store answers from each service's health form
     const [serviceAnswers, setServiceAnswers] = useState<Record<number, Record<string, { question: string; value: any }>>>({});
 
-    // Normalize values that may be nested answer objects ({ question, value })
-    const normalizeAnswerValue = (v: any) => {
-        if (v && typeof v === 'object' && 'question' in v && 'value' in v) return v.value;
-        return v;
-    };
-
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    
     const { data: healthFormData, isLoading, error } = useQuery({
         queryKey: ['healthFormBooking', id],
         queryFn: () =>
-            http.get(apiRoutes.healthFormBooking(id!)).then((res) => res.data?.data),
+            http.get(apiRoutes.healthFormBooking(id!)).then((res) => {
+                setSubmitError(res.data.message || null);
+                return res.data?.data
+            }),
         enabled: !!id,
     });
 
@@ -39,6 +45,7 @@ const HealthFormClient = () => {
 
         const questionsByService: Array<{
             serviceId: number;
+            bookingItemId: number;
             serviceName: string;
             questions: any[];
         }> = [];
@@ -88,117 +95,9 @@ const HealthFormClient = () => {
 
         return questionsByService.length > 0 ? questionsByService : null;
     }, [healthFormData]);
+ 
 
-    const handleHealthFormSubmit = (serviceId: number, answers: Record<string, { question: string; value: any }>) => {
-        console.log(`Health form submitted for service ${serviceId} with answers:`, answers);
-        // Store the answers for this service
-        setServiceAnswers(prev => ({
-            ...prev,
-            [serviceId]: answers
-        }));
-    };
-
-    // common field changes are handled inside each MagicForm and saved per-service
-
-    const handleFinalSubmit = () => {
-        // Create array of client objects with answers (uses per-service saved answers)
-        const clientsData = healthQuestionsData?.map(serviceData => {
-            const answers = serviceAnswers[serviceData.bookingItemId] || {};
-            return {
-                bookingItemId: serviceData.bookingItemId,
-                serviceName: serviceData.serviceName,
-                client: {
-                    email: answers.email?.value || '',
-                    nom: answers.nom?.value || '',
-                    telephone: answers.telephone?.value || '',
-                    codePostal: answers.codePostal?.value || '',
-                },
-                answers: Object.entries(answers).reduce((acc, [key, answer]) => {
-                    if (key !== 'email' && key !== 'nom' && key !== 'telephone' && key !== 'codePostal' && key !== 'acceptConditions' && key !== 'acceptMarketing') {
-                        acc.push({ question: answer.question, value: normalizeAnswerValue(answer.value) });
-                    }
-                    return acc;
-                }, [] as Array<{ question: string; value: any }>),
-                acceptConditions: { question: "J'accepte les Conditions générales", value: answers.acceptConditions?.value ?? null },
-                acceptMarketing: { question: 'Communications marketing (optionnelles)', value: answers.acceptMarketing?.value ?? null },
-            };
-        }) || [];
-
-        const allFormData = {
-            bookingReference: healthFormData?.reference,
-            clientInfo: healthFormData?.client,
-            clients: clientsData,
-        };
-
-        console.log('Final form submission:', allFormData);
-        // Here you would send allFormData to the backend
-    };
-
-    if (isLoading) {
-        return (
-            <>
-                <HeaderBooking />
-                <div className="container mx-auto p-4 mt-28">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t('health.loading', 'Loading Health Form...')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-center py-8">
-                                <Loader2 className="h-8 w-8 animate-spin" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </>
-        );
-    }
-
-    if (error) {
-        return (
-            <>
-                <HeaderBooking />
-                <div className="container mx-auto p-4 mt-28">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t('health.errorTitle', 'Health Form Error')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Alert variant="destructive">
-                                <AlertDescription>
-                                    {t('health.errorMessage', 'Unable to load health form. Please try again later.')}
-                                </AlertDescription>
-                            </Alert>
-                        </CardContent>
-                    </Card>
-                </div>
-            </>
-        );
-    }
-
-    if (!healthFormData) {
-        return (
-            <>
-                <HeaderBooking />
-                <div className="container mx-auto p-4 mt-28">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t('health.notFoundTitle', 'Health Form Not Found')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Alert>
-                                <AlertDescription>
-                                    {t('health.notFoundMessage', 'No health form found for this booking.')}
-                                </AlertDescription>
-                            </Alert>
-                        </CardContent>
-                    </Card>
-                </div>
-            </>
-        );
-    }
-
-    // Build combined MagicForm groups (one group per service) and global initialValues
+        // Build combined MagicForm groups (one group per service) and global initialValues
     const groups = useMemo(() => {
         if (!healthQuestionsData) return [] as any[];
         const lang = healthFormData?.language || 'en';
@@ -209,15 +108,16 @@ const HealthFormClient = () => {
                 bookingItemId: serviceData.bookingItemId,
                 group: serviceData.serviceName,
                 hideGroupTitle: false,
+                
                 card: true,
                 fields: [] as any[],
             };
 
             // common fields (prefixed)
-            group.fields.push({ name: `${idPrefix}email`, label: 'Email', type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}nom`, label: lang === 'fr' ? 'Nom' : 'Name', type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}telephone`, label: lang === 'fr' ? 'Téléphone' : 'Phone', type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}codePostal`, label: lang === 'fr' ? 'Code Postal' : 'Postal Code', type: 'text', required: false, placeholder: '' });
+            group.fields.push({ name: `${idPrefix}email`, label: t('health.email'), type: 'text', required: true, placeholder: '' });
+            group.fields.push({ name: `${idPrefix}nom`, label: t('health.name'), type: 'text', required: true, placeholder: '' });
+            group.fields.push({ name: `${idPrefix}telephone`, label: t('health.phone'), type: 'text', required: true, placeholder: '' });
+            group.fields.push({ name: `${idPrefix}codePostal`, label: t('health.postalCode'), type: 'text', required: false, placeholder: '' });
 
             // backend health questions
             (serviceData.questions || []).forEach((q: any) => {
@@ -274,17 +174,187 @@ const HealthFormClient = () => {
     // Add a single acceptance group appended to the service groups
     const groupsWithAcceptance = useMemo(() => {
         const acceptanceGroup = {
-            group: t('health.termsAndConditions', 'Conditions et Communications'),
+            group: t('health.termsAndConditions'),
             hideGroupTitle: false,
             card: true,
             fields: [
-                { name: 'acceptConditions', label: "J'accepte les Conditions générales", type: 'checkbox', required: true },
-                { name: 'acceptMarketing', label: 'Communications marketing (optionnelles)', type: 'checkbox', required: false },
+                { name: 'acceptConditions', label: t('health.acceptConditions'), type: 'checkbox', required: true },
+                { name: 'acceptMarketing', label: t('health.acceptMarketing'), type: 'checkbox', required: false },
             ],
         } as any;
 
         return [...groups, acceptanceGroup];
     }, [groups, t]);
+
+    const handleSubmit = useCallback((formResult: any) => {
+        // Global acceptance values
+        const globalAccept = formResult['acceptConditions'];
+        const globalMarketing = formResult['acceptMarketing'];
+
+        // Build per-service answers and overall payload
+        const clientsData = (groups || []).map((g: any) => {
+            const p = `b${g.bookingItemId}__`;
+            const answers: Record<string, { question: string; value: any }> = {};
+            g.fields.forEach((f: any) => {
+                const key = f.name;
+                const rawKey = key.replace(p, '');
+                const val = formResult[key];
+                answers[rawKey] = { question: f.label || rawKey, value: val === undefined ? null : val };
+            });
+
+            return {
+                bookingItemId: g.bookingItemId,
+                serviceName: g.group,
+                client: {
+                    email: answers.email?.value || '',
+                    name: answers.nom?.value || '',
+                    phone: answers.telephone?.value || '',
+                    postalCode: answers.codePostal?.value || '',
+                },
+                answers: Object.entries(answers).reduce((acc, [k, answer]) => {
+                    if (k !== 'email' && k !== 'nom' && k !== 'telephone' && k !== 'codePostal') {
+                        acc.push({ question: answer.question, value: normalizeAnswerValue(answer.value) });
+                    }
+                    return acc;
+                }, [] as Array<{ question: string; value: any }>),
+                acceptConditions: { question: "J'accepte les Conditions générales", value: globalAccept ?? null },
+                acceptMarketing: { question: 'Communications marketing (optionnelles)', value: globalMarketing ?? null },
+            };
+        });
+
+        // Persist all service answers in state (without acceptance fields)
+        const newServiceAnswers: any = {};
+        (groups || []).forEach((g: any) => {
+            const p = `b${g.bookingItemId}__`;
+            const map: any = {};
+            g.fields.forEach((f: any) => {
+                const raw = f.name.replace(p, '');
+                map[raw] = { question: f.label || raw, value: formResult[f.name] === undefined ? null : formResult[f.name] };
+            });
+            newServiceAnswers[g.bookingItemId] = map;
+        });
+        setServiceAnswers(newServiceAnswers);
+
+        const allFormData = {
+            bookingReference: healthFormData?.reference,
+            clientInfo: healthFormData?.client,
+            clients: clientsData,
+        };
+
+        console.log('Combined form submission:', allFormData);
+        // send it to healthFormSubmit endpoint
+        http.post(apiRoutes.healthFormSubmit, allFormData)
+            .then((res) => {
+                if (res.data.success === false) {
+                    setSubmitError(res.data.message);
+                    setSubmitSuccess(false);
+                } else {
+                    setSubmitError(null);
+                    setSubmitSuccess(true);
+                    console.log('Health form submission successful:', res.data);
+                    // Optionally show a success message or redirect
+                }
+            })
+            .catch((err) => {
+                console.error('Health form submission error:', err);
+                setSubmitError('An error occurred while submitting the form. Please try again.');
+            });
+
+    }, [groups, healthFormData, setServiceAnswers]);
+
+    if (isLoading) {
+        return (
+            <>
+                <HeaderBooking />
+                <div className="container mx-auto p-4 mt-28">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('health.loading', 'Loading Health Form...')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <HeaderBooking />
+                <div className="container mx-auto p-4 mt-28">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('health.errorTitle', 'Health Form Error')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Alert variant="destructive">
+                                <AlertDescription>
+                                    {t('health.errorMessage', 'Unable to load health form. Please try again later.')}
+                                </AlertDescription>
+                            </Alert>
+                        </CardContent>
+                    </Card>
+                </div>
+            </>
+        );
+    }
+
+    if (!healthFormData) {
+        return (
+            <>
+                <HeaderBooking />
+                <div className="container mx-auto p-4 mt-28">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('health.notFoundTitle', 'Health Form Not Found')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Alert variant={'destructive'}>
+                                <AlertDescription>
+                                    {submitError || t('health.notFoundMessage')}
+                                 
+                                </AlertDescription>
+                            </Alert>
+                        </CardContent>
+                    </Card>
+                </div>
+            </>
+        );
+    }
+
+
+    if (submitSuccess) {
+        return (
+            <>
+                <HeaderBooking />
+                <div className="container mx-auto p-4 mt-28">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('health.thankYou', 'Thank You')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex justify-center mb-4">
+                                <CheckCircle2 className="h-16 w-16 text-green-500" />
+                            </div>
+                            <p className="text-center mb-4">
+                                {t('health.thankYouMessage', 'Thank you for your time and for completing the health forms. Our staff will review them shortly.')}
+                            </p>
+                            <div className="flex justify-center">
+                                <Button onClick={() => navigate(-1)}>
+                                    {t('common.back', 'Back')}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
@@ -317,7 +387,7 @@ const HealthFormClient = () => {
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    {t('health.servicesRequiringHealthForm', 'Services Requiring Health Form')}
+                                    {t('health.servicesRequiringHealthForm')}
                                 </p>
                                 <p className="text-base">
                                     {healthFormData.booking_items?.filter((item: any) => item.service?.requires_health_form).length || 0}
@@ -327,75 +397,30 @@ const HealthFormClient = () => {
                     </CardContent>
                 </Card>
 
+                {healthFormData?.message && (
+                    <Alert variant="destructive">
+                        <AlertDescription>{healthFormData.message}</AlertDescription>
+                    </Alert>
+                )}
+
+                {submitError && (
+                    <Alert variant="destructive">
+                        <AlertDescription>{submitError}</AlertDescription>
+                    </Alert>
+                )}
+
                 {/* Combined Health Forms using a single MagicForm */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t('health.fillForms', 'Fill Health Forms')}</CardTitle>
+                        <CardTitle>{t('health.fillForms')} : {healthFormData.booking_items?.filter((item: any) => item.service?.requires_health_form).length || 0}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <MagicForm
                             fields={groupsWithAcceptance}
-                            title={t('health.fillForms', 'Fill Health Forms')}
-                            button={t('health.submitAllForms', 'Soumettre tous les formulaires')}
+                            title={''}
+                            button={t('health.submitAllForms')}
                             initialValues={initialValues}
-                            onSubmit={(formResult: any) => {
-                                // Global acceptance values
-                                const globalAccept = formResult['acceptConditions'];
-                                const globalMarketing = formResult['acceptMarketing'];
-
-                                // Build per-service answers and overall payload
-                                const clientsData = (groups || []).map((g: any) => {
-                                    const p = `b${g.bookingItemId}__`;
-                                    const answers: Record<string, { question: string; value: any }> = {};
-                                    g.fields.forEach((f: any) => {
-                                        const key = f.name;
-                                        const rawKey = key.replace(p, '');
-                                        const val = formResult[key];
-                                        answers[rawKey] = { question: f.label || rawKey, value: val === undefined ? null : val };
-                                    });
-
-                                    return {
-                                        bookingItemId: g.bookingItemId,
-                                        serviceName: g.group,
-                                        client: {
-                                            email: answers.email?.value || '',
-                                            nom: answers.nom?.value || '',
-                                            telephone: answers.telephone?.value || '',
-                                            codePostal: answers.codePostal?.value || '',
-                                        },
-                                        answers: Object.entries(answers).reduce((acc, [k, answer]) => {
-                                            if (k !== 'email' && k !== 'nom' && k !== 'telephone' && k !== 'codePostal') {
-                                                acc.push({ question: answer.question, value: normalizeAnswerValue(answer.value) });
-                                            }
-                                            return acc;
-                                        }, [] as Array<{ question: string; value: any }>),
-                                        acceptConditions: { question: "J'accepte les Conditions générales", value: globalAccept ?? null },
-                                        acceptMarketing: { question: 'Communications marketing (optionnelles)', value: globalMarketing ?? null },
-                                    };
-                                });
-
-                                // Persist all service answers in state (without acceptance fields)
-                                const newServiceAnswers: any = {};
-                                (groups || []).forEach((g: any) => {
-                                    const p = `b${g.bookingItemId}__`;
-                                    const map: any = {};
-                                    g.fields.forEach((f: any) => {
-                                        const raw = f.name.replace(p, '');
-                                        map[raw] = { question: f.label || raw, value: formResult[f.name] === undefined ? null : formResult[f.name] };
-                                    });
-                                    newServiceAnswers[g.bookingItemId] = map;
-                                });
-                                setServiceAnswers(newServiceAnswers);
-
-                                const allFormData = {
-                                    bookingReference: healthFormData?.reference,
-                                    clientInfo: healthFormData?.client,
-                                    clients: clientsData,
-                                };
-
-                                console.log('Combined form submission:', allFormData);
-                                // send allFormData to backend if needed
-                            }}
+                            onSubmit={handleSubmit}
                         />
                     </CardContent>
                 </Card>
@@ -404,4 +429,4 @@ const HealthFormClient = () => {
     );
 };
 
-export default HealthFormClient;
+export default memo(HealthFormClient);

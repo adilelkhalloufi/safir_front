@@ -456,11 +456,25 @@
     "bookingReference": "Référence de réservation",
     "clientName": "Nom du client",
     "totalPrice": "Prix total",
+    "servicesRequiringHealthForm": "Services nécessitant un formulaire de santé",
     "groupSize": "Taille du groupe",
     "required": "Ce champ est obligatoire",
     "invalidNumber": "Veuillez saisir un nombre valide",
     "minValue": "La valeur minimale est {{min}}",
     "maxValue": "La valeur maximale est {{max}}",
-    "invalidFormat": "Format invalide"
+    "invalidFormat": "Format invalide",
+    "fillForms": "Remplir les formulaires de santé",
+    "submitAllForms": "Soumettre tous les formulaires",
+    "termsAndConditions": "Conditions et Communications",
+    "email": "Email",
+    "name": "Nom",
+    "phone": "Numéro de téléphone",
+    "postalCode": "Code postal",
+    "acceptConditions": "J'accepte les Conditions générales",
+    "acceptMarketing": "Communications marketing (optionnelles)",
+    "acceptConditionsQuestion": "J'accepte les Conditions générales",
+    "acceptMarketingQuestion": "Communications marketing (optionnelles)",
+    "thankYou": "Merci",
+    "thankYouMessage": "Merci pour votre temps et pour avoir rempli les formulaires de santé. Notre équipe les examinera sous peu."
   }
 }
