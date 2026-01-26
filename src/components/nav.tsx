@@ -23,6 +23,10 @@ import {
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store'
+import { RoleEnum } from '@/interfaces/enum/RoleEnum'
+import { useMemo } from 'react'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -36,6 +40,20 @@ export default function Nav({
   className,
   closeNav,
 }: NavProps) {
+  const user = useSelector((state: RootState) => state.admin?.user);
+  const userRole = user?.role as RoleEnum;
+
+  const filteredLinks = useMemo(() => {
+    return links.filter(link => {
+      // If no roles specified, show to all authenticated users
+      if (!link.roles || link.roles.length === 0) {
+        return true;
+      }
+      // Check if user has required role
+      return link.roles.includes(userRole);
+    });
+  }, [links, userRole]);
+
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.title}-${rest.href}`
     if (isCollapsed && sub)
@@ -68,7 +86,7 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
-          {links.map(renderLink)}
+          {filteredLinks.map(renderLink)}
         </nav>
       </TooltipProvider>
     </div>

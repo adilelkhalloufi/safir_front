@@ -10,6 +10,7 @@ export interface User {
   password?: string
   role?: string
   token?: string
+  profil?:any 
 }
 
 

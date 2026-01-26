@@ -110,9 +110,9 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
         }}
       />
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* <div className="mt-4 flex flex-wrap gap-2">
         <div className="text-sm font-medium">Events are colored randomly for distinction.</div>
-      </div>
+      </div> */}
     </div>
   );
 }

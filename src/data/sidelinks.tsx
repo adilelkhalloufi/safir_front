@@ -9,6 +9,7 @@ import {
   IconHome,
   IconCreditCard,
 } from '@tabler/icons-react';
+import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
 export interface NavLink {
   title: string;
@@ -19,6 +20,7 @@ export interface NavLink {
 
 export interface SideLink extends NavLink {
   sub?: NavLink[];
+  roles?: RoleEnum[];
 }
 
 export const sidelinks: SideLink[] = [
@@ -27,18 +29,21 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.Dashboard,
     icon: <IconLayoutDashboard size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   {
     title: 'Bookings',
     label: '',
     href: webRoutes.bookings.index,
     icon: <IconCalendar size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   {
     title: 'Clients',
     label: '',
     href: webRoutes.clients.index,
     icon: <IconUsers size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   // {
   //   title: 'Subscriptions',
@@ -57,18 +62,35 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.staff.index,
     icon: <IconUserCog size={18} />,
+    roles: [RoleEnum.Admin],
+  },
+  {
+    title: 'My Profile',
+    label: '',
+    href: webRoutes.staff.view, // This will be dynamically set based on current user
+    icon: <IconUserCog size={18} />,
+    roles: [RoleEnum.Staff],
+  },
+  {
+    title: 'My Calendar',
+    label: '',
+    href: webRoutes.staff.myCalendar,
+    icon: <IconCalendar size={18} />,
+    roles: [RoleEnum.Staff],
   },
   {
     title: 'Services',
     label: '',
     href: webRoutes.services.index,
     icon: <IconMassage size={18} />,
+    roles: [RoleEnum.Admin],
   },
   {
     title: 'Resources',
     label: '',
     href: webRoutes.resources.index,
     icon: <IconHome size={18} />,
+    roles: [RoleEnum.Admin],
   },
   // {
   //   title: 'Hammam Sessions',
@@ -81,6 +103,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.payments.index,
     icon: <IconCreditCard size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   // {
   //   title: 'Reports',
@@ -93,6 +116,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '',
     icon: <IconSettings size={18} />,
+    roles: [RoleEnum.Admin],
     sub: [
       {
         title: 'Type Services',

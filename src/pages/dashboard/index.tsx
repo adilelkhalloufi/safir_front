@@ -156,10 +156,10 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Actions and Recent Activity */}
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+          {/* <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             <QuickActions />
             <RecentActivityFeed activities={[]} />
-          </div>
+          </div> */}
         </TabsContent>
       </Tabs>
     </div>

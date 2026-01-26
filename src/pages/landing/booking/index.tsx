@@ -63,15 +63,19 @@ export default function BookingWizard() {
         }
     })
     
-    // Fetch availability slots from API (fetch only when date changes)
+    // Fetch availability slots from API (fetch when moving to step 2)
     const { data: availabilityData, isLoading: availabilityLoading } = useQuery({
-        // Only depend on the selected date so the query runs when date changes
-        queryKey: ['availability', selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : null],
+        // Include step in queryKey to refetch when moving to step 2
+        queryKey: ['availability', step, selectedDate ? format(typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate, 'yyyy-MM-dd') : 'today'],
         queryFn: async () => {
             // If no services selected, nothing to request — return empty array
-            if (!selectedDate || selectedServices.length === 0) return []
+            if (selectedServices.length === 0) return []
 
-            const dateObj = typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
+            // Use selected date or default to today
+            const dateObj = selectedDate 
+                ? (typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate)
+                : new Date()
+            
             const requestData: AvailabilitySlotsRequest = {
                 services: selectedServices.map(service => ({
                     service_id: service.id,
@@ -89,8 +93,8 @@ export default function BookingWizard() {
                 return []
             }
         },
-        // Enabled only by presence of a date — changing other local state won't re-run the query automatically
-        enabled: !!selectedDate,
+        // Enabled when on step 2 and services are selected
+        enabled: step === 2 && selectedServices.length > 0,
         retry: false
     })
     // Create guest booking mutation
@@ -179,7 +183,13 @@ export default function BookingWizard() {
                                 onSelectStaff={() => { }} // No-op - staff auto-assigned
                                 anyPreferences={anyPreferences}
                                 onSelectGender={(serviceId, preference) => dispatch(setServiceAnyPreference({ serviceId, preference }))}
-                                onNext={handleNext}
+                                onNext={() => {
+                                    // Set today's date if no date is selected
+                                    if (!selectedDate) {
+                                        dispatch(setSelectedDate(new Date()))
+                                    }
+                                    handleNext()
+                                }}
                                 onPrev={handlePrev}
                             />
                         )}

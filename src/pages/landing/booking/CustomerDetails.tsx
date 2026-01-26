@@ -21,7 +21,8 @@ export function CustomerDetails({
 
     const fields : MagicFormGroupProps[] = [
         {
-            group: 'Customer',
+            group: '',
+            
             fields: [
                 {
                     name: 'name',
@@ -48,7 +49,7 @@ export function CustomerDetails({
                     name: 'notes',
                     label: t('bookingWizard.customerDetails.notes'),
                     placeholder: t('bookingWizard.customerDetails.notesPlaceholder'),
-                    type: 'text',
+                    type: 'textarea',
                     required: false,
                 }
             ]
@@ -75,6 +76,7 @@ export function CustomerDetails({
             <CardContent>
                 <MagicForm
                     fields={fields}
+                    title=''
                     onSubmit={handleSubmit}
                     initialValues={customerInfo}
                     button={t('bookingWizard.customerDetails.continue')}

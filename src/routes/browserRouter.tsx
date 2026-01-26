@@ -1,12 +1,15 @@
+
 import { createBrowserRouter } from 'react-router-dom';
 import { webRoutes } from './web';
 import loadable from '@loadable/component';
 import ProgressBar from '@/components/loader/progressBar';
 import ErrorPage from '@/components/errors/general-error';
 import RequireAuth from './requireAuth';
+import RequireRole from './requireRole';
 import Layout from '@/components/layout';
 import Logout from '@/pages/auth/logout';
 import LandingPage from '@/pages/landing';
+import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
 
 
@@ -158,6 +161,10 @@ const StaffCalendar = loadable(() => import('../pages/dashboard/staff/calendar')
   fallback: fallbackElement,
 });
 
+const MyStaffCalendar = loadable(() => import('../pages/dashboard/staff/my-calendar'), {
+  fallback: fallbackElement,
+});
+
 const PaymentsIndex = loadable(() => import('../pages/dashboard/payments'), {
   fallback: fallbackElement,
 });
@@ -236,159 +243,319 @@ export const browserRouter = createBrowserRouter([
     ),
     errorElement: errorElement,
     children: [
+      // Admin and Reception routes
       {
         path: webRoutes.Dashboard,
-        element: <Dashboard />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <Dashboard />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.bookings.index,
-        element: <BookingsIndex />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <BookingsIndex />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.bookings.add,
-        element: <BookingsAdd />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <BookingsAdd />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.bookings.view,
-        element: <BookingsView />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <BookingsView />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.clients.index,
-        element: <ClientsIndex />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <ClientsIndex />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.clients.add,
-        element: <ClientsAdd />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <ClientsAdd />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.clients.edit,
-        element: <ClientsEdit />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <ClientsEdit />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.clients.view,
-        element: <ClientsView />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <ClientsView />
+          </RequireRole>
+        ),
       },
-      {
-        path: webRoutes.staff.index,
-        element: <StaffIndex />,
-      },
-      {
-        path: webRoutes.staff.calendar,
-        element: <StaffCalendar />,
-      },
-      {
-        path: webRoutes.subscriptions.index,
-        element: <SubscriptionsIndex />,
-      },
-      {
-        path: webRoutes.subscriptions.add,
-        element: <SubscriptionsAdd />,
-      },
-      {
-        path: webRoutes.subscriptions.edit,
-        element: <SubscriptionsEdit />,
-      },
-      {
-        path: webRoutes.subscriptions.view,
-        element: <SubscriptionsView />,
-      },
-
-      {
-        path: webRoutes.services.index,
-        element: <ServicesIndex />,
-      },
-      {
-        path: webRoutes.services.add,
-        element: <ServicesAdd />,
-      },
-      {
-        path: webRoutes.services.edit,
-        element: <ServicesEdit />,
-      },
-      {
-        path: webRoutes.services.view,
-        element: <ServicesView />,
-      },
-      {
-        path: webRoutes.typeServices.index,
-        element: <TypeServices />,
-      },
-      {
-        path: webRoutes.typeServices.add,
-        element: <TypeServicesAdd />,
-      },
-      {
-        path: webRoutes.typeServices.edit,
-        element: <TypeServicesEdit />,
-      },
-      {
-        path: webRoutes.typeServices.view,
-        element: <TypeServicesView />,
-      },
-      {
-        path: webRoutes.typeResources.index,
-        element: <TypeResources />,
-      },
-      {
-        path: webRoutes.typeResources.add,
-        element: <TypeResourcesAdd />,
-      },
-      {
-        path: webRoutes.typeResources.edit,
-        element: <TypeResourcesEdit />,
-      },
-      {
-        path: webRoutes.typeResources.view,
-        element: <TypeResourcesView />,
-      },
-      {
-        path: webRoutes.resources.index,
-        element: <ResourcesIndex />,
-      },
-      {
-        path: webRoutes.resources.add,
-        element: <ResourcesAdd />,
-      },
-      {
-        path: webRoutes.resources.edit,
-        element: <ResourcesEdit />,
-      },
-      {
-        path: webRoutes.resources.view,
-        element: <ResourcesView />,
-      },
-      {
-        path: webRoutes.staff.add,
-        element: <StaffAdd />,
-      },
-      {
-        path: webRoutes.staff.edit,
-        element: <StaffEdit />,
-      },
-      {
-        path: webRoutes.staff.view,
-        element: <StaffView />,
-      },
-
       {
         path: webRoutes.payments.index,
-        element: <PaymentsIndex />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <PaymentsIndex />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.payments.add,
-        element: <PaymentsAdd />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <PaymentsAdd />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.payments.view,
-        element: <PaymentsView />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <PaymentsView />
+          </RequireRole>
+        ),
+      },
+      // Admin only routes
+      {
+        path: webRoutes.staff.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <StaffIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.calendar,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <StaffCalendar />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <StaffAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin,RoleEnum.Staff]}>
+            <StaffEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
+            <StaffView />
+          </RequireRole>
+        ),
+      },
+      {
+        path:webRoutes.staff.myCalendar,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Staff]}>
+            <MyStaffCalendar />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptions.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionsIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptions.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionsAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptions.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionsEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptions.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.services.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ServicesIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.services.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ServicesAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.services.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ServicesEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.services.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ServicesView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeServices.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeServices />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeServices.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeServicesAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeServices.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeServicesEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeServices.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeServicesView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeResources.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeResources />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeResources.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeResourcesAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeResources.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeResourcesEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.typeResources.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <TypeResourcesView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.resources.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ResourcesIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.resources.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ResourcesAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.resources.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ResourcesEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.resources.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ResourcesView />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.reports.index,
-        element: <ReportsIndex />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <ReportsIndex />
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.settings.index,
-        element: <SettingsIndex />,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SettingsIndex />
+          </RequireRole>
+        ),
       },
     ],
   },

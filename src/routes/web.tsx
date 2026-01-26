@@ -39,10 +39,11 @@ export const webRoutes = {
   staff: {
     index: '/dashboard/staff',
     calendar: '/dashboard/staff/calendar',
+    myCalendar: '/dashboard/staff/my-calendar',
     view: '/dashboard/staff/:id',
     add: '/dashboard/staff/add',
     edit: '/dashboard/staff/:id/edit',
-  },
+   },
   services: {
     index: '/dashboard/services',
     view: '/dashboard/services/:id',

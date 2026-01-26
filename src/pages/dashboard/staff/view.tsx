@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,18 +10,41 @@ import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
 import { IconArrowLeft, IconEdit, IconLoader2, IconMail, IconPhone } from '@tabler/icons-react';
+ import { useEffect, useState } from 'react';
 
 export default function ViewStaff() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [staff, setStaff] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { id } = useParams();
 
-  const { data: staff, isLoading } = useQuery({
-    queryKey: ['staff', id],
-    queryFn: () => http.get(apiRoutes.adminStaffById(Number(id))).then(res => res.data?.data),
-    enabled: !!id,
-  });
+  const fetchStaff = async (id: string) => {
+    http.get(apiRoutes.adminStaffById(Number(id))).then(res => {
+      setStaff(res.data?.data);
+    }).catch(err => {
+      console.error('Error fetching staff:', err);
+      setIsLoading(false);
+      return null;
+    });
 
+  }
+ 
+   const user = useSelector((state: RootState) => state.admin?.user);
+
+
+  useEffect(() => {
+    if (id && Number(id) !== user?.profil?.id) {
+      navigate(webRoutes.staff.view.replace(':id', String(user?.profil?.id || '')), { replace: true } );
+    } else if (id) {
+      fetchStaff(id);
+    }
+  }, [id]);
+
+ 
+
+  
+ 
 
 
   const getStatusBadge = (isActive: boolean) => {
