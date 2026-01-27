@@ -81,6 +81,8 @@ export const apiRoutes = {
   // `${API_URL}/health-forms/booking-submit`,
   healthFormSubmit: `${API_URL}/health-forms/booking-submit`,
   healthFormBooking: (id: string) => `${API_URL}/health-forms/${id}/booking`,
+  reviewsSubmit: `${API_URL}/reviews/submit`,
+  reviewsBooking: (id: string) => `${API_URL}/reviews/${id}/booking`,
 
   resources: `${API_URL}/resources/availability`,
 };

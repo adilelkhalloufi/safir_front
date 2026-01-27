@@ -10,6 +10,7 @@ export const webRoutes = {
   booking: '/booking',
   cancelBooking: '/booking/:id/cancel',
   healthFormClient: '/booking/:id/health-form',
+  reviewsClient: '/booking/:id/reviews',
 
 
   // Admin routes

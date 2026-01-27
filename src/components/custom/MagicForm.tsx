@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { IconTrash } from "@tabler/icons-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { Combobox } from "../ui/combobox";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import IconPicker from "./IconPicker";
 
 export interface MagicFormOptionProps {
@@ -23,7 +23,7 @@ export interface MagicFormFieldProps {
   error?: string;
   value?: any;
   defaultValue?: any;
-  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color" | "iconpicker";
+  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color" | "iconpicker" | "rating";
   required?: boolean;
   order?: number;
   options?: MagicFormOptionProps[] | any[]; // Updated to any[]
@@ -91,7 +91,9 @@ const MagicForm = memo(({
               ? []
               : field.type === "checkbox"
                 ? 0
-                : "";
+                : field.type === "rating"
+                  ? 0
+                  : "";
       });
       return acc;
     }, {}),
@@ -148,7 +150,7 @@ const MagicForm = memo(({
     setFormData((prev: any) => {
       const currentTable = Array.isArray(prev[field]) ? prev[field] : [];
       const newRow = columns.reduce((acc: Record<string, any>, col) => {
-        acc[col.name] = col.type === "checkbox" ? 0 : "";
+        acc[col.name] = col.type === "checkbox" || col.type === "rating" ? 0 : "";
         return acc;
       }, {});
       return { ...prev, [field]: [...currentTable, newRow] };
@@ -178,6 +180,10 @@ const MagicForm = memo(({
           else if (type === 'select') {
             if (formData[name] === undefined || formData[name] === null || formData[name] === '') {
               newErrors[name] = "This field is required";
+            }
+          } else if (type === 'rating') {
+            if (!formData[name] || formData[name] <= 0) {
+              newErrors[name] = "Please select a rating";
             }
           } else if (!formData[name] && formData[name] !== 0) {
             newErrors[name] = "This field is required";
@@ -322,6 +328,31 @@ const MagicForm = memo(({
       );
     }
 
+    if (col.type === "rating") {
+      return (
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                disabled={col.disabled}
+                onClick={() => handleTableChange(name, rowIndex, col.name, i + 1)}
+                className="focus:outline-none"
+              >
+                <Star
+                  size={20}
+                  fill={i < (row[col.name] || 0) ? "currentColor" : "none"}
+                  className={`text-yellow-400 ${i < (row[col.name] || 0) ? "text-yellow-500" : "text-gray-300"}`}
+                />
+              </button>
+            ))}
+          </div>
+          {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+        </div>
+      );
+    }
+
     // For color and time types, use specific input types
     const inputType = col.type === "color" ? "color" :
       col.type === "time" ? "time" :
@@ -344,14 +375,14 @@ const MagicForm = memo(({
       </div>
     );
   }, [handleTableChange]);
-  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false, showIf, required = false }: MagicFormFieldProps) => {
+  const renderField = useCallback(({ name, label, type, options, placeholder, autocomplete = false, error, width = "auto", columns, disabled = false, returnFullObject = false, multiSelect = false, showIf, required = false, value }: MagicFormFieldProps) => {
     if (showIf && !showIf(formData)) return null;
     const widthClass = width === "full" ? "w-full" : width === "half" ? "w-1/2" : width === "third" ? "w-1/3" : "";
     return (
       <div key={name} className={`mb-4 flex flex-col gap-2 ${widthClass}`}>
         <Label className="w-full">{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>
         {type === "label" ? (
-          <></>
+          <p className="text-sm text-muted-foreground">{value || ""}</p>
         ) : type === "textarea" ? (
           <Textarea
             disabled={disabled}
@@ -460,6 +491,30 @@ const MagicForm = memo(({
               }
             }}
           />
+        ) : type === "rating" ? (
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                disabled={disabled}
+                onClick={() => {
+                  const newRating = i + 1;
+                  setFormData((prev: any) => ({ ...prev, [name]: newRating }));
+                  if (newRating > 0) {
+                    setErrors((prev: any) => ({ ...prev, [name]: undefined }));
+                  }
+                }}
+                className="focus:outline-none"
+              >
+                <Star
+                  size={24}
+                  fill={i < (formData[name] || 0) ? "currentColor" : "none"}
+                  className={`text-yellow-400 ${i < (formData[name] || 0) ? "text-yellow-500" : "text-gray-300"}`}
+                />
+              </button>
+            ))}
+          </div>
         ) : type === "table" ? (
           <div className="w-full">
             <Table>

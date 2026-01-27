@@ -260,9 +260,9 @@ export default function BookingsView() {
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">{t('bookings.clientInfo', 'Client Information')}</h3>
                                 <div className="space-y-2">
-                                    <p><strong>{t('common.name', 'Name')}:</strong> {selectedItem.healthForm.client_profile.user.name}</p>
-                                    <p><strong>{t('common.email', 'Email')}:</strong> {selectedItem.healthForm.client_profile.user.email}</p>
-                                    <p><strong>{t('common.phone', 'Phone')}:</strong> {selectedItem.healthForm.client_profile.user.phone}</p>
+                                    <p><strong>{t('common.name', 'Name')}:</strong> {selectedItem.healthForm.user.name}</p>
+                                    <p><strong>{t('common.email', 'Email')}:</strong> {selectedItem.healthForm.user.email}</p>
+                                    <p><strong>{t('common.phone', 'Phone')}:</strong> {selectedItem.healthForm.user.phone}</p>
                                 </div>
                             </div>
                             <Separator />

@@ -201,6 +201,10 @@ const HealthFormClient = loadable(() => import('../pages/healthFormClient'), {
   fallback: fallbackElement,
 });
 
+const ReviewsClient = loadable(() => import('../pages/reviewsClient'), {
+  fallback: fallbackElement,
+});
+
 
 export const browserRouter = createBrowserRouter([
   {
@@ -216,6 +220,11 @@ export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.healthFormClient,
     element: <HealthFormClient />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.reviewsClient,
+    element: <ReviewsClient />,
     errorElement: errorElement,
   },
   {
