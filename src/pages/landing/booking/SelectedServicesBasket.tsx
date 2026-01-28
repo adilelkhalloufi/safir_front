@@ -25,7 +25,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
         return sum + (s.price || 0) * count
     }, 0)
     const totalDuration = selectedServices.reduce((sum, s: any) => {
-        const count = s.quantity || 1
+        const count =  1
         return sum + (s.duration_minutes || s.duration || 0) * count
     }, 0)
 

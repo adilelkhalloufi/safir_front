@@ -61,7 +61,24 @@ export function SelectDateTime({
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
 
+  const isSlotEqual = (a: any, b: any) => {
+    if (!a || !b) return false
+    // Prefer explicit slot_id when available
+    if (a.slot_id && b.slot_id) return a.slot_id === b.slot_id
+    // Fall back to full datetime comparison when slot_id is absent
+    if (a.start_datetime && b.start_datetime)
+      return a.start_datetime === b.start_datetime && a.end_datetime === b.end_datetime
+    // Final fallback: compare start/end times
+    return a.start_time === b.start_time && a.end_time === b.end_time
+  }
+
   const handleServiceSlotClick = (service: Service, slot: any) => {
+    // If clicking on already selected slot, deselect it
+    if (service.slot && isSlotEqual(service.slot, slot)) {
+      dispatch(setServiceSlot({ serviceId: service.id, slot: null }))
+      showNotification(t('bookingWizard.selectDateTime.slotCleared', 'Selection cleared'), NotificationType.SUCCESS)
+      return
+    }
     const personCount = service.quantity || 1
     const availableCapacity = slot.available_capacity || 0
 
@@ -111,6 +128,8 @@ export function SelectDateTime({
     // iterate other services with chosen slots
     const hasOverlap = (selectedServices || []).some((s: any) => {
       if (s.id === service.id) return false
+      // Allow same time for services of the same type
+      if (s.type.id === service.type.id) return false
       const otherSlot = s.slot
       if (!otherSlot) return false
       const other = parseRange(otherSlot)
@@ -247,17 +266,6 @@ export function SelectDateTime({
                             ) : (
                               <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
                                 {slots.map((slot: any) => {
-                                  const isSlotEqual = (a: any, b: any) => {
-                                    if (!a || !b) return false
-                                    // Prefer explicit slot_id when available
-                                    if (a.slot_id && b.slot_id) return a.slot_id === b.slot_id
-                                    // Fall back to full datetime comparison when slot_id is absent
-                                    if (a.start_datetime && b.start_datetime)
-                                      return a.start_datetime === b.start_datetime && a.end_datetime === b.end_datetime
-                                    // Final fallback: compare start/end times
-                                    return a.start_time === b.start_time && a.end_time === b.end_time
-                                  }
-
                                   const isSelected = isSlotEqual(service.slot, slot)
                                   const personCount = service.quantity || 1
                                   const insufficient =

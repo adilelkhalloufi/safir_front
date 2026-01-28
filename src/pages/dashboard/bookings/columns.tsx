@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, CheckCircle, XCircle, Ban, CreditCard } from 'lucide-react';
+import { MoreHorizontal, Eye, CheckCircle, XCircle, Ban, CreditCard, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -81,6 +81,7 @@ interface BookingColumnsProps {
   onCancel?: (booking: Booking) => void;
   onNoShow?: (booking: Booking) => void;
   onPayment?: (booking: Booking) => void;
+  onWriteReview?: (booking: Booking) => void;
 }
 
 const statusConfig = {
@@ -97,6 +98,7 @@ export const GetBookingColumns = ({
   onCancel,
   onNoShow,
   onPayment,
+  onWriteReview,
 }: BookingColumnsProps): ColumnDef<Booking>[] => [
     {
       accessorKey: 'reference',
@@ -206,6 +208,12 @@ export const GetBookingColumns = ({
                 <DropdownMenuItem onClick={() => onView(booking)}>
                   <Eye className='mr-2 h-4 w-4' />
                   View Details
+                </DropdownMenuItem>
+              )}
+              {onWriteReview && (
+                <DropdownMenuItem onClick={() => onWriteReview(booking)}>
+                  <Star className='mr-2 h-4 w-4 text-yellow-600' />
+                  Write Review
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

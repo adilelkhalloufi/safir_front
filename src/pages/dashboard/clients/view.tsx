@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Mail, Phone, MapPin, Calendar, User } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, User, Star } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function ClientsView() {
@@ -27,11 +27,11 @@ export default function ClientsView() {
         queryKey: ['client', id],
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminClientById(parseInt(id!)));
-            return response.data;
+            return response.data?.data;
         },
         enabled: !!id,
     });
-
+    console.log("client", client);
     if (isLoading) {
         return (
             <div className="space-y-6">
@@ -154,7 +154,7 @@ export default function ClientsView() {
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('clients.totalSpent', 'Total Spent')}</p>
-                            <p className="text-3xl font-bold">{client.total_spent || 0} DH</p>
+                            <p className="text-3xl font-bold">{client.total_spent || 0} $</p>
                         </div>
 
                         <Separator />
@@ -181,12 +181,12 @@ export default function ClientsView() {
                                             {t('bookings.booking', 'Booking')} #{booking.id}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {format(new Date(booking.start_datetime), 'PPP p')}
+                                            {format(new Date(booking.created_at), 'PPP')}
                                         </p>
                                     </div>
                                     <div className="text-right">
                                         <Badge>{booking.status}</Badge>
-                                        <p className="text-sm font-semibold mt-1">{booking.total_price} DH</p>
+                                        <p className="text-sm font-semibold mt-1">{booking.total_price} $</p>
                                     </div>
                                 </div>
                             ))}
@@ -194,6 +194,113 @@ export default function ClientsView() {
                     </CardContent>
                 </Card>
             )}
+
+            {/* Reviews Section */}
+            {(() => {
+                const allReviews = client.bookings?.flatMap((booking: any) =>
+                    booking.booking_items?.flatMap((item: any) =>
+                        (item.reviews || []).map((review: any) => ({
+                            ...review,
+                            serviceName: item.service?.name_en || item.service?.name?.en || 'Service',
+                            serviceType: item.service?.type?.name_en || item.service?.type?.name?.en || 'Type',
+                            staffName: item.staff?.user?.name || (item.staff?.user?.first_name && item.staff?.user?.last_name ? `${item.staff.user.first_name} ${item.staff.user.last_name}` : `Staff ${review.staff_id}`),
+                        }))
+                    )
+                ) || [];
+
+                const clientReviews = allReviews.filter((review: any) => review.client_id);
+                const staffReviews = allReviews.filter((review: any) => review.staff_id);
+
+                return (clientReviews.length > 0 || staffReviews.length > 0) && (
+                    <div className="grid gap-6 md:grid-cols-2">
+                        {clientReviews.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Star className="h-5 w-5" />
+                                        {t('clients.clientReviews', 'Client Reviews')}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {clientReviews.map((review: any) => (
+                                            <div key={review.id} className="p-4 border rounded-lg">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="flex">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                className={`h-4 w-4 ${
+                                                                    i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                                                }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {format(new Date(review.created_at), 'PPP')}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-medium mb-1">
+                                                    {review.serviceName} 
+                                                </p>
+                                                {review.comment && (
+                                                    <p className="text-sm">{review.comment}</p>
+                                                )}
+                                                <div className="text-xs text-muted-foreground mt-2">
+                                                    Booking Item ID: {review.booking_item_id}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {staffReviews.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Star className="h-5 w-5" />
+                                        {t('clients.staffReviews', 'Staff Reviews')}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {staffReviews.map((review: any) => (
+                                            <div key={review.id} className="p-4 border rounded-lg">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="flex">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                className={`h-4 w-4 ${
+                                                                    i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                                                }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {format(new Date(review.created_at), 'PPP')}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-medium mb-1">
+                                                    {review.serviceName} ({review.serviceType})
+                                                </p>
+                                                {review.comment && (
+                                                    <p className="text-sm">{review.comment}</p>
+                                                )}
+                                                <div className="text-xs font-extrabold text-blue-600 mt-2">
+                                                   Staff: {review.staffName} , Booking Item ID: {review.booking_item_id}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                );
+            })()}
         </div>
     );
 }

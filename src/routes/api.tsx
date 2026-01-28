@@ -33,8 +33,7 @@ export const apiRoutes = {
   adminStaffById: (id: number) => `${API_URL}/admin/staff/${id}`,
   adminStaffSchedule: (id: number) => `${API_URL}/admin/staff/${id}/schedule`,
   adminStaffAvailability: (id: number) => `${API_URL}/admin/staff/${id}/availability`,
-
-  // Calendar API
+   // Calendar API
   calendarWeekly: `${API_URL}/calendar/weekly`,
   calendarDay: `${API_URL}/calendar/day`,
 
@@ -62,6 +61,8 @@ export const apiRoutes = {
   adminAnalytics: `${API_URL}/admin/analytics`,
   adminStaffPerformance: `${API_URL}/admin/reports/staff-performance`,
   adminServiceStats: `${API_URL}/admin/reports/service-stats`,
+
+   
 
   adminSettings: `${API_URL}/admin/settings`,
 
