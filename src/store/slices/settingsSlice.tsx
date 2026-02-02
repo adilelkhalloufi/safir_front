@@ -1,8 +1,8 @@
-import { Settings } from '@/interfaces/models';
+ import { Setting } from '@/interfaces/models';
 import { createSlice } from '@reduxjs/toolkit';
 
 export type SettingsState = {
-  data: Settings[] | null;
+  data: Setting[] | null;
 };
 
 const initialState: SettingsState = {
