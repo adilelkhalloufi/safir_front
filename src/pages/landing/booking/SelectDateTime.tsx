@@ -9,8 +9,9 @@ import { showNotification, NotificationType } from '@/utils'
 import { Service } from '@/interfaces/models/service'
 import SlotTimeButton from './components/SlotTimeButton'
 import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/store'
+import { AppDispatch, RootState } from '@/store'
 import { setServiceSlot } from '@/store/slices/bookingSlice'
+import { useSelector } from 'react-redux'
 
 // Interface matching actual API response
 interface CombinedSlot {
@@ -60,6 +61,90 @@ export function SelectDateTime({
 }: SelectDateTimeProps) {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
+  const settings = useSelector((state: RootState) => state.settings.data)
+
+  // Extract booking block dates and min advance booking hours from settings (safe parsing for array or map)
+  const settingsData = settings
+
+  const getSettingValue = (key: string) => {
+    if (Array.isArray(settingsData)) {
+      return settingsData.find((s: any) => s.key === key)?.value
+    }
+    if (settingsData && typeof settingsData === 'object') {
+      // support response wrapper { data: [...] }
+      if (Array.isArray((settingsData as any).data)) {
+        return (settingsData as any).data.find((s: any) => s.key === key)?.value
+      }
+      // support map-like shape { key: value } or { key: { value: ... } }
+      const raw = (settingsData as any)[key]
+      if (raw === undefined) return undefined
+      if (raw && typeof raw === 'object' && 'value' in raw) return raw.value
+      return raw
+    }
+    return undefined
+  }
+
+  const bookingBlockSetting = getSettingValue('booking_block_date')
+  const minAdvanceSetting = getSettingValue('min_advance_booking_hours')
+
+  // Parse booking block dates safely — accept single date, JSON string, or array; fallback to empty array
+  let blockedDates: string[] = []
+  try {
+    if (Array.isArray(bookingBlockSetting)) {
+      blockedDates = bookingBlockSetting
+    } else if (typeof bookingBlockSetting === 'string' && bookingBlockSetting.trim().length) {
+      // try JSON array or single date string
+      try {
+        const parsed = JSON.parse(bookingBlockSetting)
+        if (Array.isArray(parsed)) blockedDates = parsed
+        else if (typeof parsed === 'string') blockedDates = [parsed]
+        else blockedDates = [bookingBlockSetting]
+      } catch (e) {
+        // not JSON — treat as single date string
+        blockedDates = [bookingBlockSetting]
+      }
+    } else if (bookingBlockSetting) {
+      // other types (e.g. number) — coerce to string
+      blockedDates = [String(bookingBlockSetting)]
+    }
+  } catch (err) {
+    // parsing failed — keep blockedDates empty and log for debugging
+    // Use console.warn instead of throwing to avoid breaking the UI
+    // eslint-disable-next-line no-console
+    console.warn('Failed to parse booking_block_date setting:', err)
+    blockedDates = []
+  }
+
+  const blockedDateObjects = (blockedDates || [])
+    .map((dateStr: string) => {
+      const d = new Date(dateStr)
+      return isNaN(d.getTime()) ? null : d
+    })
+    .filter((d): d is Date => d !== null)
+
+  // If backend provided a single date value, treat it as a block-from date
+  // i.e., bookings on and after this date should be disabled
+  let blockFromDate: Date | undefined = undefined
+  if (blockedDateObjects.length === 1) {
+    blockFromDate = blockedDateObjects[0]
+    // Do not show the single date as a "booked" modifier when it's used as a range endpoint
+    // so clear booked marks — the disabled function will handle blocking the range
+    // If you prefer to also mark the date, remove the following line
+    blockedDateObjects.length = 0
+  }
+
+  // Calculate minimum selectable date based on min advance booking hours (robust)
+  // Allow numeric or string values; strip non-digits when parsing strings
+  let parsedMinAdvance = 0
+  if (typeof minAdvanceSetting === 'number') parsedMinAdvance = minAdvanceSetting
+  else if (typeof minAdvanceSetting === 'string' && minAdvanceSetting.trim().length) {
+    const digits = minAdvanceSetting.replace(/[^0-9-]/g, '')
+    parsedMinAdvance = digits.length ? parseInt(digits, 10) : 0
+  }
+
+  const minAdvanceHours = Number.isFinite(parsedMinAdvance) && !isNaN(parsedMinAdvance) ? parsedMinAdvance : 0
+  const minSelectableDate = new Date()
+  minSelectableDate.setHours(minSelectableDate.getHours() + minAdvanceHours)
 
   const isSlotEqual = (a: any, b: any) => {
     if (!a || !b) return false
@@ -181,7 +266,9 @@ export function SelectDateTime({
               label={t('bookingWizard.selectDateTime.selectDate')}
               defaultValue={selectedDate}
               onChange={(date) => onSelectDate(date as any)}
-
+              bookedDates={blockedDateObjects}
+              minDate={minSelectableDate}
+              disabled={blockFromDate ? ((d: Date) => d >= blockFromDate!) : undefined}
             />
           </div>
 

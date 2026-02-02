@@ -86,4 +86,6 @@ export const apiRoutes = {
   reviewsBooking: (id: string) => `${API_URL}/reviews/${id}/booking`,
 
   resources: `${API_URL}/resources/availability`,
+  settings: `${API_URL}/admin/settings`,
+  Getsettings: `${API_URL}/Getsettings`,
 };

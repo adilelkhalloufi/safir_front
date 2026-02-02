@@ -13,6 +13,7 @@ import {
     resetBooking,
     setServiceAnyPreference,
 } from '../../../store/slices/bookingSlice' 
+import { setSettings } from '../../../store/slices/settingsSlice' 
 import type {
     Service,
 } from '../../../interfaces/models/service'
@@ -33,6 +34,7 @@ import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
 import { CustomerDetails } from './CustomerDetails'
 import { SelectedServicesBasket } from './SelectedServicesBasket'
+import { toast } from 'sonner'
 
 export default function BookingWizard() {
     const {  t } = useTranslation()
@@ -97,6 +99,21 @@ export default function BookingWizard() {
         enabled: step === 2 && selectedServices.length > 0,
         retry: false
     })
+
+    // Fetch settings
+    useQuery({
+        queryKey: ['settings'],
+        queryFn: async () => {
+             try {
+                const response = await defaultHttp.get(apiRoutes.Getsettings);
+                dispatch(setSettings(response.data));
+                return response.data;
+            } catch (error: any) {
+                toast.error(error?.response?.data?.message || t('errors.fetchSettings'));
+            }
+        }
+    });
+
     // Create guest booking mutation
     const createBookingMutation = useMutation({
         mutationFn: async (bookingData: CreateGuestBookingRequest) => {
@@ -118,8 +135,6 @@ export default function BookingWizard() {
             )
         }
     })
-
-   
 
     // Navigation handlers
     const handleNext = () => dispatch(nextStep())
@@ -184,10 +199,6 @@ export default function BookingWizard() {
                                 anyPreferences={anyPreferences}
                                 onSelectGender={(serviceId, preference) => dispatch(setServiceAnyPreference({ serviceId, preference }))}
                                 onNext={() => {
-                                    // Set today's date if no date is selected
-                                    if (!selectedDate) {
-                                        dispatch(setSelectedDate(new Date()))
-                                    }
                                     handleNext()
                                 }}
                                 onPrev={handlePrev}

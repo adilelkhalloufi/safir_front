@@ -14,11 +14,12 @@ import {
 interface DatePickerProps {
   defaultValue?: Date
   onChange?: (date: Date | undefined) => void
-  label?: string,
-  disabled?: boolean
+  label?: string
+  disabled?: React.ComponentProps<typeof Calendar>['disabled']
+  bookedDates?: Date[]
+  minDate?: Date
 }
-
-export function DatePicker({ defaultValue, onChange, label = "Pick a date", disabled = false }: DatePickerProps) {
+export function DatePicker({ defaultValue, onChange, label = "Pick a date", disabled, bookedDates = [], minDate }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(defaultValue)
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -31,6 +32,22 @@ export function DatePicker({ defaultValue, onChange, label = "Pick a date", disa
   // Check if date is valid before formatting
   const isValidDate = (d: Date | undefined): d is Date => {
     return d instanceof Date && !isNaN(d.getTime())
+  }
+
+  // Combine disabled logic
+  const isDateDisabled = (date: Date) => {
+    // Check min date
+    if (minDate && date < minDate) return true
+    
+    // Check booked dates
+    if (bookedDates.some(bookedDate => 
+      bookedDate.toDateString() === date.toDateString()
+    )) return true
+    
+    // Check custom disabled function
+    if (disabled && typeof disabled === 'function') return disabled(date)
+    
+    return false
   }
 
   return (
@@ -49,12 +66,18 @@ export function DatePicker({ defaultValue, onChange, label = "Pick a date", disa
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          disabled={disabled}
           mode="single"
           className="w-full"
           selected={date}
           onSelect={handleDateSelect}
           initialFocus
+          disabled={isDateDisabled}
+          modifiers={{
+            booked: bookedDates,
+          }}
+          modifiersClassNames={{
+            booked: "[&>button]:line-through opacity-100",
+          }}
         />
       </PopoverContent>
     </Popover>

@@ -15,3 +15,6 @@ export * from './payment';
 
 // Resource
 export * from './resource';
+
+// Settings
+export * from './settings';
