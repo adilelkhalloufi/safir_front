@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Clock, ChevronRight, Search, DollarSign } from 'lucide-react'
@@ -106,125 +105,134 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                             />
                         </div>
 
-                        {/* Tabs for Service Types */}
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <ScrollArea className="w-full">
-                                <TabsList className="inline-flex w-max">
-                                    {Object.entries(sortedGroupedServices).map(([typeId, typeData]: any) => (
-                                        <TabsTrigger key={typeId} value={typeId} className="flex items-center gap-2">
-                                            {typeData?.icon && <IconDisplay iconName={typeData.icon} size={20} stroke={1.5} />}
+                        {/* Service Types Cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {Object.entries(sortedGroupedServices).map(([typeId, typeData]: any) => (
+                                <Card
+                                    key={typeId}
+                                    className={cn("cursor-pointer transition-all hover:shadow-md", activeTab === typeId && "ring-2 ring-[#E09900]")}
+                                    onClick={() => setActiveTab(typeId)}
+                                >
+                                    <CardContent className="p-4 text-center">
+                                        <div className='flex justify-center items-center'>
+                                           {typeData.icon && <IconDisplay iconName={typeData.icon} size={32} stroke={1.5}   />}
+                                        </div>
+                                        <h3 className="font-semibold">{typeData.name}</h3>
+                                        <Badge variant="secondary">{typeData.services.length}</Badge>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                            <Card
+                                className={cn("cursor-pointer transition-all hover:shadow-md", activeTab === 'all' && "ring-2 ring-[#E09900]")}
+                                onClick={() => setActiveTab('all')}
+                            >
+                                <CardContent className="p-4 text-center">
+                                    <div className="text-2xl mb-2">📋</div>
+                                    <h3 className="font-semibold">{t('bookingWizard.selectServices.allServices', 'All Services')}</h3>
+                                    <Badge variant="secondary">{services.length}</Badge>
+                                </CardContent>
+                            </Card>
+                        </div>
 
-                                            {typeData.name}
-                                            <Badge variant="secondary" className="ml-1">{typeData.services.length}</Badge>
-                                        </TabsTrigger>
-                                    ))}
-                                    <TabsTrigger value="all" className="flex items-center gap-2">
-                                        {t('bookingWizard.selectServices.allServices', 'All Services')}
-                                        <Badge variant="secondary" className="ml-1">{services.length}</Badge>
-                                    </TabsTrigger>
-                                </TabsList>
-                            </ScrollArea>
+                        {/* Services List */}
+                        <div className="mt-4">
+                            <ScrollArea className="h-[400px] pr-4">
+                                <div className="space-y-2">
+                                    {displayServices.length === 0 ? (
+                                        <div className="text-center py-12 text-muted-foreground">
+                                            {t('bookingWizard.selectServices.noResults', 'No services found')}
+                                        </div>
+                                    ) : (
+                                        displayServices.map((svc: any) => {
+                                            const isSelected = selected.includes(svc.id)
+                                            const typeColor = svc.type?.color || '#E09900'
+                                            const typeIcon = svc.type?.icon
 
-                            {/* Services List */}
-                            <div className="mt-4">
-                                <ScrollArea className="h-[400px] pr-4">
-                                    <div className="space-y-2">
-                                        {displayServices.length === 0 ? (
-                                            <div className="text-center py-12 text-muted-foreground">
-                                                {t('bookingWizard.selectServices.noResults', 'No services found')}
-                                            </div>
-                                        ) : (
-                                            displayServices.map((svc: any) => {
-                                                const isSelected = selected.includes(svc.id)
-                                                const typeColor = svc.type?.color || '#E09900'
-                                                const typeIcon = svc.type?.icon
+                                            return (
+                                                <button
+                                                    key={svc.id}
+                                                    className={cn(
+                                                        'w-full group relative rounded-lg border-2 p-4 text-left transition-all duration-200',
+                                                        'hover:shadow-md hover:-translate-y-0.5',
+                                                        isSelected
+                                                            ? 'border-[#E09900] bg-gradient-to-r from-orange-50 to-blue-50 shadow-md'
+                                                            : 'border-gray-200 bg-white hover:border-[#E09900]/30'
+                                                    )}
+                                                    onClick={() => onToggle(svc.id, svc)}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        {/* Type Indicator */}
+                                                        <div
+                                                            className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
+                                                            style={{ backgroundColor: typeColor }}
+                                                        />
 
-                                                return (
-                                                    <button
-                                                        key={svc.id}
-                                                        className={cn(
-                                                            'w-full group relative rounded-lg border-2 p-4 text-left transition-all duration-200',
-                                                            'hover:shadow-md hover:-translate-y-0.5',
-                                                            isSelected
-                                                                ? 'border-[#E09900] bg-gradient-to-r from-orange-50 to-blue-50 shadow-md'
-                                                                : 'border-gray-200 bg-white hover:border-[#E09900]/30'
-                                                        )}
-                                                        onClick={() => onToggle(svc.id, svc)}
-                                                    >
-                                                        <div className="flex items-start gap-4">
-                                                            {/* Type Indicator */}
+                                                        {/* Type Icon - Big and Nice */}
+                                                        {typeIcon && (
                                                             <div
-                                                                className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
-                                                                style={{ backgroundColor: typeColor }}
-                                                            />
+                                                                className="shrink-0 rounded-lg p-3 ml-3 flex items-center justify-center"
+                                                                style={{
+                                                                    backgroundColor: `${typeColor}15`,
+                                                                }}
+                                                            >
+                                                                <IconDisplay
+                                                                    iconName={typeIcon}
+                                                                    size={40}
+                                                                    stroke={1.5}
+                                                                    color={typeColor}
+                                                                />
+                                                            </div>
+                                                        )}
 
-                                                            {/* Type Icon - Big and Nice */}
-                                                            {typeIcon && (
-                                                                <div
-                                                                    className="shrink-0 rounded-lg p-3 ml-3 flex items-center justify-center"
-                                                                    style={{
-                                                                        backgroundColor: `${typeColor}15`,
-                                                                    }}
-                                                                >
-                                                                    <IconDisplay
-                                                                        iconName={typeIcon}
-                                                                        size={40}
-                                                                        stroke={1.5}
-                                                                        color={typeColor}
-                                                                    />
-                                                                </div>
-                                                            )}
-
-                                                            {/* Service Info */}
-                                                            <div className={cn("flex-1", !typeIcon && "ml-3")}>
-                                                                <div className="flex items-start justify-between gap-2">
-                                                                    <div>
-                                                                        <h4 className="font-semibold text-base mb-1">
-                                                                            {getLocalizedValue(svc.name, currentLang)}
-                                                                        </h4>
-                                                                        {svc.description && getLocalizedValue(svc.description, currentLang) && (
-                                                                            <p className="text-sm text-muted-foreground line-clamp-2">
-                                                                                {getLocalizedValue(svc.description, currentLang)}
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-                                                                    {isSelected && (
-                                                                        <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0" />
+                                                        {/* Service Info */}
+                                                        <div className={cn("flex-1", !typeIcon && "ml-3")}>
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div>
+                                                                    <h4 className="font-semibold text-base mb-1">
+                                                                        {getLocalizedValue(svc.name, currentLang)}
+                                                                    </h4>
+                                                                    {svc.description && getLocalizedValue(svc.description, currentLang) && (
+                                                                        <p className="text-sm text-muted-foreground line-clamp-2">
+                                                                            {getLocalizedValue(svc.description, currentLang)}
+                                                                        </p>
                                                                     )}
                                                                 </div>
+                                                                {isSelected && (
+                                                                    <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0" />
+                                                                )}
+                                                            </div>
 
-                                                                <div className="flex items-center gap-4 mt-3">
-                                                                    <div className="flex items-center gap-1.5 text-sm">
-                                                                        <Clock className="h-3.5 w-3.5 text-green-600" />
-                                                                        <span className="text-green-600 font-medium">
-                                                                            {svc.duration_minutes || svc.duration} min
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#E09900]">
-                                                                        <DollarSign className="h-3.5 w-3.5" />
-                                                                        {svc.price}
-                                                                    </div>
-                                                                    <Badge
-                                                                        variant="outline"
-                                                                        className="text-xs"
-                                                                        style={{
-                                                                            borderColor: typeColor,
-                                                                            color: typeColor
-                                                                        }}
-                                                                    >
-                                                                        {getLocalizedValue(svc.type?.name, currentLang)}
-                                                                    </Badge>
+                                                            <div className="flex items-center gap-4 mt-3">
+                                                                <div className="flex items-center gap-1.5 text-sm">
+                                                                    <Clock className="h-3.5 w-3.5 text-green-600" />
+                                                                    <span className="text-green-600 font-medium">
+                                                                        {svc.duration_minutes || svc.duration} min
+                                                                    </span>
                                                                 </div>
+                                                                <div className="flex items-center gap-1.5 text-sm font-semibold text-[#E09900]">
+                                                                    <DollarSign className="h-3.5 w-3.5" />
+                                                                    {svc.price}
+                                                                </div>
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="text-xs"
+                                                                    style={{
+                                                                        borderColor: typeColor,
+                                                                        color: typeColor
+                                                                    }}
+                                                                >
+                                                                    {getLocalizedValue(svc.type?.name, currentLang)}
+                                                                </Badge>
                                                             </div>
                                                         </div>
-                                                    </button>
-                                                )
-                                            })
-                                        )}
-                                    </div>
-                                </ScrollArea>
-                            </div>
-                        </Tabs>
+                                                    </div>
+                                                </button>
+                                            )
+                                        })
+                                    )}
+                                </div>
+                            </ScrollArea>
+                        </div>
 
                         {/* Footer with Continue Button */}
                         <div className="flex justify-between items-center pt-4 border-t">
