@@ -160,13 +160,15 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                     )}
                                                     onClick={() => onToggle(svc.id, svc)}
                                                 >
-                                                    <div className="flex items-start gap-4">
+                                                <div className="flex flex-col md:flex-row items-center gap-4">
                                                         {/* Type Indicator */}
                                                         <div
                                                             className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
                                                             style={{ backgroundColor: typeColor }}
                                                         />
-
+                                                        {isSelected && (
+                                                            <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0 absolute m-4 top-0 right-0" />
+                                                        )}
                                                         {/* Type Icon - Big and Nice */}
                                                         {typeIcon && (
                                                             <div
@@ -197,9 +199,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                                         </p>
                                                                     )}
                                                                 </div>
-                                                                {isSelected && (
-                                                                    <CheckCircle2 className="h-6 w-6 text-[#E09900] shrink-0" />
-                                                                )}
+                                                              
                                                             </div>
 
                                                             <div className="flex items-center gap-4 mt-3">
