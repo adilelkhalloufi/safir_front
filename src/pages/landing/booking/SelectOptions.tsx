@@ -22,6 +22,7 @@ interface Slot {
     capacity_self: number;
     max_scrubbers: number;
     days_of_week: number[];
+    time_of_day?: 'morning' | 'afternoon' | 'all_day'; // Optional: morning/afternoon/all_day
     created_at: string;
     updated_at: string;
 }
@@ -70,20 +71,35 @@ export function SelectOptions({
         t('bookingWizard.days.saturday')
     ]
 
-    // Group available days by gender from slots
+    // Group available days by gender with time slots
     const getAvailableDaysByGender = (slots: Slot[]) => {
-        const daysByGender: Record<string, Set<number>> = {
-            mixed: new Set(),
-            female: new Set(),
-            male: new Set()
+        const daysByGender: Record<string, Record<number, string[]>> = {
+            mixed: {},
+            female: {},
+            male: {}
         }
-
+        
+        console.log('Processing slots for available days by gender:', slots)
+        
         slots?.forEach(slot => {
             if (slot.is_active) {
+                const timeStr = slot.slot_time.substring(0, 5) // Extract HH:MM from HH:MM:SS
                 slot.days_of_week.forEach(day => {
-                    daysByGender[slot.gender].add(day)
+                    if (!daysByGender[slot.gender][day]) {
+                        daysByGender[slot.gender][day] = []
+                    }
+                    if (!daysByGender[slot.gender][day].includes(timeStr)) {
+                        daysByGender[slot.gender][day].push(timeStr)
+                    }
                 })
             }
+        })
+
+        // Sort time slots for each day
+        Object.keys(daysByGender).forEach(gender => {
+            Object.keys(daysByGender[gender]).forEach(day => {
+                daysByGender[gender][Number(day)].sort()
+            })
         })
 
         return daysByGender
@@ -157,13 +173,26 @@ export function SelectOptions({
                                                 { id: 'female', label: t('bookingWizard.selectOptions.genderFemale'), color: 'text-pink-700' },
                                                 { id: 'male', label: t('bookingWizard.selectOptions.genderMale'), color: 'text-blue-700' }
                                             ].map((g: any) => {
-                                                const days = Array.from(availableDaysByGender[g.id]).sort((a, b) => a - b)
+                                                const daySlots = availableDaysByGender[g.id] || {}
+                                                const days = Object.keys(daySlots).map(Number).sort((a, b) => a - b)
                                                 if (days.length === 0) return null
+                                                
+                                                const formatDayWithTime = (day: number) => {
+                                                    const dayName = dayNames[day]
+                                                    const times = daySlots[day]
+                                                    if (times.length > 0) {
+                                                        const firstTime = times[0]
+                                                        const lastTime = times[times.length - 1]
+                                                        return `${dayName} (${firstTime} - ${lastTime})`
+                                                    }
+                                                    return dayName
+                                                }
+                                                
                                                 return (
                                                     <div key={g.id} className="flex items-start gap-2 text-xs">
                                                         <span className={cn('font-semibold min-w-[60px]', g.color)}>{g.label}:</span>
                                                         <span className="text-gray-700">
-                                                            {days.map(d => dayNames[d]).join(', ')}
+                                                            {days.map(formatDayWithTime).join(', ')}
                                                         </span>
                                                     </div>
                                                 )
