@@ -78,21 +78,35 @@ export function SelectOptions({
             female: {},
             male: {}
         }
-        
-        console.log('Processing slots for available days by gender:', slots)
-        
+
+        const hasZeroDay = slots?.some(slot => slot.days_of_week?.includes(0))
+        const hasSevenDay = slots?.some(slot => slot.days_of_week?.includes(7 as number))
+        const normalizeDay = (rawDay: number) => {
+            if (!Number.isFinite(rawDay)) return null
+            if (hasZeroDay) return rawDay
+            if (hasSevenDay || (rawDay >= 1 && rawDay <= 7)) return rawDay - 1
+            return rawDay
+        }
+
         slots?.forEach(slot => {
-            if (slot.is_active) {
-                const timeStr = slot.slot_time.substring(0, 5) // Extract HH:MM from HH:MM:SS
-                slot.days_of_week.forEach(day => {
-                    if (!daysByGender[slot.gender][day]) {
-                        daysByGender[slot.gender][day] = []
-                    }
-                    if (!daysByGender[slot.gender][day].includes(timeStr)) {
-                        daysByGender[slot.gender][day].push(timeStr)
-                    }
-                })
-            }
+            if (!slot.is_active) return
+            const timeStr = slot.slot_time?.substring(0, 5)
+            if (!timeStr) return
+
+            const genderKey = String(slot.gender).toLowerCase().trim()
+            if (!daysByGender[genderKey]) return
+
+            slot.days_of_week?.forEach(rawDay => {
+                const day = normalizeDay(Number(rawDay))
+                if (day === null || day < 0 || day > 6) return
+
+                if (!daysByGender[genderKey][day]) {
+                    daysByGender[genderKey][day] = []
+                }
+                if (!daysByGender[genderKey][day].includes(timeStr)) {
+                    daysByGender[genderKey][day].push(timeStr)
+                }
+            })
         })
 
         // Sort time slots for each day

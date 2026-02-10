@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { format } from 'date-fns'
+// import { format } from 'date-fns'
 import { ChevronRight, Loader2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getLocalizedValue } from '@/interfaces/models/booking'
@@ -180,68 +180,91 @@ export function SelectDateTime({
     }
 
     // Check overlap with already selected service slots
-    const parseRange = (s: any) => {
-      try {
-        if (s.start_datetime && s.end_datetime) {
-          const start = new Date(s.start_datetime.replace(' ', 'T'))
-          const end = new Date(s.end_datetime.replace(' ', 'T'))
-          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
-        }
+    // const parseRange = (s: any) => {
+    //   try {
+    //     if (s.start_datetime && s.end_datetime) {
+    //       const start = new Date(s.start_datetime.replace(' ', 'T'))
+    //       const end = new Date(s.end_datetime.replace(' ', 'T'))
+    //       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
+    //     }
 
-        if (selectedDate && s.start_time && s.end_time) {
-          // build from selected date
-          const dateStr = format(selectedDate, 'yyyy-MM-dd')
-          const startStr = `${dateStr}T${s.start_time}${s.start_time.includes(':') && s.start_time.split(':').length === 2 ? ':00' : ''}`
-          const endStr = `${dateStr}T${s.end_time}${s.end_time.includes(':') && s.end_time.split(':').length === 2 ? ':00' : ''}`
-          const start = new Date(startStr)
-          const end = new Date(endStr)
-          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
-        }
-      } catch (err) {
-        // ignore
+    //     if (selectedDate && s.start_time && s.end_time) {
+    //       // build from selected date
+    //       const dateStr = format(selectedDate, 'yyyy-MM-dd')
+    //       const startStr = `${dateStr}T${s.start_time}${s.start_time.includes(':') && s.start_time.split(':').length === 2 ? ':00' : ''}`
+    //       const endStr = `${dateStr}T${s.end_time}${s.end_time.includes(':') && s.end_time.split(':').length === 2 ? ':00' : ''}`
+    //       const start = new Date(startStr)
+    //       const end = new Date(endStr)
+    //       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) return { start, end }
+    //     }
+    //   } catch (err) {
+    //     // ignore
+    //   }
+    //   return { start: null, end: null }
+    // }
+
+    // Check if service type allows multiple services in the same slot
+    const allowsMultipleServices = (service.type as any)?.allows_multiple_services !== false
+
+    if (!allowsMultipleServices) {
+      // This service type doesn't allow sharing slots with other services
+      // Check if any other selected service is using the same slot
+      const slotConflict = (selectedServices || []).some((s: any) => {
+        if (s.id === service.id) return false
+        if (!s.slot) return false
+        return isSlotEqual(s.slot, slot)
+      })
+
+      if (slotConflict) {
+        showNotification(
+          t('bookingWizard.selectDateTime.cannotSelectSlot', 'Cannot select this time slot - another service is already using it'),
+          NotificationType.ERROR
+        )
+        return
       }
-      return { start: null, end: null }
     }
 
-    const candidate = parseRange(slot)
-    if (!candidate.start || !candidate.end) {
-      // Can't validate overlap, allow selection (but could warn)
-      dispatch(setServiceSlot({ serviceId: service.id, slot }))
-      return
-    }
+    // ========== OVERLAPPING VALIDATION (COMMENTED OUT) ==========
+    // const candidate = parseRange(slot)
+    // if (!candidate.start || !candidate.end) {
+    //   // Can't validate overlap, allow selection (but could warn)
+    //   dispatch(setServiceSlot({ serviceId: service.id, slot }))
+    //   return
+    // }
 
-    // Calculate total party size as the MAXIMUM quantity (not sum)
-    // Example: couple books hammam (2 people), then splits for hair (1) + massage (1)
-    // Party size = max(2, 1, 1) = 2, not 2+1+1=4
-    const totalPartySize = Math.max(...(selectedServices || []).map(s => s.quantity || 1))
+    // // Calculate total party size as the MAXIMUM quantity (not sum)
+    // // Example: couple books hammam (2 people), then splits for hair (1) + massage (1)
+    // // Party size = max(2, 1, 1) = 2, not 2+1+1=4
+    // const totalPartySize = Math.max(...(selectedServices || []).map(s => s.quantity || 1))
 
-    // Find overlapping services with chosen slots
-    const overlappingServices = (selectedServices || []).filter((s: any) => {
-      if (s.id === service.id) return false
-      const otherSlot = s.slot
-      if (!otherSlot) return false
-      const other = parseRange(otherSlot)
-      if (!other.start || !other.end) return false
-      // overlap if startA < endB && startB < endA
-      return candidate.start < other.end && other.start < candidate.end
-    })
+    // // Find overlapping services with chosen slots
+    // const overlappingServices = (selectedServices || []).filter((s: any) => {
+    //   if (s.id === service.id) return false
+    //   const otherSlot = s.slot
+    //   if (!otherSlot) return false
+    //   const other = parseRange(otherSlot)
+    //   if (!other.start || !other.end) return false
+    //   // overlap if startA < endB && startB < endA
+    //   return candidate.start < other.end && other.start < candidate.end
+    // })
 
-    // Calculate total people in the overlapping time window
-    const overlappingPersonCount = overlappingServices.reduce((sum: number, s: any) => 
-      sum + (s.quantity || 1), 0
-    )
+    // // Calculate total people in the overlapping time window
+    // const overlappingPersonCount = overlappingServices.reduce((sum: number, s: any) => 
+    //   sum + (s.quantity || 1), 0
+    // )
 
-    // Add current service person count
-    const totalAtThisTime = overlappingPersonCount + personCount
+    // // Add current service person count
+    // const totalAtThisTime = overlappingPersonCount + personCount
 
-    // Allow if total doesn't exceed party size (enables parallel bookings for split parties)
-    if (totalAtThisTime > totalPartySize) {
-      showNotification(
-        t('bookingWizard.selectDateTime.cannotSelectSlot', 'Cannot select this time slot'),
-        NotificationType.ERROR
-      )
-      return
-    }
+    // // Allow if total doesn't exceed party size (enables parallel bookings for split parties)
+    // if (totalAtThisTime > totalPartySize) {
+    //   showNotification(
+    //     t('bookingWizard.selectDateTime.cannotSelectSlot', 'Cannot select this time slot'),
+    //     NotificationType.ERROR
+    //   )
+    //   return
+    // }
+    // ========== END OVERLAPPING VALIDATION ==========
 
     // No conflict — update slot in booking slice
     dispatch(setServiceSlot({ serviceId: service.id, slot }))
