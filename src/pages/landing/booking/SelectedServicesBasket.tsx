@@ -27,10 +27,10 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
         const count = s.quantity || 1
         return sum + (s.price || 0) * count
     }, 0)
-    const totalDuration = selectedServices.reduce((sum, s: any) => {
-        const count =  1
-        return sum + (s.duration_minutes || s.duration || 0) * count
-    }, 0)
+    // const totalDuration = selectedServices.reduce((sum, s: any) => {
+    //     const count =  1
+    //     return sum + (s.duration_minutes || s.duration || 0) * count
+    // }, 0)
 
     return (
         <div className="w-full md:w-80 block md:sticky top-4 h-fit">
