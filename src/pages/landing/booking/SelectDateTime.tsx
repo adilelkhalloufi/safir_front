@@ -210,11 +210,14 @@ export function SelectDateTime({
       return
     }
 
-    // iterate other services with chosen slots
-    const hasOverlap = (selectedServices || []).some((s: any) => {
+    // Calculate total party size as the MAXIMUM quantity (not sum)
+    // Example: couple books hammam (2 people), then splits for hair (1) + massage (1)
+    // Party size = max(2, 1, 1) = 2, not 2+1+1=4
+    const totalPartySize = Math.max(...(selectedServices || []).map(s => s.quantity || 1))
+
+    // Find overlapping services with chosen slots
+    const overlappingServices = (selectedServices || []).filter((s: any) => {
       if (s.id === service.id) return false
-      // Allow same time for services of the same type
-      if (s.type.id === service.type.id) return false
       const otherSlot = s.slot
       if (!otherSlot) return false
       const other = parseRange(otherSlot)
@@ -223,12 +226,24 @@ export function SelectDateTime({
       return candidate.start < other.end && other.start < candidate.end
     })
 
-    if (hasOverlap) {
-      showNotification(t('bookingWizard.selectDateTime.slotOverlap', 'Selected time overlaps with another chosen service.'), NotificationType.ERROR)
+    // Calculate total people in the overlapping time window
+    const overlappingPersonCount = overlappingServices.reduce((sum: number, s: any) => 
+      sum + (s.quantity || 1), 0
+    )
+
+    // Add current service person count
+    const totalAtThisTime = overlappingPersonCount + personCount
+
+    // Allow if total doesn't exceed party size (enables parallel bookings for split parties)
+    if (totalAtThisTime > totalPartySize) {
+      showNotification(
+        t('bookingWizard.selectDateTime.cannotSelectSlot', 'Cannot select this time slot'),
+        NotificationType.ERROR
+      )
       return
     }
 
-    // No overlap — update slot in booking slice
+    // No conflict — update slot in booking slice
     dispatch(setServiceSlot({ serviceId: service.id, slot }))
 
 
@@ -364,6 +379,7 @@ export function SelectDateTime({
                                     <SlotTimeButton
                                       key={slot.slot_id}
                                       slot={slot}
+                                      
                                       isSelected={isSelected}
                                       disabled={disabled}
                                       insufficient={insufficient}

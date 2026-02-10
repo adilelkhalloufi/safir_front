@@ -507,10 +507,21 @@
       "genderFemale": "Women",
       "genderMale": "Men",
       "genderMixed": "Mixed",
+      "scheduleInfo": "Available Schedule",
       "practitioner": "Practitioner",
       "noPreference": "No preference",
       "back": "Back",
       "continue": "Continue"
+    },
+
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
     },
 
     "customerDetails": {
@@ -561,7 +572,9 @@
       "otherDates": "Other available dates:",
       "notEnough": "Not enough",
       "insufficientCapacity": "This slot has only {{available}} places available, but you need {{needed}} places. Please select another slot.",
+      "insufficientCapacityShort": "Insufficient capacity",
       "slotOverlap": "Selected time overlaps with another chosen service.",
+      "cannotSelectSlot": "Cannot select this time slot",
       "slotCleared": "Selection cleared",
       "clearSelection": "Clear selection",
       "noSlotsForService": "No slots available for this service",

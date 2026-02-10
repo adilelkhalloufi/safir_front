@@ -77,6 +77,11 @@ export default function TypeServicesAdd() {
                     label: t('typeServices.isActive', 'Active'),
                     type: 'checkbox',
                 },
+                {
+                    name: 'allows_multiple_services',
+                    label: t('typeServices.allowsMultipleServices', 'Allows Multiple Services selection'),
+                    type: 'checkbox',
+                }
             ],
         },
     ];

@@ -91,6 +91,11 @@ export default function TypeServicesEdit() {
                     label: t('typeServices.isActive', 'Active'),
                     type: 'checkbox',
                 },
+                   {
+                    name: 'allows_multiple_services',
+                    label: t('typeServices.allowsMultipleServices', 'Allows Multiple Services selection'),
+                    type: 'checkbox',
+                }
             ],
         },
     ];
@@ -125,6 +130,7 @@ export default function TypeServicesEdit() {
                 color: serviceType?.color,
                 is_active: serviceType?.is_active,
                 display_order: serviceType?.display_order,
+                allows_multiple_services: serviceType?.allows_multiple_services,
             }}
             loading={loading}
         />

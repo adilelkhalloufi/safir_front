@@ -1,17 +1,35 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { ChevronRight, Sparkles, Scissors, Droplets } from 'lucide-react'
+import { ChevronRight, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { setServiceSlot } from '@/store/slices/bookingSlice'
+import type { AppDispatch } from '@/store'
 import type { Service } from '@/interfaces/models/service'
 import type { Staff } from '@/interfaces/models/booking'
 import { getLocalizedValue } from '@/interfaces/models/booking'
+
+interface Slot {
+    id: number;
+    slot_time: string;
+    is_active: boolean;
+    default_capacity: number;
+    gender: 'mixed' | 'female' | 'male';
+    capacity_total: number;
+    capacity_staff: number;
+    capacity_self: number;
+    max_scrubbers: number;
+    days_of_week: number[];
+    created_at: string;
+    updated_at: string;
+}
 
 interface SelectOptionsProps {
     selectedServices: Service[]
     staff: Staff[]
     staffSelections: any
-    // Record<number, number>
     onSelectStaff: (selections: Record<number, number>) => void
     anyPreferences: Record<number, 'female' | 'male' | 'mixed'> // serviceId -> preference
     onSelectGender: (serviceId: number, preference: 'female' | 'male' | 'mixed') => void
@@ -19,11 +37,7 @@ interface SelectOptionsProps {
     onPrev: () => void
 }
 
-const SERVICE_ICONS: Record<string, any> = {
-    'masso': Sparkles,
-    'coiffure': Scissors,
-    'hammam': Droplets
-}
+ 
 
 export function SelectOptions({
     selectedServices,
@@ -37,6 +51,43 @@ export function SelectOptions({
 }: SelectOptionsProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
+    const dispatch = useDispatch<AppDispatch>()
+
+    // Clear all selected slots when returning to this step
+    useEffect(() => {
+        selectedServices.forEach((service) => {
+            dispatch(setServiceSlot({ serviceId: service.id, slot: null }))
+        })
+    }, []) // Empty dependency array = run only on mount
+
+    const dayNames = [
+        t('bookingWizard.days.sunday'),
+        t('bookingWizard.days.monday'),
+        t('bookingWizard.days.tuesday'),
+        t('bookingWizard.days.wednesday'),
+        t('bookingWizard.days.thursday'),
+        t('bookingWizard.days.friday'),
+        t('bookingWizard.days.saturday')
+    ]
+
+    // Group available days by gender from slots
+    const getAvailableDaysByGender = (slots: Slot[]) => {
+        const daysByGender: Record<string, Set<number>> = {
+            mixed: new Set(),
+            female: new Set(),
+            male: new Set()
+        }
+
+        slots?.forEach(slot => {
+            if (slot.is_active) {
+                slot.days_of_week.forEach(day => {
+                    daysByGender[slot.gender].add(day)
+                })
+            }
+        })
+
+        return daysByGender
+    }
 
     const handleStaffSelect = (serviceId: number, staffId: number) => {
         onSelectStaff({ ...staffSelections, [serviceId]: staffId })
@@ -52,8 +103,10 @@ export function SelectOptions({
                 <div className="space-y-6">
 
                     {selectedServices.map((service: any) => {
-                        const Icon = SERVICE_ICONS[service.type_service] || Sparkles
+                        const Icon = Sparkles
                         const serviceStaff = staff.filter(s => s.type_staff === service.type_service)
+                        const serviceSlots = service.slots || []
+                        const availableDaysByGender = getAvailableDaysByGender(serviceSlots)
 
                         return (
                             <div key={service.id} className="rounded-xl border-2 border-gray-200 bg-white p-5">
@@ -90,6 +143,31 @@ export function SelectOptions({
                                                     {g.label}
                                                 </button>
                                             ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Available Days Schedule for services with sessions */}
+                                {service.has_sessions && serviceSlots.length > 0 && (
+                                    <div className="mb-4 rounded-lg border-2 border-blue-200/50 bg-blue-50/30 p-4">
+                                        <div className="mb-3 text-sm font-semibold text-[#020F44]">{t('bookingWizard.selectOptions.scheduleInfo')}</div>
+                                        <div className="space-y-2">
+                                            {[
+                                                { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed'), color: 'text-purple-700' },
+                                                { id: 'female', label: t('bookingWizard.selectOptions.genderFemale'), color: 'text-pink-700' },
+                                                { id: 'male', label: t('bookingWizard.selectOptions.genderMale'), color: 'text-blue-700' }
+                                            ].map((g: any) => {
+                                                const days = Array.from(availableDaysByGender[g.id]).sort((a, b) => a - b)
+                                                if (days.length === 0) return null
+                                                return (
+                                                    <div key={g.id} className="flex items-start gap-2 text-xs">
+                                                        <span className={cn('font-semibold min-w-[60px]', g.color)}>{g.label}:</span>
+                                                        <span className="text-gray-700">
+                                                            {days.map(d => dayNames[d]).join(', ')}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            })}
                                         </div>
                                     </div>
                                 )}

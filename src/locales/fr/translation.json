@@ -182,10 +182,20 @@
       "genderFemale": "Femmes",
       "genderMale": "Hommes",
       "genderMixed": "Mixte",
+      "scheduleInfo": "Horaires Disponibles",
       "practitioner": "Praticien(ne)",
       "noPreference": "Pas de préférence",
       "back": "Retour",
       "continue": "Continuer"
+    },
+    "days": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
     },
     "selectDateTime": {
       "title": "Date et horaire",
@@ -202,7 +212,9 @@
       "otherDates": "Autres dates disponibles:",
       "notEnough": "Insuffisant",
       "insufficientCapacity": "Ce créneau a seulement {{available}} places disponibles, mais vous avez besoin de {{needed}} places. Veuillez sélectionner un autre créneau.",
+      "insufficientCapacityShort": "Capacité insuffisante",
       "slotOverlap": "L'heure sélectionnée chevauche avec un autre service choisi.",
+      "cannotSelectSlot": "Impossible de sélectionner ce créneau",
       "slotCleared": "Sélection effacée",
       "clearSelection": "Effacer la sélection",
       "noSlotsForService": "Aucun créneau disponible pour ce service",
