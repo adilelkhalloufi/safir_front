@@ -17,7 +17,7 @@ export default function EditStaff() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
-  const [staffData, setStaffData] = useState(null);
+  const [staffData, setStaffData] = useState<any>(null);
   const [fetchLoading, setFetchLoading] = useState(false);
   const user = useSelector((state: RootState) => state.admin?.user);
 
