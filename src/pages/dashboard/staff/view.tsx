@@ -33,7 +33,10 @@ export default function ViewStaff() {
   console.log('Current user from Redux:', user);
 
   useEffect(() => {
-    if (id) {
+     if (id == ':id') {
+      fetchStaff(user?.profil?.id);
+    }
+    else{
       fetchStaff(id);
     }
   }, [id]);

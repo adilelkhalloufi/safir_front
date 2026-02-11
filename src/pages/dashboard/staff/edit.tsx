@@ -9,22 +9,43 @@ import { toast } from '@/components/ui/use-toast';
 import { setPageTitle, handleErrorResponse } from '@/utils';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 import { IconLoader2 } from '@tabler/icons-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function EditStaff() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const [staffData, setStaffData] = useState(null);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const user = useSelector((state: RootState) => state.admin?.user);
 
   useEffect(() => {
     setPageTitle(t('staff.editTitle', 'Edit Staff Member'));
   }, [t]);
 
-  const { data: staff, isLoading } = useQuery({
-    queryKey: ['staff', id],
-    queryFn: () => http.get(apiRoutes.adminStaffById(Number(id))),
-    enabled: !!id,
-  });
+  const fetchStaff = async (staffId) => {
+    setFetchLoading(true);
+    try {
+      const response = await http.get(apiRoutes.adminStaffById(Number(staffId)));
+      setStaffData(response.data);
+    } catch (error) {
+      handleErrorResponse(error);
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id === ':id') {
+      fetchStaff(user?.profil?.id);
+    } else {
+      fetchStaff(id);
+    }
+  }, [id, user?.profil?.id]);
+
+  
 
   // Fetch service types
   const { data: serviceTypesData, isLoading: isLoadingTypes } = useQuery({
@@ -221,9 +242,9 @@ export default function EditStaff() {
   ];
 
   const initialValues = useMemo(() => {
-    const staffData = staff?.data?.data;
+    const staff = staffData?.data;
 
-    if (!staffData) {
+    if (!staff) {
       return {
         name: '',
         email: '',
@@ -240,28 +261,28 @@ export default function EditStaff() {
     }
 
     return {
-      name: staffData?.user?.email?.split('@')[0] || staffData?.name || '',
-      email: staffData?.user?.email || staffData?.email || '',
-      phone: staffData?.user?.phone || staffData?.phone || '',
-      type_staff_id: staffData?.type_staff?.id?.toString() || staffData?.type_staff_id?.toString() || '',
-      specialization: staffData?.specialization || '',
-      certification: staffData?.certification || '',
-      hire_date: staffData?.hire_date || new Date().toISOString().split('T')[0],
-      default_break_minutes: staffData?.default_break_minutes || 15,
-      is_active: staffData?.is_active ? 1 : 0,
-      service_ids: staffData?.services?.map((service: any) => ({
+      name: staff?.user?.email?.split('@')[0] || staff?.name || '',
+      email: staff?.user?.email || staff?.email || '',
+      phone: staff?.user?.phone || staff?.phone || '',
+      type_staff_id: staff?.type_staff?.id?.toString() || staff?.type_staff_id?.toString() || '',
+      specialization: staff?.specialization || '',
+      certification: staff?.certification || '',
+      hire_date: staff?.hire_date || new Date().toISOString().split('T')[0],
+      default_break_minutes: staff?.default_break_minutes || 15,
+      is_active: staff?.is_active ? 1 : 0,
+      service_ids: staff?.services?.map((service: any) => ({
         service_id: service.id?.toString(),
       })) || [],
-      availability: staffData?.availability?.map((avail: any) => ({
+      availability: staff?.availability?.map((avail: any) => ({
         day_of_week: avail.day_of_week?.toString() || '',
         start_time: avail.start_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
         end_time: avail.end_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
         is_available: avail.is_available ? 1 : 0,
       })) || [],
     };
-  }, [staff?.data]);
+  }, [staffData]);
 
-  if (isLoading) {
+  if (fetchLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <IconLoader2 className="h-8 w-8 animate-spin" />
