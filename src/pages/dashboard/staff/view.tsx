@@ -30,12 +30,10 @@ export default function ViewStaff() {
   }
  
    const user = useSelector((state: RootState) => state.admin?.user);
-
+  console.log('Current user from Redux:', user);
 
   useEffect(() => {
-    if (id && Number(id) !== user?.profil?.id) {
-      navigate(webRoutes.staff.view.replace(':id', String(user?.profil?.id || '')), { replace: true } );
-    } else if (id) {
+    if (id) {
       fetchStaff(id);
     }
   }, [id]);
