@@ -195,7 +195,9 @@ const Login = loadable(() => import('../pages/auth/sign-in'), {
 });
 
 
-
+const Docs = loadable(() => import('../pages/docs'), {
+  fallback: fallbackElement,
+});
 
 const HealthFormClient = loadable(() => import('../pages/healthFormClient'), {
   fallback: fallbackElement,
@@ -258,6 +260,14 @@ export const browserRouter = createBrowserRouter([
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <Dashboard />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.docs,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Staff]}>
+            <Docs />
           </RequireRole>
         ),
       },

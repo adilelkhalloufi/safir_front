@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { webRoutes } from "@/routes/web";
-import { IconLogin, IconUser } from "@tabler/icons-react";
+import { IconFileReport, IconLogin, IconUser } from "@tabler/icons-react";
 import { LangToggle } from "./lang-toggle";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -76,8 +76,8 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <ThemeSwitch />
           <LangToggle />
-
-
+       
+ 
           {admin && (
             <Button
               variant="ghost"

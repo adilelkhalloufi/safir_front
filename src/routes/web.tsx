@@ -12,7 +12,7 @@ export const webRoutes = {
   healthFormClient: '/booking/:id/health-form',
   reviewsClient: '/booking/:id/reviews',
 
-
+  docs: '/docs',
   // Admin routes
   bookings: {
     index: '/dashboard/bookings',
