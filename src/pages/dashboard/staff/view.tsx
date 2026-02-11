@@ -18,7 +18,7 @@ export default function ViewStaff() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { id } = useParams();
 
-  const fetchStaff = async (id: string) => {
+  const fetchStaff = async (id: any) => {
     http.get(apiRoutes.adminStaffById(Number(id))).then(res => {
       setStaff(res.data?.data);
     }).catch(err => {

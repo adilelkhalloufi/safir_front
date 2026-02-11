@@ -1,5 +1,4 @@
-import { Header } from "@/components/landing/Header";
-import { useState } from "react";
+ import { useState } from "react";
 
 export default function Docs() {
     const [modalOpen, setModalOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { webRoutes } from "@/routes/web";
-import { IconFileReport, IconLogin, IconUser } from "@tabler/icons-react";
+import {  IconLogin, IconUser } from "@tabler/icons-react";
 import { LangToggle } from "./lang-toggle";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";

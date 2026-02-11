@@ -25,7 +25,7 @@ export default function EditStaff() {
     setPageTitle(t('staff.editTitle', 'Edit Staff Member'));
   }, [t]);
 
-  const fetchStaff = async (staffId) => {
+  const fetchStaff = async (staffId : any) => {
     setFetchLoading(true);
     try {
       const response = await http.get(apiRoutes.adminStaffById(Number(staffId)));
