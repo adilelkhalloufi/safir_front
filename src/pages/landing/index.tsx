@@ -7,7 +7,7 @@ import HeaderBooking from "./booking/HeaderBooking";
 
 const Index = () => {
   useEffect(() => {
-    setPageTitle("SAFIRI - Booking")
+    setPageTitle("SAFIR - Booking")
   }, [])
   return (
     <>
