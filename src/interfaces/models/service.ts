@@ -60,6 +60,7 @@ export interface Service {
   requires_health_form: boolean;
   has_sessions: boolean;
   price: number;
+  is_price_starting_from?: boolean;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

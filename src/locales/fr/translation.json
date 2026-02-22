@@ -375,6 +375,8 @@
     "duration": "Durée (minutes)",
     "bufferMinutes": "Minutes tampon",
     "price": "Prix",
+    "isPriceStartingFrom": "Prix à partir de",
+    "startingFrom": "à partir de",
     "description": "Description",
     "descriptionPlaceholder": "Décrivez le service...",
     "descriptionFr": "Description (FR)",

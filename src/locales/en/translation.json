@@ -214,6 +214,8 @@
     "serviceType": "Service Type",
     "duration": "Duration (minutes)",
     "price": "Price (€)",
+    "isPriceStartingFrom": "Price Starting From",
+    "startingFrom": "from",
     "description": "Description",
     "descriptionPlaceholder": "Describe the service...",
     "status": "Status",

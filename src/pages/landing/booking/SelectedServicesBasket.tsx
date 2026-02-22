@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { CheckCircle2, Clock, DollarSign, Minus, Plus, ShoppingCart} from 'lucide-react'
+import { CheckCircle2, Clock, DollarSign, Minus, Plus, ShoppingCart } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import { useDispatch } from 'react-redux'
@@ -41,14 +41,14 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                             <CheckCircle2 className="h-5 w-5 text-[#E09900]" />
                             {t('bookingWizard.selectServices.selectedServices', 'Selected Services')} ({selected.length})
                         </div>
-                             <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setIsClearDialogOpen(true)}
-                            >
-                                <IconTrash className="h-4 w-4" />
-                            </Button>
-                       
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setIsClearDialogOpen(true)}
+                        >
+                            <IconTrash className="h-4 w-4" />
+                        </Button>
+
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
                         {t('bookingWizard.selectServices.quantityNote', 'Note: The quantity indicates the number of persons for each service (max 4). Services will be scheduled sequentially in the order selected to avoid time conflicts.')}
@@ -70,11 +70,14 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                             <div className="flex flex-col gap-2 mt-1">
                                                 <div className='flex flex-row items-center gap-4'>
                                                     <Clock className="h-3 w-3 text-green-600" />
-                                                    <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0) } min</span>
+                                                    <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0)} min</span>
                                                 </div>
                                                 <div className='flex flex-row items-center gap-4'>
                                                     <DollarSign className="h-3 w-3 text-[#E09900]" />
-                                                    <span className="text-xs font-semibold text-[#E09900]">{(svc.price || 0) * (svc.quantity || 1)}</span>
+                                                    <span className="text-xs font-semibold text-[#E09900]">
+                                                        {svc.is_price_starting_from ? `${t('services.startingFrom')} ` : ''}
+                                                        {(svc.price || 0) * (svc.quantity || 1)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -82,42 +85,42 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                         {/* Person Count Controls */}
                                         <div className="flex items-center gap-1">
                                             {step < 2 && (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-6 w-6 p-0"
-                                                disabled={(svc.quantity || 1) <= 1}
-                                                onClick={() => {
-                                                    const currentCount = svc.quantity || 1
-                                                    if (currentCount > 1) {
-                                                        dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount - 1 }))
-                                                    }
-                                                }}
-                                            >
-                                                <Minus className="h-3 w-3" />
-                                            </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-6 w-6 p-0"
+                                                    disabled={(svc.quantity || 1) <= 1}
+                                                    onClick={() => {
+                                                        const currentCount = svc.quantity || 1
+                                                        if (currentCount > 1) {
+                                                            dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount - 1 }))
+                                                        }
+                                                    }}
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </Button>
                                             )}
                                             {step >= 2 && (
-                                             <IconUsersGroup size={16} className="text-muted-foreground" />   
+                                                <IconUsersGroup size={16} className="text-muted-foreground" />
                                             )}
                                             <span className="text-sm font-medium min-w-[20px] text-center">
                                                 {svc.quantity || 1}
                                             </span>
                                             {step < 2 && (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-6 w-6 p-0"
-                                                disabled={(svc.quantity || 1) >= 4}
-                                                onClick={() => {
-                                                    const currentCount = svc.quantity || 1
-                                                    if (currentCount < 4) {
-                                                        dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount + 1 }))
-                                                    }
-                                                }}
-                                            >
-                                                <Plus className="h-3 w-3" />
-                                            </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-6 w-6 p-0"
+                                                    disabled={(svc.quantity || 1) >= 4}
+                                                    onClick={() => {
+                                                        const currentCount = svc.quantity || 1
+                                                        if (currentCount < 4) {
+                                                            dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount + 1 }))
+                                                        }
+                                                    }}
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </Button>
                                             )}
                                         </div>
 
@@ -126,7 +129,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                             onClick={() => dispatch(toggleService({ serviceId: svc.id, service: svc }))}
                                             className="rounded-full hover:bg-red-100 p-1"
                                         >
-                                             <IconTrash size={16} className="text-red-500" />
+                                            <IconTrash size={16} className="text-red-500" />
                                         </button>
                                     </div>
                                 ))}
@@ -162,8 +165,8 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                         <Button variant="outline" onClick={() => setIsClearDialogOpen(false)}>
                             {t('common.cancel', 'Cancel')}
                         </Button>
-                        <Button 
-                            variant="destructive" 
+                        <Button
+                            variant="destructive"
                             onClick={() => {
                                 dispatch(resetBooking())
                                 setIsClearDialogOpen(false)

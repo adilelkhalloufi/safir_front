@@ -228,7 +228,10 @@ export function Review({
                         )}
                       </div>
                       <div className='ml-4 text-right'>
-                        <p className='font-semibold'>{service.price} $</p>
+                        <p className='font-semibold'>
+                          {service.is_price_starting_from ? `${t('services.startingFrom')} ` : ''}
+                          {service.price} $
+                        </p>
                         <p className='text-sm text-muted-foreground'>
                           {service.duration_minutes} min
                         </p>

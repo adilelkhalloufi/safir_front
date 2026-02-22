@@ -54,6 +54,7 @@ export default function EditService() {
         buffer_minutes: 0,
         requires_health_form: 0,
         has_sessions: 0,
+        is_price_starting_from: 0,
         slots: [],
         health_questions: [],
       };
@@ -71,6 +72,7 @@ export default function EditService() {
       is_active: serviceData.is_active ? 1 : 0,
       requires_health_form: serviceData.requires_health_form ? 1 : 0,
       has_sessions: serviceData.has_sessions ? 1 : 0,
+      is_price_starting_from: serviceData.is_price_starting_from ? 1 : 0,
       requirements: serviceData.requirements?.map((req: any) => ({
         resource_id: req.resource_id?.toString() || req.resource?.id?.toString() || '',
         quantity: req.quantity || 1,
@@ -201,6 +203,11 @@ export default function EditService() {
           type: 'number',
           required: true,
           placeholder: '0.00',
+        },
+        {
+          name: 'is_price_starting_from',
+          label: t('services.isPriceStartingFrom', 'Price Starting From'),
+          type: 'checkbox',
         },
         {
           name: 'requires_health_form',

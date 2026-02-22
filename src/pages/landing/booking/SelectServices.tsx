@@ -46,12 +46,19 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
     const sortedGroupedServices = Object.entries(groupedServices)
         .sort(([, a], [, b]) => a.displayOrder - b.displayOrder)
         .reduce((acc, [key, value]) => {
-            // Sort services within each type by name
-            value.services.sort((a: any, b: any) => {
-                const nameA = getLocalizedValue(a.name, currentLang) || ''
-                const nameB = getLocalizedValue(b.name, currentLang) || ''
-                return nameA.localeCompare(nameB)
-            })
+            // Sort services within each type:
+            // 1. Regular services (without has_sessions) sorted by price descending
+            // 2. Subscriptions (with has_sessions) sorted by price descending - appear last
+            const regularServices = value.services.filter((s: any) => !s.has_sessions)
+            const subscriptions = value.services.filter((s: any) => s.has_sessions)
+
+            // Sort both groups by price descending (highest first)
+            regularServices.sort((a: any, b: any) => b.price - a.price)
+            subscriptions.sort((a: any, b: any) => b.price - a.price)
+
+            // Combine: regular services first, then subscriptions
+            value.services = [...regularServices, ...subscriptions]
+
             acc[key] = value
             return acc
         }, {} as Record<string, { name: string, color: string, displayOrder: number, services: Service[] }>)
@@ -115,7 +122,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                 >
                                     <CardContent className="p-4 text-center">
                                         <div className='flex justify-center items-center'>
-                                           {typeData.icon && <IconDisplay iconName={typeData.icon} size={32} stroke={1.5}   />}
+                                            {typeData.icon && <IconDisplay iconName={typeData.icon} size={32} stroke={1.5} />}
                                         </div>
                                         <h3 className="font-semibold">{typeData.name}</h3>
                                         <Badge variant="secondary">{typeData.services.length}</Badge>
@@ -160,7 +167,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                     )}
                                                     onClick={() => onToggle(svc.id, svc)}
                                                 >
-                                                <div className="flex flex-col md:flex-row items-center gap-4">
+                                                    <div className="flex flex-col md:flex-row items-center gap-4">
                                                         {/* Type Indicator */}
                                                         <div
                                                             className="w-1 h-full absolute left-0 top-0 bottom-0 rounded-l-lg"
@@ -199,7 +206,7 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                                         </p>
                                                                     )}
                                                                 </div>
-                                                              
+
                                                             </div>
 
                                                             <div className="flex items-center gap-4 mt-3">
@@ -210,6 +217,9 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5 text-sm font-semibold text-[#E09900]">
+                                                                    {svc.is_price_starting_from && (
+                                                                        <span className="text-xs font-normal">{t('services.startingFrom')} </span>
+                                                                    )}
                                                                     <DollarSign className="h-3.5 w-3.5" />
                                                                     {svc.price}
                                                                 </div>

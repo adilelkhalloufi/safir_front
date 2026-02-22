@@ -138,7 +138,11 @@ export default function AddService() {
           required: true,
           placeholder: '0.00',
         },
-
+        {
+          name: 'is_price_starting_from',
+          label: t('services.isPriceStartingFrom', 'Price Starting From'),
+          type: 'checkbox',
+        },
 
         {
           name: 'description_fr',

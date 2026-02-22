@@ -38,7 +38,7 @@ interface SelectOptionsProps {
     onPrev: () => void
 }
 
- 
+
 
 export function SelectOptions({
     selectedServices,
@@ -146,7 +146,9 @@ export function SelectOptions({
                                     </div>
                                     <div>
                                         <div className="font-semibold text-lg">{getLocalizedValue(service.name, currentLang)}</div>
-                                        <div className="text-sm text-muted-foreground">{service.duration_minutes} min • {service.price} $</div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {service.duration_minutes} min • {service.is_price_starting_from ? `${t('services.startingFrom')} ` : ''}{service.price} $
+                                        </div>
                                     </div>
                                 </div>
 
@@ -159,7 +161,7 @@ export function SelectOptions({
                                                 { id: 'female', label: t('bookingWizard.selectOptions.genderFemale') },
                                                 { id: 'male', label: t('bookingWizard.selectOptions.genderMale') },
                                                 { id: 'mixed', label: t('bookingWizard.selectOptions.genderMixed') }
-                                            ].map((g : any) => (
+                                            ].map((g: any) => (
                                                 <button
                                                     key={g.id}
                                                     onClick={() => onSelectGender(service.id, g.id)}
@@ -190,7 +192,7 @@ export function SelectOptions({
                                                 const daySlots = availableDaysByGender[g.id] || {}
                                                 const days = Object.keys(daySlots).map(Number).sort((a, b) => a - b)
                                                 if (days.length === 0) return null
-                                                
+
                                                 const formatDayWithTime = (day: number) => {
                                                     const dayName = dayNames[day]
                                                     const times = daySlots[day]
@@ -201,7 +203,7 @@ export function SelectOptions({
                                                     }
                                                     return dayName
                                                 }
-                                                
+
                                                 return (
                                                     <div key={g.id} className="flex items-start gap-2 text-xs">
                                                         <span className={cn('font-semibold min-w-[60px]', g.color)}>{g.label}:</span>

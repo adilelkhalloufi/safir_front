@@ -41,9 +41,9 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
             : 'No Staff';
           const clientName = booking.client?.name || booking.client?.email || 'Unknown Client';
           const time = format(new Date(item.start_datetime), 'HH:mm');
-          const reference = booking.reference ? ` (${booking.reference})` : '';
+          // const reference = booking.reference ? ` (${booking.reference})` : '';
 
-          const title = `#${booking.id}${reference}\n${serviceName}\n${staffName} - ${clientName}\n${time}`;
+          const title = `\n${serviceName}\n(staff :${staffName}) - client: ${clientName}\n${time}`;
 
           return {
             title,
@@ -105,8 +105,7 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
             ? staff.user?.name || staff.user?.email || `Staff #${staff.id}`
             : 'No Staff';
           const clientName = client?.name || client?.email || 'Unknown Client';
-          const reference = event.booking.reference ? ` (${event.booking.reference})` : '';
-          return `Booking #${event.booking.id}${reference} | ${serviceName} | ${staffName} | ${clientName} | ${time}`;
+          return `Booking #${event.booking.id} | ${serviceName} | ${staffName} | ${clientName} | ${time}`;
         }}
       />
 

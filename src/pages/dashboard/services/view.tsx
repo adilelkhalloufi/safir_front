@@ -185,6 +185,18 @@ export default function ViewService() {
                 </div>
                 <div>
                   <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.isPriceStartingFrom', 'Price Starting From')}
+                  </p>
+                  <div className='mt-1'>
+                    <Badge
+                      variant={service?.is_price_starting_from ? 'default' : 'secondary'}
+                    >
+                      {service?.is_price_starting_from ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
                     {t('services.requiresHealthForm', 'Requires Health Form')}
                   </p>
                   <div className='mt-1'>
