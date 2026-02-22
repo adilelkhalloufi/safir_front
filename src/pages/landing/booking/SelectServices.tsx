@@ -81,7 +81,12 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
     // Get all services or filtered by type
     const getDisplayServices = () => {
         if (activeTab === 'all') {
-            return filterServices(services)
+            // Flatten all services while maintaining type grouping and price order within each type
+            const allServicesSorted: Service[] = []
+            Object.values(sortedGroupedServices).forEach((typeGroup) => {
+                allServicesSorted.push(...typeGroup.services)
+            })
+            return filterServices(allServicesSorted)
         }
         return filterServices(sortedGroupedServices[activeTab]?.services || [])
     }

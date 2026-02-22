@@ -12,8 +12,8 @@ import {
     updateCustomerInfo,
     resetBooking,
     setServiceAnyPreference,
-} from '../../../store/slices/bookingSlice' 
-import { setSettings } from '../../../store/slices/settingsSlice' 
+} from '../../../store/slices/bookingSlice'
+import { setSettings } from '../../../store/slices/settingsSlice'
 import type {
     Service,
 } from '../../../interfaces/models/service'
@@ -37,8 +37,8 @@ import { SelectedServicesBasket } from './SelectedServicesBasket'
 import { toast } from 'sonner'
 
 export default function BookingWizard() {
-    const {  t } = useTranslation()
- 
+    const { t } = useTranslation()
+
     const dispatch = useDispatch<AppDispatch>()
     const {
         step,
@@ -51,7 +51,7 @@ export default function BookingWizard() {
     const selectedServiceIds = selectedServices.map(s => s.id)
     const anyPreferences = selectedServices.reduce((acc, s) => {
         if (s.preferred_gender) {
-             acc[s.id] = s.preferred_gender
+            acc[s.id] = s.preferred_gender
         }
         return acc
     }, {} as Record<number, 'female' | 'male' | 'mixed'>)
@@ -64,7 +64,7 @@ export default function BookingWizard() {
             return response.data.data as Service[]
         }
     })
-    
+
     // Fetch availability slots from API (fetch when moving to step 2)
     const { data: availabilityData, isLoading: availabilityLoading } = useQuery({
         // Include step in queryKey to refetch when moving to step 2
@@ -74,10 +74,10 @@ export default function BookingWizard() {
             if (selectedServices.length === 0) return []
 
             // Use selected date or default to today
-            const dateObj = selectedDate 
+            const dateObj = selectedDate
                 ? (typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate)
                 : new Date()
-            
+
             const requestData: AvailabilitySlotsRequest = {
                 services: selectedServices.map(service => ({
                     service_id: service.id,
@@ -104,7 +104,7 @@ export default function BookingWizard() {
     useQuery({
         queryKey: ['settings'],
         queryFn: async () => {
-             try {
+            try {
                 const response = await defaultHttp.get(apiRoutes.Getsettings);
                 dispatch(setSettings(response.data));
                 return response.data;
@@ -160,9 +160,8 @@ export default function BookingWizard() {
             <div className="mx-auto max-w-7xl">
                 {/* Header */}
                 <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-[#020F44] to-[#E09900] bg-clip-text text-transparent mb-2">
-                        {t('bookingWizard.title')}
-                    </h1>
+                    <h1 className="text-4xl font-bold  mb-2">
+                        SAFIR Moroccan Hammam & Spa                      </h1>
                     <p className="text-muted-foreground">{t('bookingWizard.subtitle')}</p>
                 </div>
 
