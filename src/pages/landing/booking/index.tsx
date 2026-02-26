@@ -169,7 +169,7 @@ export default function BookingWizard() {
                 <Progress step={step} />
 
                 {/* Main Content with Basket */}
-                <div className="flex  flex-col-reverse md:flex-row gap-6">
+                <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 space-y-6">
 
                         {/* Step 0: Select Services */}
@@ -185,6 +185,13 @@ export default function BookingWizard() {
                                         handleNext()
                                     }
                                 }}
+                                mobileBasket={
+                                    <SelectedServicesBasket
+                                        selectedServices={selectedServices}
+                                        selected={selectedServiceIds}
+                                        step={step}
+                                    />
+                                }
                             />
                         )}
 
@@ -201,6 +208,13 @@ export default function BookingWizard() {
                                     handleNext()
                                 }}
                                 onPrev={handlePrev}
+                                mobileBasket={
+                                    <SelectedServicesBasket
+                                        selectedServices={selectedServices}
+                                        selected={selectedServiceIds}
+                                        step={step}
+                                    />
+                                }
                             />
                         )}
 
@@ -218,6 +232,13 @@ export default function BookingWizard() {
                                     }
                                 }}
                                 onPrev={handlePrev}
+                                mobileBasket={
+                                    <SelectedServicesBasket
+                                        selectedServices={selectedServices}
+                                        selected={selectedServiceIds}
+                                        step={step}
+                                    />
+                                }
                             />
                         )}
 
@@ -234,6 +255,13 @@ export default function BookingWizard() {
                                     }
                                 }}
                                 onPrev={handlePrev}
+                                mobileBasket={
+                                    <SelectedServicesBasket
+                                        selectedServices={selectedServices}
+                                        selected={selectedServiceIds}
+                                        step={step}
+                                    />
+                                }
                             />
                         )}
 
@@ -253,14 +281,15 @@ export default function BookingWizard() {
                             />
                         )}
 
-                        {/* Selected Services Basket - Shows in all steps */}
-
                     </div>
-                    <SelectedServicesBasket
-                        selectedServices={selectedServices}
-                        selected={selectedServiceIds}
-                        step={step}
-                    />
+                    {/* Selected Services Basket - Desktop only (shows on the side) */}
+                    <div className="hidden md:block">
+                        <SelectedServicesBasket
+                            selectedServices={selectedServices}
+                            selected={selectedServiceIds}
+                            step={step}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

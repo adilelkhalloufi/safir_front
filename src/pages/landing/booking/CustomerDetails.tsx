@@ -2,27 +2,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from 'react-i18next'
 import type { CustomerInfo } from './types'
-import MagicForm, {  MagicFormGroupProps } from '@/components/custom/MagicForm'
+import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm'
 
 interface CustomerDetailsProps {
     customerInfo: CustomerInfo
     onUpdateCustomer: (field: keyof CustomerInfo, value: string) => void
     onNext: () => void
     onPrev: () => void
+    mobileBasket?: React.ReactNode
 }
 
 export function CustomerDetails({
     customerInfo,
     onUpdateCustomer,
     onNext,
-    onPrev
+    onPrev,
+    mobileBasket
 }: CustomerDetailsProps) {
     const { t } = useTranslation()
 
-    const fields : MagicFormGroupProps[] = [
+    const fields: MagicFormGroupProps[] = [
         {
             group: '',
-            
+
             fields: [
                 {
                     name: 'name',
@@ -81,6 +83,13 @@ export function CustomerDetails({
                     initialValues={customerInfo}
                     button={t('bookingWizard.customerDetails.continue')}
                 />
+
+                {/* Mobile Basket - Before Back Button */}
+                {mobileBasket && (
+                    <div className="block md:hidden mt-4">
+                        {mobileBasket}
+                    </div>
+                )}
 
                 <div className="mt-3 flex justify-start">
                     <Button variant="outline" onClick={onPrev} size="lg">{t('bookingWizard.customerDetails.back')}</Button>

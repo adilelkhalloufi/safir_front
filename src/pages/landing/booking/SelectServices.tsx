@@ -17,9 +17,10 @@ interface SelectServicesProps {
     selected: number[]
     onToggle: (id: number, service: Service) => void
     onNext: () => void | null
+    mobileBasket?: React.ReactNode
 }
 
-export function SelectServices({ services, selected, onToggle, onNext }: SelectServicesProps) {
+export function SelectServices({ services, selected, onToggle, onNext, mobileBasket }: SelectServicesProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
     const [activeTab, setActiveTab] = useState<string>('all')
@@ -248,6 +249,13 @@ export function SelectServices({ services, selected, onToggle, onNext }: SelectS
                                 </div>
                             </ScrollArea>
                         </div>
+
+                        {/* Mobile Basket - Before Footer */}
+                        {mobileBasket && (
+                            <div className="block md:hidden">
+                                {mobileBasket}
+                            </div>
+                        )}
 
                         {/* Footer with Continue Button */}
                         <div className="flex justify-between items-center pt-4 border-t">

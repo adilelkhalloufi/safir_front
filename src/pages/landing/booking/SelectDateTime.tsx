@@ -48,7 +48,9 @@ interface SelectDateTimeProps {
   selectedServices?: Service[]
   onNext: () => void | null
   onPrev: () => void
+  mobileBasket?: React.ReactNode
 }
+
 
 export function SelectDateTime({
   selectedDate,
@@ -58,6 +60,7 @@ export function SelectDateTime({
   selectedServices,
   onNext,
   onPrev,
+  mobileBasket
 }: SelectDateTimeProps) {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
@@ -402,7 +405,7 @@ export function SelectDateTime({
                                     <SlotTimeButton
                                       key={slot.slot_id}
                                       slot={slot}
-                                      
+
                                       isSelected={isSelected}
                                       disabled={disabled}
                                       insufficient={insufficient}
@@ -431,6 +434,14 @@ export function SelectDateTime({
             </div>
           )}
         </div>
+
+        {/* Mobile Basket - Before Footer */}
+        {mobileBasket && (
+          <div className="block md:hidden mt-4">
+            {mobileBasket}
+          </div>
+        )}
+
         <div className='mt-6 flex justify-between'>
           <Button variant='outline' onClick={onPrev} size='lg'>
             {t('bookingWizard.selectDateTime.back')}

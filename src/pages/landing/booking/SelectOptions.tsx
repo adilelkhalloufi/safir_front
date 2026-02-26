@@ -36,6 +36,7 @@ interface SelectOptionsProps {
     onSelectGender: (serviceId: number, preference: 'female' | 'male' | 'mixed') => void
     onNext: () => void
     onPrev: () => void
+    mobileBasket?: React.ReactNode
 }
 
 
@@ -48,7 +49,8 @@ export function SelectOptions({
     anyPreferences,
     onSelectGender,
     onNext,
-    onPrev
+    onPrev,
+    mobileBasket
 }: SelectOptionsProps) {
     const { i18n, t } = useTranslation()
     const currentLang = (i18n.language || 'fr') as 'fr' | 'en' | 'ar'
@@ -258,6 +260,14 @@ export function SelectOptions({
                         )
                     })}
                 </div>
+
+                {/* Mobile Basket - Before Footer */}
+                {mobileBasket && (
+                    <div className="block md:hidden mt-4">
+                        {mobileBasket}
+                    </div>
+                )}
+
                 <div className="mt-6 flex justify-between">
                     <Button variant="outline" onClick={onPrev} size="lg">{t('bookingWizard.selectOptions.back')}</Button>
                     <Button onClick={onNext} size="lg" className="bg-gradient-to-r from-[#020F44] to-[#E09900] hover:from-[#020F44]/90 hover:to-[#E09900]/90">
