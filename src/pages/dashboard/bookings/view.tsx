@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { Calendar, Clock, User, Package, CreditCard, FileText } from 'lucide-react';
+import { Calendar, Clock, User, Package, CreditCard, FileText, ExternalLink } from 'lucide-react';
 
 export default function BookingsView() {
     const { t } = useTranslation();
@@ -41,6 +41,12 @@ export default function BookingsView() {
             setSelectedItem(item);
             setIsDialogOpen(true);
         }
+    };
+
+    const handleGoToHealthForm = (itemId: number, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const healthFormUrl = webRoutes.healthFormClient.replace(':id', itemId.toString());
+        window.open(healthFormUrl, '_blank');
     };
 
     const getStatusColor = (status: string) => {
@@ -189,6 +195,11 @@ export default function BookingsView() {
                                         </Badge>
                                         <h4 className="font-semibold">{item.service?.name?.[booking.language] || item.service?.name?.en}</h4>
                                         {item.healthForm && <FileText className="h-4 w-4 text-blue-500" />}
+                                        {item.service?.requires_health_form && !item.healthForm && (
+                                            <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                                {t('bookings.healthFormRequired', 'Health Form Required')}
+                                            </Badge>
+                                        )}
                                     </div>
                                     {item.service?.description?.[booking.language] && (
                                         <p className="text-sm text-muted-foreground mb-2">{item.service.description[booking.language]}</p>
@@ -210,8 +221,19 @@ export default function BookingsView() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right flex flex-col gap-2 items-end">
                                     <p className="font-semibold">{item.price} $</p>
+                                    {item.service?.requires_health_form && !item.healthForm && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={(e) => handleGoToHealthForm(item.id, e)}
+                                            className="flex items-center gap-1"
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                            {t('bookings.goToHealthForm', 'Fill Health Form')}
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ))}

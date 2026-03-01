@@ -80,6 +80,8 @@
     "status_completed": "Terminé",
     "status_cancelled": "Annulé",
     "status_no-show": "Absent",
+    "healthFormRequired": "Formulaire de santé requis",
+    "goToHealthForm": "Remplir le formulaire",
     "cancel": {
       "confirmTitle": "Annuler la réservation",
       "confirmMessage": "Êtes-vous sûr de vouloir annuler cette réservation ?",

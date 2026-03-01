@@ -80,6 +80,8 @@
     "status_completed": "Completed",
     "status_cancelled": "Cancelled",
     "status_no-show": "No-show",
+    "healthFormRequired": "Health Form Required",
+    "goToHealthForm": "Fill Health Form",
     "cancel": {
       "confirmTitle": "Cancel Booking",
       "confirmMessage": "Are you sure you want to cancel this booking?",
