@@ -5,11 +5,11 @@ import { apiRoutes } from '@/routes/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
- import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Languages } from 'lucide-react';
 import http from '@/utils/http';
 import HeaderBooking from './landing/booking/HeaderBooking';
 import MagicForm from '@/components/custom/MagicForm';
-import { useMemo, useState, useCallback, memo } from 'react';
+import { useMemo, useState, useCallback, memo, useEffect } from 'react';
 
 const normalizeAnswerValue = (v: any) => {
     if (v && typeof v === 'object' && 'question' in v && 'value' in v) return v.value;
@@ -18,7 +18,7 @@ const normalizeAnswerValue = (v: any) => {
 
 const HealthFormClient = () => {
     const { id } = useParams<{ id: string }>();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
     // (common fields are stored per-service in MagicForm answers)
@@ -28,7 +28,10 @@ const HealthFormClient = () => {
 
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState(false);
-    
+
+    // Get current language from i18n
+    const currentLang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
+
     const { data: healthFormData, isLoading, error } = useQuery({
         queryKey: ['healthFormBooking', id],
         queryFn: () =>
@@ -41,7 +44,7 @@ const HealthFormClient = () => {
 
     // Extract health questions from booking items that require health forms
     const healthQuestionsData = useMemo(() => {
-        if (!healthFormData?.booking_items) return null;
+        if (!healthFormData?.bookingItem) return null;
 
         const questionsByService: Array<{
             serviceId: number;
@@ -50,57 +53,68 @@ const HealthFormClient = () => {
             questions: any[];
         }> = [];
 
-        healthFormData.booking_items.forEach((item: any) => {
-            if (item.service?.requires_health_form && item.service?.health_questions) {
-                // Add common fields to each service's questions
-                const commonQuestions = [
-                    {
-                        id: 'email',
-                        question: { en: 'Email', fr: 'Email' },
-                        type: 'email',
-                        required: true,
-                        placeholder: { en: 'your.email@example.com', fr: 'votre.email@example.com' }
-                    },
-                    {
-                        id: 'nom',
-                        question: { en: 'Name', fr: 'Nom' },
-                        type: 'text',
-                        required: true,
-                        placeholder: { en: 'Your full name', fr: 'Votre nom complet' }
-                    },
-                    {
-                        id: 'telephone',
-                        question: { en: 'Phone Number', fr: 'Numéro de téléphone' },
-                        type: 'tel',
-                        required: true,
-                        placeholder: { en: '(506) 123-4567', fr: '(506) 123-4567' }
-                    },
-                    {
-                        id: 'codePostal',
-                        question: { en: 'Postal Code', fr: 'Code Postal' },
-                        type: 'text',
-                        required: false,
-                        placeholder: { en: 'E1A 1A1', fr: 'E1A 1A1' }
-                    }
-                ];
+        const item = healthFormData.bookingItem;
+        const lang = currentLang;
 
-                questionsByService.push({
-                    serviceId: item.service.id,
-                    bookingItemId: item.id,
-                    serviceName: item.service.name?.[healthFormData.language || 'en'] || item.service.name?.en,
-                    questions: [...commonQuestions, ...item.service.health_questions],
-                });
+        if (item.service?.requires_health_form && item.service?.health_questions) {
+            // Add common fields to each service's questions
+            const commonQuestions = [
+                {
+                    id: 'email',
+                    question: { en: 'Email', fr: 'Email' },
+                    type: 'email',
+                    required: true,
+                    placeholder: { en: 'your.email@example.com', fr: 'votre.email@example.com' }
+                },
+                {
+                    id: 'nom',
+                    question: { en: 'Name', fr: 'Nom' },
+                    type: 'text',
+                    required: true,
+                    placeholder: { en: 'Your full name', fr: 'Votre nom complet' }
+                },
+                {
+                    id: 'telephone',
+                    question: { en: 'Phone Number', fr: 'Numéro de téléphone' },
+                    type: 'tel',
+                    required: true,
+                    placeholder: { en: '(506) 123-4567', fr: '(506) 123-4567' }
+                },
+                {
+                    id: 'codePostal',
+                    question: { en: 'Postal Code', fr: 'Code Postal' },
+                    type: 'text',
+                    required: false,
+                    placeholder: { en: 'E1A 1A1', fr: 'E1A 1A1' }
+                }
+            ];
+
+            // Get service name based on language or fallback
+            let serviceName = item.service.name;
+            if (typeof serviceName === 'string') {
+                // name is already a string
+            } else if (serviceName?.[lang]) {
+                serviceName = serviceName[lang];
+            } else {
+                serviceName = serviceName?.en || serviceName?.name_fr || 'Service';
             }
-        });
+
+            questionsByService.push({
+                serviceId: item.service.id,
+                bookingItemId: item.id,
+                serviceName: serviceName,
+                questions: [...commonQuestions, ...item.service.health_questions],
+            });
+        }
 
         return questionsByService.length > 0 ? questionsByService : null;
-    }, [healthFormData]);
- 
+    }, [healthFormData, currentLang]);
 
-        // Build combined MagicForm groups (one group per service) and global initialValues
+
+    // Build combined MagicForm groups (one group per service) and global initialValues
     const groups = useMemo(() => {
         if (!healthQuestionsData) return [] as any[];
-        const lang = healthFormData?.language || 'en';
+        const lang = currentLang;
         return healthQuestionsData.map((serviceData) => {
             const idPrefix = `b${serviceData.bookingItemId}__`;
             const group: any = {
@@ -108,20 +122,13 @@ const HealthFormClient = () => {
                 bookingItemId: serviceData.bookingItemId,
                 group: serviceData.serviceName,
                 hideGroupTitle: false,
-                
+
                 card: true,
                 fields: [] as any[],
             };
 
-            // common fields (prefixed)
-            group.fields.push({ name: `${idPrefix}email`, label: t('health.email'), type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}nom`, label: t('health.name'), type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}telephone`, label: t('health.phone'), type: 'text', required: true, placeholder: '' });
-            group.fields.push({ name: `${idPrefix}codePostal`, label: t('health.postalCode'), type: 'text', required: false, placeholder: '' });
-
-            // backend health questions
+            // Process all questions from serviceData (including common ones)
             (serviceData.questions || []).forEach((q: any) => {
-                if (['email','nom','telephone','codePostal'].includes(q.id)) return;
                 const fieldName = `${idPrefix}${q.id}`;
                 const baseField: any = {
                     name: fieldName,
@@ -145,7 +152,7 @@ const HealthFormClient = () => {
 
             return group;
         });
-    }, [healthQuestionsData, healthFormData]);
+    }, [healthQuestionsData, currentLang]);
 
     const initialValues = useMemo(() => {
         const init: any = {};
@@ -173,23 +180,39 @@ const HealthFormClient = () => {
 
     // Add a single acceptance group appended to the service groups
     const groupsWithAcceptance = useMemo(() => {
+        const lang = currentLang;
         const acceptanceGroup = {
-            group: t('health.termsAndConditions'),
+            group: lang === 'fr' ? 'Termes et Conditions' : 'Terms and Conditions',
             hideGroupTitle: false,
             card: true,
             fields: [
-                { name: 'acceptConditions', label: t('health.acceptConditions'), type: 'checkbox', required: true },
-                { name: 'acceptMarketing', label: t('health.acceptMarketing'), type: 'checkbox', required: false },
+                {
+                    name: 'acceptConditions',
+                    label: lang === 'fr'
+                        ? "J'accepte les Conditions générales"
+                        : 'I accept the Terms and Conditions',
+                    type: 'checkbox',
+                    required: true
+                },
+                {
+                    name: 'acceptMarketing',
+                    label: lang === 'fr'
+                        ? "J'accepte de recevoir des communications marketing (optionnel)"
+                        : 'I accept to receive marketing communications (optional)',
+                    type: 'checkbox',
+                    required: false
+                },
             ],
         } as any;
 
         return [...groups, acceptanceGroup];
-    }, [groups, t]);
+    }, [groups, currentLang]);
 
     const handleSubmit = useCallback((formResult: any) => {
         // Global acceptance values
         const globalAccept = formResult['acceptConditions'];
         const globalMarketing = formResult['acceptMarketing'];
+        const lang = currentLang;
 
         // Build per-service answers and overall payload
         const clientsData = (groups || []).map((g: any) => {
@@ -217,8 +240,18 @@ const HealthFormClient = () => {
                     }
                     return acc;
                 }, [] as Array<{ question: string; value: any }>),
-                acceptConditions: { question: "J'accepte les Conditions générales", value: globalAccept ?? null },
-                acceptMarketing: { question: 'Communications marketing (optionnelles)', value: globalMarketing ?? null },
+                acceptConditions: {
+                    question: lang === 'fr'
+                        ? "J'accepte les Conditions générales"
+                        : 'I accept the Terms and Conditions',
+                    value: globalAccept ?? null
+                },
+                acceptMarketing: {
+                    question: lang === 'fr'
+                        ? 'Communications marketing (optionnelles)'
+                        : 'Marketing communications (optional)',
+                    value: globalMarketing ?? null
+                },
             };
         });
 
@@ -236,7 +269,8 @@ const HealthFormClient = () => {
         setServiceAnswers(newServiceAnswers);
 
         const allFormData = {
-            bookingReference: healthFormData?.reference,
+            bookingReference: healthFormData?.booking?.reference,
+            bookingItemId: healthFormData?.bookingItem?.id,
             clientInfo: healthFormData?.client,
             clients: clientsData,
         };
@@ -260,7 +294,7 @@ const HealthFormClient = () => {
                 setSubmitError('An error occurred while submitting the form. Please try again.');
             });
 
-    }, [groups, healthFormData, setServiceAnswers]);
+    }, [groups, healthFormData, currentLang]);
 
     if (isLoading) {
         return (
@@ -317,7 +351,7 @@ const HealthFormClient = () => {
                             <Alert variant={'destructive'}>
                                 <AlertDescription>
                                     {submitError || t('health.notFoundMessage')}
-                                 
+
                                 </AlertDescription>
                             </Alert>
                         </CardContent>
@@ -371,7 +405,7 @@ const HealthFormClient = () => {
                                 <p className="text-sm font-medium text-muted-foreground">
                                     {t('health.bookingReference', 'Booking Reference')}
                                 </p>
-                                <p className="text-base font-mono">{healthFormData.reference}</p>
+                                <p className="text-base font-mono">{healthFormData.booking?.reference}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
@@ -381,16 +415,16 @@ const HealthFormClient = () => {
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    {t('health.totalPrice', 'Total Price')}
+                                    {t('health.serviceName', 'Service')}
                                 </p>
-                                <p className="text-base font-semibold">${healthFormData.total_price}</p>
+                                <p className="text-base">{healthFormData.bookingItem?.service?.name || healthFormData.bookingItem?.service?.name_fr}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    {t('health.servicesRequiringHealthForm')}
+                                    {t('health.session', 'Session')}
                                 </p>
                                 <p className="text-base">
-                                    {healthFormData.booking_items?.filter((item: any) => item.service?.requires_health_form).length || 0}
+                                    {healthFormData.bookingItem?.start_datetime ? new Date(healthFormData.bookingItem.start_datetime).toLocaleString() : 'N/A'}
                                 </p>
                             </div>
                         </div>
@@ -412,7 +446,7 @@ const HealthFormClient = () => {
                 {/* Combined Health Forms using a single MagicForm */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t('health.fillForms')} : {healthFormData.booking_items?.filter((item: any) => item.service?.requires_health_form).length || 0}</CardTitle>
+                        <CardTitle>{t('health.fillForms')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <MagicForm
