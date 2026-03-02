@@ -5,11 +5,11 @@ import { apiRoutes } from '@/routes/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2, Languages } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import http from '@/utils/http';
 import HeaderBooking from './landing/booking/HeaderBooking';
 import MagicForm from '@/components/custom/MagicForm';
-import { useMemo, useState, useCallback, memo, useEffect } from 'react';
+import { useMemo, useState, useCallback, memo } from 'react';
 
 const normalizeAnswerValue = (v: any) => {
     if (v && typeof v === 'object' && 'question' in v && 'value' in v) return v.value;
