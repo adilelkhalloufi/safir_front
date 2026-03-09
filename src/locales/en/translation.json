@@ -396,6 +396,64 @@
     "refundError": "Error",
     "refundErrorDesc": "Failed to process refund. Please try again."
   },
+  "communications": {
+    "title": "Communications",
+    "subtitle": "View and manage communication history",
+    "list": "Communication History",
+    "columns": {
+      "id": "ID",
+      "booking": "Booking",
+      "channel": "Channel",
+      "to": "To",
+      "subject": "Subject",
+      "status": "Status",
+      "sent_at": "Sent At",
+      "created_at": "Created At"
+    },
+    "filter": {
+      "search": "Search by email or phone...",
+      "status": "Filter by status",
+      "channel": "Filter by channel"
+    },
+    "status": {
+      "all": "All",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "pending": "Pending"
+    },
+    "channel": {
+      "all": "All",
+      "email": "Email",
+      "sms": "SMS"
+    },
+    "stats": {
+      "total": "Total",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "byChannel": "By Channel",
+      "last30days": "Last 30 days"
+    },
+    "view": {
+      "title": "Communication Details",
+      "booking": "Booking ID",
+      "channel": "Channel",
+      "to": "To",
+      "status": "Status",
+      "subject": "Subject",
+      "error": "Error Message",
+      "sent_at": "Sent At",
+      "created_at": "Created At"
+    },
+    "empty": {
+      "title": "No communications found",
+      "description": "There are no communication records to display."
+    },
+    "error": {
+      "fetch": "Failed to fetch communications"
+    }
+  },
   "reports": {
     "title": "Analytics & Reports",
     "subtitle": "Business insights and performance metrics",

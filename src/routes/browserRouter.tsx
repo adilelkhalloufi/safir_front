@@ -177,6 +177,10 @@ const PaymentsView = loadable(() => import('../pages/dashboard/payments/view'), 
   fallback: fallbackElement,
 });
 
+const CommunicationsIndex = loadable(() => import('../pages/dashboard/communications'), {
+  fallback: fallbackElement,
+});
+
 const ReportsIndex = loadable(() => import('../pages/dashboard/reports'), {
   fallback: fallbackElement,
 });
@@ -348,6 +352,14 @@ export const browserRouter = createBrowserRouter([
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <PaymentsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.communications.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <CommunicationsIndex />
           </RequireRole>
         ),
       },

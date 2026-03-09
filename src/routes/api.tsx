@@ -62,7 +62,9 @@ export const apiRoutes = {
   adminStaffPerformance: `${API_URL}/admin/reports/staff-performance`,
   adminServiceStats: `${API_URL}/admin/reports/service-stats`,
 
-   
+  adminCommunications: `${API_URL}/admin/communications`,
+  adminCommunicationById: (id: number) => `${API_URL}/admin/communications/${id}`,
+  adminCommunicationsStatistics: `${API_URL}/admin/communications/statistics`,
 
   adminSettings: `${API_URL}/admin/settings`,
 

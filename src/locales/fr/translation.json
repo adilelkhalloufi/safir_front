@@ -305,6 +305,64 @@
     "more": "plus",
     "services": "Services"
   },
+  "communications": {
+    "title": "Communications",
+    "subtitle": "Voir et gérer l'historique des communications",
+    "list": "Historique des communications",
+    "columns": {
+      "id": "ID",
+      "booking": "Réservation",
+      "channel": "Canal",
+      "to": "À",
+      "subject": "Sujet",
+      "status": "Statut",
+      "sent_at": "Envoyé le",
+      "created_at": "Créé le"
+    },
+    "filter": {
+      "search": "Rechercher par email ou téléphone...",
+      "status": "Filtrer par statut",
+      "channel": "Filtrer par canal"
+    },
+    "status": {
+      "all": "Tout",
+      "sent": "Envoyé",
+      "delivered": "Livré",
+      "failed": "Échoué",
+      "pending": "En attente"
+    },
+    "channel": {
+      "all": "Tout",
+      "email": "Email",
+      "sms": "SMS"
+    },
+    "stats": {
+      "total": "Total",
+      "sent": "Envoyé",
+      "delivered": "Livré",
+      "failed": "Échoué",
+      "byChannel": "Par canal",
+      "last30days": "30 derniers jours"
+    },
+    "view": {
+      "title": "Détails de la communication",
+      "booking": "ID de réservation",
+      "channel": "Canal",
+      "to": "À",
+      "status": "Statut",
+      "subject": "Sujet",
+      "error": "Message d'erreur",
+      "sent_at": "Envoyé le",
+      "created_at": "Créé le"
+    },
+    "empty": {
+      "title": "Aucune communication trouvée",
+      "description": "Il n'y a aucun enregistrement de communication à afficher."
+    },
+    "error": {
+      "fetch": "Échec du chargement des communications"
+    }
+  },
   "reports": {
     "title": "Analytique & Rapports",
     "subtitle": "Aperçus commerciaux et indicateurs de performance",

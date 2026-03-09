@@ -74,6 +74,10 @@ export const webRoutes = {
     add: '/dashboard/payments/add',
     view: '/dashboard/payments/:id',
   },
+  communications: {
+    index: '/dashboard/communications',
+    view: '/dashboard/communications/:id',
+  },
   reports: {
     index: '/dashboard/reports',
   },

@@ -6,6 +6,8 @@ export * from './booking';
 // Client/User
 export * from './client';
 
+// Communication
+export * from './communication';
 
 // Subscription
 export * from './subscription';

@@ -8,6 +8,7 @@ import {
   IconMassage,
   IconHome,
   IconCreditCard,
+  IconMessage,
 } from '@tabler/icons-react';
 import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
@@ -103,6 +104,13 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.payments.index,
     icon: <IconCreditCard size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
+  },
+  {
+    title: 'Communications',
+    label: '',
+    href: webRoutes.communications.index,
+    icon: <IconMessage size={18} />,
     roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   // {
