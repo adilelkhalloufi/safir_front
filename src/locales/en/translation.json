@@ -407,6 +407,7 @@
       "to": "To",
       "subject": "Subject",
       "status": "Status",
+      "read_status": "Read Status",
       "sent_at": "Sent At",
       "created_at": "Created At"
     },
@@ -420,7 +421,9 @@
       "sent": "Sent",
       "delivered": "Delivered",
       "failed": "Failed",
-      "pending": "Pending"
+      "pending": "Pending",
+      "read": "Read",
+      "not_read": "Not Read"
     },
     "channel": {
       "all": "All",
@@ -452,6 +455,10 @@
     },
     "error": {
       "fetch": "Failed to fetch communications"
+    },
+    "tooltip": {
+      "message_read": "Message has been read by recipient",
+      "message_not_read": "Message has not been read yet"
     }
   },
   "reports": {

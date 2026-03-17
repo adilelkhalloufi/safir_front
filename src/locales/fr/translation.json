@@ -316,6 +316,7 @@
       "to": "À",
       "subject": "Sujet",
       "status": "Statut",
+      "read_status": "Statut de lecture",
       "sent_at": "Envoyé le",
       "created_at": "Créé le"
     },
@@ -329,7 +330,9 @@
       "sent": "Envoyé",
       "delivered": "Livré",
       "failed": "Échoué",
-      "pending": "En attente"
+      "pending": "En attente",
+      "read": "Lu",
+      "not_read": "Non lu"
     },
     "channel": {
       "all": "Tout",
@@ -361,6 +364,10 @@
     },
     "error": {
       "fetch": "Échec du chargement des communications"
+    },
+    "tooltip": {
+      "message_read": "Le message a été lu par le destinataire",
+      "message_not_read": "Le message n'a pas encore été lu"
     }
   },
   "reports": {
