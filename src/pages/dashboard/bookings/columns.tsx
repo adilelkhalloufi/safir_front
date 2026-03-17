@@ -105,13 +105,17 @@ export const GetBookingColumns = ({
       header: 'ID',
       cell: ({ row }) => {
         const booking = row.original;
+        const reference = row.getValue('reference') as string;
+        const displayRef = reference && reference.length > 3 
+          ? `${reference.substring(0, 3)}..` 
+          : reference;
         return (
           <Button
             variant="link"
             className="p-0 h-auto font-medium"
             onClick={() => onView?.(booking)}
           >
-            #{row.getValue('reference')}
+            #{displayRef}
           </Button>
         );
       },

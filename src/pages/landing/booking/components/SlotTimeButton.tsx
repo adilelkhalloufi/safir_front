@@ -56,11 +56,11 @@ export default function SlotTimeButton({
             {slot.available_staff && slot.available_staff.length > 2 ? ` +${slot.available_staff.length - 2}` : ''}
           </div>
 
-          {(slot.available_capacity || 0) > 0 && (
+          {/* {(slot.available_capacity || 0) > 0 && (
             <div className={cn('text-[9px] font-medium', insufficient ? 'text-red-600' : 'text-gray-500')}>
               {slot.available_capacity} {t('bookingWizard.selectDateTime.places')}
             </div>
-          )}
+          )} */}
 
           {insufficient && (
             <div className="mt-1 text-xs text-red-600">{t('bookingWizard.selectDateTime.insufficientCapacityShort')}</div>

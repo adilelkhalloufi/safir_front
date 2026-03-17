@@ -76,7 +76,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                                     <DollarSign className="h-3 w-3 text-[#E09900]" />
                                                     <span className="text-xs font-semibold text-[#E09900]">
                                                         {svc.is_price_starting_from ? `${t('services.startingFrom')} ` : ''}
-                                                        {(svc.price || 0) * (svc.quantity || 1)}
+                                                        {(svc.price || 0) * (svc.quantity || 1)} + Tax
                                                     </span>
                                                 </div>
                                             </div>
@@ -144,7 +144,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <DollarSign className="h-4 w-4 text-[#E09900]" />
-                                        <span className="font-semibold text-[#E09900]">{totalPrice}</span>
+                                        <span className="font-semibold text-[#E09900]">{totalPrice} + Tax</span>
                                     </div>
                                 </div>
                             </div>
