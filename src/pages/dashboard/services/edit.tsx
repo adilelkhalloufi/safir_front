@@ -75,6 +75,7 @@ export default function EditService() {
       has_sessions: serviceData.has_sessions ? 1 : 0,
       is_price_starting_from: serviceData.is_price_starting_from ? 1 : 0,
       has_tax: serviceData.has_tax ? 1 : 0,
+      minimum_booking_deposit: serviceData.minimum_booking_deposit || 0,
       requirements: serviceData.requirements?.map((req: any) => ({
         resource_id: req.resource_id?.toString() || req.resource?.id?.toString() || '',
         quantity: req.quantity || 1,
@@ -225,6 +226,13 @@ export default function EditService() {
           name: 'has_tax',
           label: t('services.hasTax', 'Has Tax'),
           type: 'checkbox',
+        },
+        {
+          name: 'minimum_booking_deposit',
+          label: t('services.minimumBookingDeposit', 'Minimum Booking Deposit'),
+          type: 'number',
+          required: false,
+          placeholder: '0',
         },
         {
           name: 'is_active',

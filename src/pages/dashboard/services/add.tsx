@@ -176,6 +176,13 @@ export default function AddService() {
           label: t('services.hasTax', 'Has Tax'),
           type: 'checkbox',
         },
+        {
+          name: 'minimum_booking_deposit',
+          label: t('services.minimumBookingDeposit', 'Minimum Booking Deposit'),
+          type: 'number',
+          required: false,
+          placeholder: '0',
+        }
       ],
     },
     {

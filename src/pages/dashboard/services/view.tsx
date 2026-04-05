@@ -197,6 +197,27 @@ export default function ViewService() {
                 </div>
                 <div>
                   <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.hasTax', 'Has Tax')}
+                  </p>
+                  <div className='mt-1'>
+                    <Badge
+                      variant={service?.has_tax ? 'default' : 'secondary'}
+                    >
+                      {service?.has_tax ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
+                    {t('services.minimumBookingDeposit', 'Minimum Booking Deposit')}
+                  </p>
+                  <div className='mt-1 flex items-center gap-2'>
+                    <IconCurrencyEuro className='h-4 w-4 text-muted-foreground' />
+                    <p className='text-base font-semibold'>{service?.minimum_booking_deposit || 0}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>
                     {t('services.requiresHealthForm', 'Requires Health Form')}
                   </p>
                   <div className='mt-1'>
