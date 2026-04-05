@@ -1,9 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Admin } from '@/interfaces/models/admin';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
@@ -11,9 +5,8 @@ import { login } from '@/store/slices/adminSlice';
 import { RootState } from '@/store';
 import http, { defaultHttp } from '@/utils/http';
 import { setPageTitle } from '@/utils';
-import { PasswordInput } from '@/components/custom/password-input';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Check, CreditCard, Loader2, Lock, Mail, Phone, Building2, Shield, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Check, CreditCard, Building2, User } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,6 +14,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { SubscriptionPlan } from '@/interfaces/models/subscriptionPlan';
 import HeaderBooking from '../booking/HeaderBooking';
+import { AccountCreationStep } from './components/AccountCreationStep';
+import { ServiceSelectionStep } from './components/ServiceSelectionStep';
+import { PlanSelectionStep } from './components/PlanSelectionStep';
+import { PaymentStep } from './components/PaymentStep';
+import { CheckoutStepper } from './components/CheckoutStepper';
 
 
 
@@ -277,336 +275,73 @@ export default function SubscriptionCheckoutPage() {
                 </div>
 
                 {/* Stepper */}
-                <div className='flex items-center justify-center gap-0'>
-                    {stepsConfig.map((s, i) => {
-                        const StepIcon = s.icon;
-                        const isActive = step === i;
-                        const isDone = step > i;
-                        return (
-                            <div key={i} className='flex items-center'>
-                                <div className='flex flex-col items-center gap-1.5'>
-                                    <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${isDone
-                                        ? 'border-primary bg-primary text-white'
-                                        : isActive
-                                            ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-muted-foreground/30 bg-muted/50 text-muted-foreground'
-                                        }`}>
-                                        {isDone ? <Check className='h-5 w-5' /> : <StepIcon className='h-4 w-4' />}
-                                    </div>
-                                    <span className={`text-xs font-medium whitespace-nowrap ${isActive || isDone ? 'text-primary' : 'text-muted-foreground'}`}>
-                                        {s.label}
-                                    </span>
-                                </div>
-                                {i < totalSteps - 1 && (
-                                    <div className={`mx-3 mt-[-18px] h-0.5 w-12 md:w-20 transition-colors duration-300 ${step > i ? 'bg-primary' : 'bg-muted-foreground/20'}`} />
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                <CheckoutStepper steps={stepsConfig} currentStep={step} />
 
                 {/* Step 0 (guest only): Create Account */}
                 {!isAuthenticated && step === 0 && (
-                    <Card className='overflow-hidden border-0 shadow-xl'>
-                        <div className='bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-6 py-5'>
-                            <div className='flex items-center gap-3'>
-                                <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white'>
-                                    <User className='h-5 w-5' />
-                                </div>
-                                <div>
-                                    <CardTitle className='text-xl'>{t('subscriptionCheckout.createAccountTitle', 'Create your account')}</CardTitle>
-                                    <p className='text-sm text-muted-foreground mt-0.5'>
-                                        {t('subscriptionCheckout.createAccountDescription', 'Create an account to continue with your subscription and payment.')}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <CardContent className='p-6 space-y-6'>
-                            {/* Personal info */}
-                            <div className='space-y-4'>
-                                <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
-                                    {t('subscriptionCheckout.personalInfo', 'Personal information')}
-                                </h3>
-                                <div className='grid gap-4 md:grid-cols-2'>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-name'>{t('subscriptionCheckout.fullName', 'Full name')}</Label>
-                                        <div className='relative'>
-                                            <User className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                            <Input
-                                                id='reg-name'
-                                                className='pl-10'
-                                                value={registerName}
-                                                onChange={(e) => setRegisterName(e.target.value)}
-                                                placeholder='John Doe'
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-email'>{t('subscriptionCheckout.email', 'Email')}</Label>
-                                        <div className='relative'>
-                                            <Mail className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                            <Input
-                                                id='reg-email'
-                                                type='email'
-                                                className='pl-10'
-                                                value={registerEmail}
-                                                onChange={(e) => setRegisterEmail(e.target.value)}
-                                                placeholder='you@example.com'
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-phone'>{t('subscriptionCheckout.phone', 'Phone number')}</Label>
-                                        <div className='relative'>
-                                            <Phone className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                            <Input
-                                                id='reg-phone'
-                                                className='pl-10'
-                                                value={registerPhone}
-                                                onChange={(e) => setRegisterPhone(e.target.value)}
-                                                placeholder='+1 XXX XXX XXXX'
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-company'>{t('subscriptionCheckout.company', 'Company')}</Label>
-                                        <div className='relative'>
-                                            <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                            <Input
-                                                id='reg-company'
-                                                className='pl-10'
-                                                value={registerCompany}
-                                                onChange={(e) => setRegisterCompany(e.target.value)}
-                                                placeholder={t('subscriptionCheckout.companyPlaceholder', 'Your company')}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Separator />
-
-                            {/* Password */}
-                            <div className='space-y-4'>
-                                <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
-                                    {t('subscriptionCheckout.securitySection', 'Security')}
-                                </h3>
-                                <div className='grid gap-4 md:grid-cols-2'>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-password'>{t('subscriptionCheckout.password', 'Password')}</Label>
-                                        <PasswordInput
-                                            id='reg-password'
-                                            value={registerPassword}
-                                            onChange={(e) => setRegisterPassword(e.target.value)}
-                                            placeholder='••••••••'
-                                        />
-                                        <p className='text-xs text-muted-foreground'>
-                                            {t('subscriptionCheckout.passwordHint', 'Minimum 6 characters')}
-                                        </p>
-                                    </div>
-                                    <div className='space-y-2'>
-                                        <Label htmlFor='reg-password-confirm'>{t('subscriptionCheckout.passwordConfirm', 'Confirm password')}</Label>
-                                        <PasswordInput
-                                            id='reg-password-confirm'
-                                            value={registerPasswordConfirm}
-                                            onChange={(e) => setRegisterPasswordConfirm(e.target.value)}
-                                            placeholder='••••••••'
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className='flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground'>
-                                <Lock className='h-4 w-4 shrink-0' />
-                                {t('subscriptionCheckout.privacyNote', 'Your information is secure and will never be shared with third parties.')}
-                            </div>
-
-                            <Button
-                                className='w-full h-12 text-base'
-                                disabled={!canCreateAccount || createAccountMutation.isPending}
-                                onClick={() => createAccountMutation.mutate()}
-                            >
-                                {createAccountMutation.isPending ? (
-                                    <><Loader2 className='mr-2 h-4 w-4 animate-spin' />{t('subscriptionCheckout.creatingAccount', 'Creating account...')}</>
-                                ) : (
-                                    <>{t('subscriptionCheckout.createAndContinue', 'Create account and continue')}<ArrowRight className='ml-2 h-4 w-4' /></>
-                                )}
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <AccountCreationStep
+                        registerName={registerName}
+                        setRegisterName={setRegisterName}
+                        registerEmail={registerEmail}
+                        setRegisterEmail={setRegisterEmail}
+                        registerPhone={registerPhone}
+                        setRegisterPhone={setRegisterPhone}
+                        registerCompany={registerCompany}
+                        setRegisterCompany={setRegisterCompany}
+                        registerPassword={registerPassword}
+                        setRegisterPassword={setRegisterPassword}
+                        registerPasswordConfirm={registerPasswordConfirm}
+                        setRegisterPasswordConfirm={setRegisterPasswordConfirm}
+                        canCreateAccount={canCreateAccount}
+                        isCreating={createAccountMutation.isPending}
+                        onCreateAccount={() => createAccountMutation.mutate()}
+                    />
                 )}
 
                 {/* Service step */}
                 {step === serviceStep && (
-                    <Card className='border-0 shadow-xl'>
-                        <CardHeader>
-                            <CardTitle>{t('subscriptionCheckout.chooseService', 'Choose a service')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className='flex flex-wrap gap-3'>
-                            {services.map((service) => (
-                                <Button
-                                    key={service.id}
-                                    variant={selectedServiceId === service.id ? 'default' : 'outline'}
-                                    onClick={() => {
-                                        setSelectedServiceId(service.id);
-                                        setSelectedPlanId(null);
-                                        updateUrl(service.id, null);
-                                    }}
-                                >
-                                    {service.name}
-                                </Button>
-                            ))}
-                        </CardContent>
-                        <CardContent className='flex justify-end'>
-                            <Button
-                                disabled={!selectedServiceId}
-                                onClick={() => setStep(planStep)}
-                            >
-                                {t('subscriptionCheckout.continue', 'Continue')}<ArrowRight className='ml-2 h-4 w-4' />
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <ServiceSelectionStep
+                        services={services}
+                        selectedServiceId={selectedServiceId}
+                        onSelectService={(serviceId) => {
+                            setSelectedServiceId(serviceId);
+                            setSelectedPlanId(null);
+                            updateUrl(serviceId, null);
+                        }}
+                        onContinue={() => setStep(planStep)}
+                    />
                 )}
 
                 {/* Plan step */}
                 {step === planStep && (
-                    <Card className='border-0 shadow-xl'>
-                        <CardHeader>
-                            <CardTitle>{t('subscriptionCheckout.choosePlan', 'Choose a plan')}</CardTitle>
-                            <CardDescription>
-                                {isLoading ? t('common.loading', 'Loading...') : t('subscriptionCheckout.planHelp', 'Select one subscription plan')}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='space-y-4'>
-                            {filteredPlans.map((plan) => (
-                                <button
-                                    key={plan.id}
-                                    type='button'
-                                    className={`w-full rounded-xl border-2 p-5 text-left transition-all duration-200 ${selectedPlanId === plan.id
-                                        ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20'
-                                        : 'border-transparent bg-muted/30 hover:border-primary/30 hover:shadow-sm'
-                                        }`}
-                                    onClick={() => {
-                                        setSelectedPlanId(plan.id);
-                                        updateUrl(selectedServiceId, plan.id);
-                                    }}
-                                >
-                                    <div className='flex items-center justify-between gap-2'>
-                                        <div className='font-semibold text-lg'>{getPlanName(plan)}</div>
-                                        <div className='flex items-center gap-2'>
-                                            {plan.max_members > 1 && <Badge>{t('subscriptionPublic.shared', 'Shared')}</Badge>}
-                                            {selectedPlanId === plan.id && (
-                                                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white'>
-                                                    <Check className='h-4 w-4' />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className='mt-2 text-sm text-muted-foreground'>
-                                        {plan.total_sessions} {t('subscriptionPublic.sessions', 'Sessions')} &middot; {plan.duration_days} {t('common.days', 'days')}
-                                    </div>
-                                    <div className='mt-2 text-2xl font-bold'>{plan.price} $</div>
-                                </button>
-                            ))}
-                        </CardContent>
-                        <CardContent className='flex justify-between'>
-                            <Button variant='outline' onClick={() => setStep(serviceStep)}>
-                                <ArrowLeft className='mr-2 h-4 w-4' />{t('subscriptionCheckout.back', 'Back')}
-                            </Button>
-                            <Button disabled={!selectedPlanId} onClick={() => setStep(paymentStep)}>
-                                {t('subscriptionCheckout.continue', 'Continue')}<ArrowRight className='ml-2 h-4 w-4' />
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <PlanSelectionStep
+                        plans={filteredPlans}
+                        selectedPlanId={selectedPlanId}
+                        isLoading={isLoading}
+                        onSelectPlan={(planId) => {
+                            setSelectedPlanId(planId);
+                            updateUrl(selectedServiceId, planId);
+                        }}
+                        onBack={() => setStep(serviceStep)}
+                        onContinue={() => setStep(paymentStep)}
+                        getPlanName={getPlanName}
+                    />
                 )}
 
                 {/* Payment step */}
                 {step === paymentStep && selectedPlan && (
-                    <Card className='border-0 shadow-xl overflow-hidden'>
-                        <div className='bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-6 py-5'>
-                            <div className='flex items-center gap-3'>
-                                <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white'>
-                                    <CreditCard className='h-5 w-5' />
-                                </div>
-                                <div>
-                                    <CardTitle className='text-xl'>{t('subscriptionCheckout.paymentTitle', 'Secure payment')}</CardTitle>
-                                    <p className='text-sm text-muted-foreground mt-0.5'>
-                                        {t('subscriptionCheckout.paymentDescription', 'Enter your card details below to complete payment via Square.')}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <CardContent className='p-6 space-y-5'>
-                            {/* Order summary */}
-                            <div className='rounded-xl border bg-muted/20 p-5'>
-                                <p className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2'>
-                                    {t('subscriptionCheckout.orderSummary', 'Order summary')}
-                                </p>
-                                <div className='flex items-center justify-between'>
-                                    <div>
-                                        <div className='font-semibold text-lg'>{getPlanName(selectedPlan)}</div>
-                                        <div className='text-sm text-muted-foreground'>
-                                            {selectedPlan.total_sessions} {t('subscriptionPublic.sessions', 'Sessions')} &middot; {selectedPlan.duration_days} {t('common.days', 'days')}
-                                        </div>
-                                    </div>
-                                    <div className='text-3xl font-bold'>{selectedPlan.price} $</div>
-                                </div>
-                            </div>
-
-                            <Separator />
-
-                            {/* Card holder */}
-                            <div className='space-y-2'>
-                                <Label htmlFor='card-name'>{t('subscriptionCheckout.cardHolder', 'Card holder name')}</Label>
-                                <div className='relative'>
-                                    <User className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                    <Input
-                                        id='card-name'
-                                        className='pl-10'
-                                        value={cardName}
-                                        onChange={(e) => setCardName(e.target.value)}
-                                        placeholder={t('subscriptionCheckout.cardHolderPlaceholder', 'Name on card')}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Square card container */}
-                            <div className='space-y-2'>
-                                <Label>{t('subscriptionCheckout.cardDetails', 'Card details')}</Label>
-                                <div
-                                    ref={cardContainerRef}
-                                    className='min-h-[90px] rounded-lg border-2 border-dashed bg-white p-4 transition-colors focus-within:border-primary'
-                                />
-                                {!squareReady && (
-                                    <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                                        <Loader2 className='h-4 w-4 animate-spin' />
-                                        {t('subscriptionCheckout.loadingCard', 'Loading secure card form...')}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className='flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800'>
-                                <Shield className='h-4 w-4 shrink-0' />
-                                {t('subscriptionCheckout.securedBy', 'Secured payment by Square')}
-                            </div>
-                        </CardContent>
-                        <CardContent className='flex justify-between p-6 pt-0'>
-                            <Button variant='outline' onClick={() => setStep(planStep)}>
-                                <ArrowLeft className='mr-2 h-4 w-4' />{t('subscriptionCheckout.back', 'Back')}
-                            </Button>
-                            <Button
-                                className='h-12 px-8 text-base'
-                                disabled={!squareReady || !cardName.trim() || paymentProcessing || createSubscriptionMutation.isPending}
-                                onClick={handleSquarePayment}
-                            >
-                                {(paymentProcessing || createSubscriptionMutation.isPending) ? (
-                                    <><Loader2 className='mr-2 h-4 w-4 animate-spin' />{t('subscriptionCheckout.processing', 'Processing...')}</>
-                                ) : (
-                                    <><Lock className='mr-2 h-4 w-4' />{t('subscriptionCheckout.payAndActivate', 'Pay and activate subscription')}</>
-                                )}
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <PaymentStep
+                        plan={selectedPlan}
+                        cardName={cardName}
+                        setCardName={setCardName}
+                        cardContainerRef={cardContainerRef}
+                        squareReady={squareReady}
+                        paymentProcessing={paymentProcessing}
+                        isProcessing={createSubscriptionMutation.isPending}
+                        onBack={() => setStep(planStep)}
+                        onPay={handleSquarePayment}
+                        getPlanName={getPlanName}
+                    />
                 )}
             </div>
         </div>
