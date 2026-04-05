@@ -71,6 +71,7 @@ export interface Service {
   preferred_gender?: Gender;
   quantity?: number; // Note: 'quantity' is for person count in booking context
   slot?: ServiceSlot; // Slot information for booking context
+  has_tax?: boolean; // Indicates if the service has tax applied
   
 }
 

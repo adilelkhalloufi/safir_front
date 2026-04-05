@@ -171,6 +171,11 @@ export default function AddService() {
           label: t('services.hasSessions', 'Has Sessions'),
           type: 'checkbox',
         },
+        {
+          name: 'has_tax',
+          label: t('services.hasTax', 'Has Tax'),
+          type: 'checkbox',
+        },
       ],
     },
     {

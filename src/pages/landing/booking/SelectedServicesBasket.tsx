@@ -63,7 +63,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                     ) : (
                         <>
                             <div className="space-y-3">
-                                {selectedServices.map((svc: any) => (
+                                {selectedServices.map((svc: Service) => (
                                     <div key={svc.id} className="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-blue-50 rounded-lg p-3 border">
                                         <div className="flex-1">
                                             <span className="text-sm font-medium">{getLocalizedValue(svc.name, currentLang)}</span>
@@ -76,7 +76,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                                     <DollarSign className="h-3 w-3 text-[#E09900]" />
                                                     <span className="text-xs font-semibold text-[#E09900]">
                                                         {svc.is_price_starting_from ? `${t('services.startingFrom')} ` : ''}
-                                                        {(svc.price || 0) * (svc.quantity || 1)} + Tax
+                                                        {(svc.price || 0) * (svc.quantity || 1)} {svc.has_tax ? `+ TAX` : ''}
                                                     </span>
                                                 </div>
                                             </div>
@@ -144,7 +144,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <DollarSign className="h-4 w-4 text-[#E09900]" />
-                                        <span className="font-semibold text-[#E09900]">{totalPrice} + Tax</span>
+                                        <span className="font-semibold text-[#E09900]">{totalPrice} </span>
                                     </div>
                                 </div>
                             </div>

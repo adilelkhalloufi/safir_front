@@ -54,6 +54,7 @@ export default function EditService() {
         buffer_minutes: 0,
         requires_health_form: 0,
         has_sessions: 0,
+        has_tax: 0,
         is_price_starting_from: 0,
         slots: [],
         health_questions: [],
@@ -73,6 +74,7 @@ export default function EditService() {
       requires_health_form: serviceData.requires_health_form ? 1 : 0,
       has_sessions: serviceData.has_sessions ? 1 : 0,
       is_price_starting_from: serviceData.is_price_starting_from ? 1 : 0,
+      has_tax: serviceData.has_tax ? 1 : 0,
       requirements: serviceData.requirements?.map((req: any) => ({
         resource_id: req.resource_id?.toString() || req.resource?.id?.toString() || '',
         quantity: req.quantity || 1,
@@ -217,6 +219,11 @@ export default function EditService() {
         {
           name: 'has_sessions',
           label: t('services.hasSessions', 'Has Sessions'),
+          type: 'checkbox',
+        },
+        {
+          name: 'has_tax',
+          label: t('services.hasTax', 'Has Tax'),
           type: 'checkbox',
         },
         {
