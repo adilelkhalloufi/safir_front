@@ -8,6 +8,8 @@ export const webRoutes = {
   logout: '/logout',
   Dashboard: '/Dashbord',
   booking: '/booking',
+  subscriptionPlans: '/subscriptions',
+  subscriptionCheckout: '/subscriptions/checkout',
   cancelBooking: '/booking/:id/cancel',
   healthFormClient: '/booking/:id/health-form',
   reviewsClient: '/booking/:id/reviews',
@@ -32,6 +34,16 @@ export const webRoutes = {
     add: '/dashboard/subscriptions/add',
     edit: '/dashboard/subscriptions/:id/edit',
   },
+  subscriptionPlansAdmin: {
+    index: '/dashboard/subscription-plans',
+    view: '/dashboard/subscription-plans/:id',
+    add: '/dashboard/subscription-plans/add',
+    edit: '/dashboard/subscription-plans/:id/edit',
+  },
+  client: {
+    subscriptions: '/dashboard/my-subscriptions',
+    subscriptionMembers: '/dashboard/my-subscriptions/:id/members',
+  },
   healthForms: {
     index: '/dashboard/health-forms',
     view: '/dashboard/health-forms/:id',
@@ -44,7 +56,7 @@ export const webRoutes = {
     view: '/dashboard/staff/:id',
     add: '/dashboard/staff/add',
     edit: '/dashboard/staff/:id/edit',
-   },
+  },
   services: {
     index: '/dashboard/services',
     view: '/dashboard/services/:id',

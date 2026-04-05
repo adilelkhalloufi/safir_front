@@ -2,7 +2,7 @@ import { HTMLAttributes, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
- import {
+import {
   Form,
   FormControl,
   FormField,
@@ -23,8 +23,8 @@ import { defaultHttp } from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
 import { Admin } from '@/interfaces/models/admin'
 import { login } from '@/store/slices/adminSlice'
- 
-interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
+
+interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
   email: z
@@ -46,9 +46,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const from = location.state?.from?.pathname || webRoutes.Dashboard;
+  const fromPathname = location.state?.from?.pathname || webRoutes.Dashboard;
+  const fromSearch = location.state?.from?.search || '';
   const admin = useSelector((state: RootState) => state.admin);
- 
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,23 +60,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
 
 
-  
+
   useEffect(() => {
-      setPageTitle('Log in');
-  
- 
-    
+    setPageTitle('Log in');
+
+
+
   }, []);
 
   useEffect(() => {
     if (admin) {
-      navigate(from, { replace: true });
+      navigate(`${fromPathname}${fromSearch}`, { replace: true });
     }
-  }, [admin]);
- 
+  }, [admin, fromPathname, fromSearch, navigate]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-  
-    
+
+
     setIsLoading(true)
 
 
@@ -85,7 +86,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         password: values.password,
       })
       .then((response) => {
-        console.log("response ",response.data)
+        console.log("response ", response.data)
         const admin: Admin = {
           token: response.data.token,
           user: response.data.user
@@ -140,7 +141,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Button className='mt-2' loading={isLoading}  >
               Login
             </Button>
-{/* 
+            {/* 
             <div className='relative my-2'>
               <div className='absolute inset-0 flex items-center'>
                 <span className='w-full border-t' />

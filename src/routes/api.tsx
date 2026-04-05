@@ -27,13 +27,21 @@ export const apiRoutes = {
   adminSubscriptions: `${API_URL}/admin/subscriptions`,
   adminSubscriptionById: (id: number) => `${API_URL}/admin/subscriptions/${id}`,
   adminSubscriptionSuspend: (id: number) => `${API_URL}/admin/subscriptions/${id}/suspend`,
+  adminSubscriptionActivate: (id: number) => `${API_URL}/admin/subscriptions/${id}/activate`,
+  adminSubscriptionDeactivate: (id: number) => `${API_URL}/admin/subscriptions/${id}/deactivate`,
+  adminSubscriptionMembers: (id: number) => `${API_URL}/admin/subscriptions/${id}/members`,
+  adminSubscriptionMemberByUser: (id: number, userId: number) => `${API_URL}/admin/subscriptions/${id}/members/${userId}`,
+
+  adminSubscriptionPlans: `${API_URL}/admin/subscription-plans`,
+  adminSubscriptionPlanById: (id: number) => `${API_URL}/admin/subscription-plans/${id}`,
+  adminSubscriptionPlanToggleActive: (id: number) => `${API_URL}/admin/subscription-plans/${id}/toggle-active`,
 
 
   adminStaff: `${API_URL}/admin/staff`,
   adminStaffById: (id: number) => `${API_URL}/admin/staff/${id}`,
   adminStaffSchedule: (id: number) => `${API_URL}/admin/staff/${id}/schedule`,
   adminStaffAvailability: (id: number) => `${API_URL}/admin/staff/${id}/availability`,
-   // Calendar API
+  // Calendar API
   calendarWeekly: `${API_URL}/calendar/weekly`,
   calendarDay: `${API_URL}/calendar/day`,
 
@@ -77,6 +85,12 @@ export const apiRoutes = {
   availability: `${API_URL}/availability/multiple-services`,
   hammamSessions: `${API_URL}/hammam/sessions`,
   bookings: `${API_URL}/bookings`,
+  subscriptionPlans: `${API_URL}/subscription-plans`,
+  subscriptions: `${API_URL}/subscriptions`,
+  subscriptionById: (id: number) => `${API_URL}/subscriptions/${id}`,
+  subscriptionPayment: `${API_URL}/subscriptions/payment`,
+  subscriptionMembers: (id: number) => `${API_URL}/subscriptions/${id}/members`,
+  subscriptionMemberByUser: (id: number, userId: number) => `${API_URL}/subscriptions/${id}/members/${userId}`,
   guestBookings: `${API_URL}/guest-bookings`,
   guestBookingById: (id: number) => `${API_URL}/guest-bookings/${id}`,
   confirmGuestBooking: (id: number) => `${API_URL}/guest-bookings/${id}/confirm`,

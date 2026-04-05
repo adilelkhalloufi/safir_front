@@ -70,7 +70,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                             <div className="flex flex-col gap-2 mt-1">
                                                 <div className='flex flex-row items-center gap-4'>
                                                     <Clock className="h-3 w-3 text-green-600" />
-                                                    <span className="text-xs text-green-600">{(svc.duration_minutes || svc.duration || 0)} min</span>
+                                                    <span className="text-xs text-green-600">{(svc.duration_minutes || 0)} min</span>
                                                 </div>
                                                 <div className='flex flex-row items-center gap-4'>
                                                     <DollarSign className="h-3 w-3 text-[#E09900]" />

@@ -11,6 +11,12 @@ import { StatsCards } from './components/stats-cards';
 import { BookingStatusChart } from './components/booking-status-chart';
 import { ServiceTypeChart } from './components/service-type-chart';
 import { Overview } from './components/overview';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { RoleEnum } from '@/interfaces/enum/RoleEnum';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { webRoutes } from '@/routes/web';
 
 interface ServiceTypeData {
   service_type_id: number;
@@ -67,17 +73,26 @@ interface DashboardStatistics {
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const navigate = useNavigate();
+  const userRole = useSelector((state: RootState) => state.admin?.user?.role as RoleEnum | undefined);
   const [dashboardData, setDashboardData] = useState<DashboardStatistics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [clientSubscriptions, setClientSubscriptions] = useState<any[]>([]);
 
   useEffect(() => {
     setPageTitle(t('dashboard.title'));
     fetchDashboardData();
-  }, [t]);
+  }, [t, userRole]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      if (userRole === RoleEnum.Client) {
+        const response = await http.get(apiRoutes.subscriptions);
+        const payload = response.data?.data || response.data || [];
+        setClientSubscriptions(Array.isArray(payload) ? payload : []);
+        return;
+      }
       // Get current month date range
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -96,6 +111,54 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  if (userRole === RoleEnum.Client) {
+    const totalSubscriptions = clientSubscriptions.length;
+    const activeSubscriptions = clientSubscriptions.filter((item) => item?.is_valid).length;
+    const remainingSessions = clientSubscriptions.reduce((sum, item) => sum + Number(item?.remaining_sessions || 0), 0);
+
+    return (
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h1 className='text-2xl font-bold tracking-tight'>{t('dashboard.title')}</h1>
+        </div>
+        <div className='grid gap-4 md:grid-cols-3'>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('clientSubscriptions.total', 'My subscriptions')}</CardTitle>
+            </CardHeader>
+            <CardContent className='text-2xl font-bold'>{totalSubscriptions}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('clientSubscriptions.active', 'Active')}</CardTitle>
+            </CardHeader>
+            <CardContent className='text-2xl font-bold'>{activeSubscriptions}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('clientSubscriptions.sessionsLeft', 'Sessions left')}</CardTitle>
+            </CardHeader>
+            <CardContent className='text-2xl font-bold'>{remainingSessions}</CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('clientSubscriptions.quickActions', 'Quick actions')}</CardTitle>
+          </CardHeader>
+          <CardContent className='flex flex-wrap gap-2'>
+            <Button onClick={() => navigate(webRoutes.client.subscriptions)}>
+              {t('clientSubscriptions.manageMembers', 'Manage members')}
+            </Button>
+            <Button variant='outline' onClick={() => navigate(webRoutes.booking)}>
+              {t('clientSubscriptions.bookNew', 'Book a reservation')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -137,7 +200,7 @@ export default function Dashboard() {
             todayBookings={dashboardData?.bookings.total || 0}
             todayRevenue={dashboardData?.revenue.total || 0}
             activeClients={dashboardData?.clients.active_in_period || 0}
-           />
+          />
 
           {/* Revenue Trend Chart */}
           <Card>

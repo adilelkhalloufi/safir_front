@@ -9,6 +9,7 @@ import {
   IconHome,
   IconCreditCard,
   IconMessage,
+  IconTicket,
 } from '@tabler/icons-react';
 import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
@@ -46,12 +47,27 @@ export const sidelinks: SideLink[] = [
     icon: <IconUsers size={18} />,
     roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
-  // {
-  //   title: 'Subscriptions',
-  //   label: '',
-  //   href: webRoutes.subscriptions.index,
-  //   icon: <IconTicket size={18} />,
-  // },
+  {
+    title: 'My Subscriptions',
+    label: '',
+    href: webRoutes.client.subscriptions,
+    icon: <IconTicket size={18} />,
+    roles: [RoleEnum.Client],
+  },
+  {
+    title: 'Subscription Plans',
+    label: '',
+    href: webRoutes.subscriptionPlansAdmin.index,
+    icon: <IconTicket size={18} />,
+    roles: [RoleEnum.Admin],
+  },
+  {
+    title: 'Subscriptions',
+    label: '',
+    href: webRoutes.subscriptions.index,
+    icon: <IconTicket size={18} />,
+    roles: [RoleEnum.Admin],
+  },
   // {
   //   title: 'Health Forms',
   //   label: '',

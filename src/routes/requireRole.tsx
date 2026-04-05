@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { RootState } from '../store';
 import { webRoutes } from './web';
 import { RoleEnum } from '@/interfaces/enum/RoleEnum';
- 
+
 export type RequireRoleProps = {
     children: JSX.Element;
     allowedRoles?: RoleEnum[];
@@ -27,8 +27,11 @@ const RequireRole = ({ children, allowedRoles }: RequireRoleProps) => {
         if (userRole === RoleEnum.Staff) {
             return <Navigate to={webRoutes.staff.view.replace(':id', String(user?.profil?.id || ''))} replace />;
         }
+        if (userRole === RoleEnum.Client) {
+            return <Navigate to={webRoutes.client.subscriptions} replace />;
+        }
         // Otherwise, redirect to dashboard or first accessible page
-        return <Navigate to={webRoutes.bookings.index} replace />;
+        return <Navigate to={webRoutes.Dashboard} replace />;
     }
 
     return children;

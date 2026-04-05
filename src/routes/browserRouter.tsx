@@ -198,6 +198,38 @@ const Login = loadable(() => import('../pages/auth/sign-in'), {
   fallback: fallbackElement,
 });
 
+const SubscriptionPlansPage = loadable(() => import('../pages/landing/subscriptions'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionCheckoutPage = loadable(() => import('../pages/landing/subscriptions/checkout'), {
+  fallback: fallbackElement,
+});
+
+const ClientSubscriptionsPage = loadable(() => import('../pages/dashboard/client-subscriptions'), {
+  fallback: fallbackElement,
+});
+
+const ClientSubscriptionMembersPage = loadable(() => import('../pages/dashboard/client-subscriptions/members'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionPlansAdminIndex = loadable(() => import('../pages/dashboard/subscription-plans'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionPlansAdminAdd = loadable(() => import('../pages/dashboard/subscription-plans/add'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionPlansAdminEdit = loadable(() => import('../pages/dashboard/subscription-plans/edit'), {
+  fallback: fallbackElement,
+});
+
+const SubscriptionPlansAdminView = loadable(() => import('../pages/dashboard/subscription-plans/view'), {
+  fallback: fallbackElement,
+});
+
 
 const Docs = loadable(() => import('../pages/docs'), {
   fallback: fallbackElement,
@@ -216,6 +248,21 @@ export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.home,
     element: <LandingPage />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.booking,
+    element: <LandingPage />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.subscriptionPlans,
+    element: <SubscriptionPlansPage />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.subscriptionCheckout,
+    element: <SubscriptionCheckoutPage />,
     errorElement: errorElement,
   },
   {
@@ -262,8 +309,24 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.Dashboard,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Client]}>
             <Dashboard />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.client.subscriptions,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Client]}>
+            <ClientSubscriptionsPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.client.subscriptionMembers,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Client]}>
+            <ClientSubscriptionMembersPage />
           </RequireRole>
         ),
       },
@@ -391,7 +454,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.staff.edit,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin,RoleEnum.Staff]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
             <StaffEdit />
           </RequireRole>
         ),
@@ -405,7 +468,7 @@ export const browserRouter = createBrowserRouter([
         ),
       },
       {
-        path:webRoutes.staff.myCalendar,
+        path: webRoutes.staff.myCalendar,
         element: (
           <RequireRole allowedRoles={[RoleEnum.Staff]}>
             <MyStaffCalendar />
@@ -441,6 +504,38 @@ export const browserRouter = createBrowserRouter([
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin]}>
             <SubscriptionsView />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptionPlansAdmin.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionPlansAdminIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptionPlansAdmin.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionPlansAdminAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptionPlansAdmin.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionPlansAdminEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.subscriptionPlansAdmin.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <SubscriptionPlansAdminView />
           </RequireRole>
         ),
       },

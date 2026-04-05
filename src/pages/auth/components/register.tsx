@@ -23,7 +23,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Header } from '@/components/landing/Header'
 import Footer from '@/components/landing/Footer'
 
-interface RegisterFormProps extends HTMLAttributes<HTMLDivElement> {}
+interface RegisterFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
   name: z
@@ -48,10 +48,10 @@ const formSchema = z.object({
     .string()
     .min(1, { message: 'Veuillez confirmer votre mot de passe' })
 })
-.refine((data) => data.password === data.password_confirmation, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ['password_confirmation'],
-})
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ['password_confirmation'],
+  })
 
 export default function Register({ className, ...props }: RegisterFormProps) {
   const navigate = useNavigate()
@@ -68,7 +68,7 @@ export default function Register({ className, ...props }: RegisterFormProps) {
       password_confirmation: ''
     },
   })
-  
+
   useEffect(() => {
     setPageTitle('Register')
   }, [])
@@ -100,104 +100,104 @@ export default function Register({ className, ...props }: RegisterFormProps) {
 
   return (
     <>
-    <Header/>
-    <div className={cn('grid gap-6 container my-36', className)} {...props}>
-      <h1 className='text-3xl font-bold text-center'>Créer un compte</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid gap-3'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <Input placeholder='John Doe' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder='nom@exemple.com' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name='phone'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Téléphone</FormLabel>
-                  <FormControl>
-                    <Input placeholder='+212 661234567' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name='company'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Nom de l'entreprise</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Votre entreprise' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Mot de passe</FormLabel>
-                  <FormControl>
-                    <PasswordInput placeholder='********' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name='password_confirmation'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Confirmer le mot de passe</FormLabel>
-                  <FormControl>
-                    <PasswordInput placeholder='********' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button className='mt-2' loading={isLoading} type="submit">
-              Créer un compte
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
-    <Footer/>
+      <Header />
+      <div className={cn('grid gap-6 container my-36', className)} {...props}>
+        <h1 className='text-3xl font-bold text-center'>Créer un compte</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className='grid gap-3'>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Nom</FormLabel>
+                    <FormControl>
+                      <Input placeholder='John Doe' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder='nom@exemple.com' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='phone'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Téléphone</FormLabel>
+                    <FormControl>
+                      <Input placeholder='+1 XXX XXX XXXX' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='company'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Nom de l'entreprise</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Votre entreprise' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='password'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Mot de passe</FormLabel>
+                    <FormControl>
+                      <PasswordInput placeholder='********' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='password_confirmation'
+                render={({ field }) => (
+                  <FormItem className='space-y-1'>
+                    <FormLabel>Confirmer le mot de passe</FormLabel>
+                    <FormControl>
+                      <PasswordInput placeholder='********' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button className='mt-2' loading={isLoading} type="submit">
+                Créer un compte
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+      <Footer />
     </>
   )
 }
