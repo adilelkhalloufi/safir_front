@@ -8,32 +8,101 @@ import http from '@/utils/http';
 import { setPageTitle } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import IconDisplay from '@/components/custom/IconDisplay';
+import SubscriptionBookingDialog from './SubscriptionBookingDialog';
+import SubscriptionDetailsDialog from './SubscriptionDetailsDialog';
 
-interface SubscriptionMember {
-    user_id: number;
-    is_owner: boolean;
-    name: string;
+interface ServiceType {
+    id: number;
+    name: {
+        en: string;
+        fr: string;
+    };
+    color: string;
+    is_active: boolean;
+    icon: string;
+    display_order: number;
+    allows_multiple_services: boolean;
+}
+
+interface Service {
+    id: number;
+    type: ServiceType;
+    name: {
+        fr: string;
+        en: string;
+    };
+    description: {
+        fr: string | null;
+        en: string | null;
+    };
+    duration_minutes: number;
+    buffer_minutes: number;
+    requires_health_form: boolean;
+    has_sessions: boolean;
+    price: number;
+    is_price_starting_from: boolean;
+    health_questions: any;
+    is_active: boolean;
+    quantity: number;
+    has_tax: number;
+    minimum_booking_deposit: number;
+}
+
+interface SubscriptionPlan {
+    id: number;
+    service_id: number;
+    service: Service;
+    name: {
+        fr: string;
+        en: string;
+    };
+    description: {
+        fr: string;
+        en: string;
+    };
+    total_sessions: number;
+    price: number;
+    duration_days: number;
+    max_members: number;
+    is_active: boolean;
+    display_order: number;
 }
 
 interface ClientSubscription {
     id: number;
-    name: string;
+    user_id: number;
+    subscription_plan: SubscriptionPlan;
+    name: string | null;
+    description: string | null;
     total_sessions: number;
     used_sessions: number;
-    remaining_sessions: number;
+    remaining_sessions: number | null;
+    price_paid: number;
+    start_date: string;
     end_date: string;
     is_active: boolean;
-    is_valid: boolean;
-    max_members?: number;
-    members?: SubscriptionMember[];
+    created_at: string;
+    updated_at: string;
 }
 
 export default function ClientSubscriptionsPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const [bookingDialog, setBookingDialog] = useState<{
+        open: boolean;
+        serviceId: number;
+        serviceName: string;
+        subscriptionId: number;
+    }>({ open: false, serviceId: 0, serviceName: '', subscriptionId: 0 });
+    const [detailsDialog, setDetailsDialog] = useState<{
+        open: boolean;
+        subscriptionId: number;
+        subscriptionName: string;
+    }>({ open: false, subscriptionId: 0, subscriptionName: '' });
 
     useEffect(() => {
         setPageTitle(t('clientSubscriptions.title', 'My subscriptions'));
@@ -48,6 +117,23 @@ export default function ClientSubscriptionsPage() {
         },
     });
 
+    const getPlanName = (subscription: ClientSubscription) => {
+        const lang = i18n.language as 'en' | 'fr';
+        return subscription.name || subscription.subscription_plan?.name[lang] || subscription.subscription_plan?.name.en || '';
+    };
+
+    const getServiceName = (subscription: ClientSubscription) => {
+        const lang = i18n.language as 'en' | 'fr';
+        return subscription.subscription_plan?.service?.name[lang] || subscription.subscription_plan?.service?.name.en || '';
+    };
+
+    const getRemainingSessionsCount = (subscription: ClientSubscription) => {
+        if (subscription.remaining_sessions !== null) {
+            return subscription.remaining_sessions;
+        }
+        return subscription.total_sessions - subscription.used_sessions;
+    };
+
     return (
         <div className='space-y-6'>
             <div className='flex items-center justify-between'>
@@ -57,14 +143,7 @@ export default function ClientSubscriptionsPage() {
                         {t('clientSubscriptions.subtitle', 'Track sessions and manage shared members')}
                     </p>
                 </div>
-                <div className='flex gap-2'>
-                    <Button variant='outline' onClick={() => navigate(webRoutes.booking)}>
-                        {t('clientSubscriptions.bookNew', 'Book a reservation')}
-                    </Button>
-                    <Button variant='outline' onClick={() => refetch()}>
-                        {t('clientSubscriptions.refresh', 'Refresh')}
-                    </Button>
-                </div>
+            
             </div>
 
             {isLoading ? (
@@ -78,6 +157,7 @@ export default function ClientSubscriptionsPage() {
             ) : (
                 <div className='grid gap-4 md:grid-cols-2'>
                     {subscriptions.map((subscription) => {
+                        const remainingSessions = getRemainingSessionsCount(subscription);
                         const usage = subscription.total_sessions > 0
                             ? (subscription.used_sessions / subscription.total_sessions) * 100
                             : 0;
@@ -85,10 +165,29 @@ export default function ClientSubscriptionsPage() {
                         return (
                             <Card key={subscription.id}>
                                 <CardHeader>
-                                    <CardTitle className='flex items-center justify-between gap-2'>
-                                        <span>{subscription.name}</span>
-                                        <Badge variant={subscription.is_valid ? 'default' : 'secondary'}>
-                                            {subscription.is_valid
+                                    <CardTitle className='flex items-start justify-between gap-2'>
+                                        <div className='flex items-start gap-3'>
+                                            {subscription.subscription_plan?.service?.type?.icon && (
+                                                <div 
+                                                    className='flex h-10 w-10 items-center justify-center rounded-lg'
+                                                    style={{ backgroundColor: subscription.subscription_plan.service.type.color + '20' }}
+                                                >
+                                                    <IconDisplay 
+                                                        iconName={subscription.subscription_plan.service.type.icon} 
+                                                        size={20}
+                                                        color={subscription.subscription_plan.service.type.color}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className='space-y-1'>
+                                                <div>{getPlanName(subscription)}</div>
+                                                <div className='text-sm font-normal text-muted-foreground'>
+                                                    {getServiceName(subscription)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Badge variant={subscription.is_active ? 'default' : 'secondary'}>
+                                            {subscription.is_active
                                                 ? t('clientSubscriptions.active', 'Active')
                                                 : t('clientSubscriptions.inactive', 'Inactive')}
                                         </Badge>
@@ -98,7 +197,7 @@ export default function ClientSubscriptionsPage() {
                                     <div>
                                         <div className='mb-2 flex items-center justify-between text-sm'>
                                             <span className='text-muted-foreground'>
-                                                {subscription.remaining_sessions} / {subscription.total_sessions} {t('clientSubscriptions.sessionsLeft', 'sessions left')}
+                                                {remainingSessions} / {subscription.total_sessions} {t('clientSubscriptions.sessionsLeft', 'sessions left')}
                                             </span>
                                             <span className='font-medium'>
                                                 {subscription.used_sessions} {t('clientSubscriptions.used', 'used')}
@@ -107,24 +206,65 @@ export default function ClientSubscriptionsPage() {
                                         <Progress value={usage} className='h-2' />
                                     </div>
 
-                                    <div className='text-sm text-muted-foreground'>
-                                        {t('clientSubscriptions.expires', 'Expires')}: {subscription.end_date ? format(new Date(subscription.end_date), 'PPP') : '-'}
+                                    <div className='flex items-center justify-between text-sm'>
+                                        <span className='text-muted-foreground'>
+                                            {t('clientSubscriptions.price', 'Price paid')}:
+                                        </span>
+                                        <span className='font-medium'>{subscription.price_paid} $</span>
                                     </div>
 
-                                    <div className='flex flex-wrap items-center gap-2'>
-                                        {(subscription.members || []).map((member) => (
-                                            <Badge key={`${subscription.id}-${member.user_id}`} variant='outline'>
-                                                {member.name}{member.is_owner ? ` (${t('clientSubscriptions.owner', 'owner')})` : ''}
-                                            </Badge>
-                                        ))}
+                                    <div className='flex items-center justify-between text-sm'>
+                                        <span className='text-muted-foreground'>
+                                            {t('clientSubscriptions.startDate', 'Start date')}:
+                                        </span>
+                                        <span>{subscription.start_date ? format(new Date(subscription.start_date), 'PP') : '-'}</span>
                                     </div>
 
-                                    {subscription.max_members && subscription.max_members > 1 && (
+                                    <div className='flex items-center justify-between text-sm'>
+                                        <span className='text-muted-foreground'>
+                                            {t('clientSubscriptions.expires', 'Expires')}:
+                                        </span>
+                                        <span>{subscription.end_date ? format(new Date(subscription.end_date), 'PP') : '-'}</span>
+                                    </div>
+
+                                    {subscription.subscription_plan?.max_members && subscription.subscription_plan.max_members > 1 && (
                                         <Button
                                             variant='outline'
+                                            className='w-full'
                                             onClick={() => navigate(webRoutes.client.subscriptionMembers.replace(':id', String(subscription.id)))}
                                         >
-                                            {t('clientSubscriptions.manageMembers', 'Manage members')}
+                                            {t('clientSubscriptions.manageMembers', 'Manage members')} ({subscription.subscription_plan.max_members} {t('clientSubscriptions.maxMembers', 'max')})
+                                        </Button>
+                                    )}
+
+                                    <Button
+                                        variant='outline'
+                                        className='w-full'
+                                        onClick={() => {
+                                            setDetailsDialog({
+                                                open: true,
+                                                subscriptionId: subscription.id,
+                                                subscriptionName: getPlanName(subscription),
+                                            });
+                                        }}
+                                    >
+                                        {t('clientSubscriptions.viewDetails', 'View bookings')}
+                                    </Button>
+
+                                    {subscription.is_active && remainingSessions > 0 && (
+                                        <Button
+                                            className='w-full'
+                                            onClick={() => {
+                                                const lang = i18n.language as 'en' | 'fr';
+                                                setBookingDialog({
+                                                    open: true,
+                                                    serviceId: subscription.subscription_plan.service.id,
+                                                    serviceName: subscription.subscription_plan.service.name[lang] || subscription.subscription_plan.service.name.en,
+                                                    subscriptionId: subscription.id,
+                                                });
+                                            }}
+                                        >
+                                            {t('clientSubscriptions.bookSession', 'Book a session')}
                                         </Button>
                                     )}
                                 </CardContent>
@@ -133,6 +273,21 @@ export default function ClientSubscriptionsPage() {
                     })}
                 </div>
             )}
+
+            <SubscriptionBookingDialog
+                open={bookingDialog.open}
+                onOpenChange={(open) => setBookingDialog((prev) => ({ ...prev, open }))}
+                serviceId={bookingDialog.serviceId}
+                serviceName={bookingDialog.serviceName}
+                subscriptionId={bookingDialog.subscriptionId}
+            />
+
+            <SubscriptionDetailsDialog
+                open={detailsDialog.open}
+                onOpenChange={(open) => setDetailsDialog((prev) => ({ ...prev, open }))}
+                subscriptionId={detailsDialog.subscriptionId}
+                subscriptionName={detailsDialog.subscriptionName}
+            />
         </div>
     );
 }

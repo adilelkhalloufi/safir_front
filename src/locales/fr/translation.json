@@ -605,7 +605,30 @@
     "memberRemoveError": "Impossible de supprimer le membre",
     "add": "Ajouter",
     "remove": "Supprimer",
-    "noMembers": "Aucun membre trouvé"
+    "noMembers": "Aucun membre trouvé",
+    "bookSession": "Réserver une séance",
+    "viewDetails": "Voir les réservations"
+  },
+  "subscriptionBooking": {
+    "title": "Réserver une séance",
+    "selectDate": "Choisir une date",
+    "pickDate": "Choisir une date",
+    "availableSlots": "Créneaux disponibles",
+    "noSlots": "Aucun créneau disponible pour cette date. Essayez une autre date.",
+    "confirm": "Confirmer la réservation",
+    "booking": "Réservation en cours...",
+    "success": "Réservation confirmée !",
+    "error": "La réservation a échoué. Veuillez réessayer."
+  },
+  "subscriptionDetails": {
+    "title": "Historique des réservations",
+    "noBookings": "Aucune réservation pour cet abonnement.",
+    "status": {
+      "confirmed": "Confirmée",
+      "pending": "En attente",
+      "cancelled": "Annulée",
+      "completed": "Terminée"
+    }
   },
   "subscriptionPlansAdmin": {
     "title": "Formules d'abonnement",

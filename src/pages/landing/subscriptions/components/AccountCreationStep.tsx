@@ -1,48 +1,80 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { PasswordInput } from '@/components/custom/password-input';
-import { User, Mail, Phone, Building2, Lock, Loader2, ArrowRight } from 'lucide-react';
+import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
+import { User, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 
 interface AccountCreationStepProps {
-    registerName: string;
-    setRegisterName: (val: string) => void;
-    registerEmail: string;
-    setRegisterEmail: (val: string) => void;
-    registerPhone: string;
-    setRegisterPhone: (val: string) => void;
-    registerCompany: string;
-    setRegisterCompany: (val: string) => void;
-    registerPassword: string;
-    setRegisterPassword: (val: string) => void;
-    registerPasswordConfirm: string;
-    setRegisterPasswordConfirm: (val: string) => void;
-    canCreateAccount: boolean;
+    
     isCreating: boolean;
-    onCreateAccount: () => void;
+    onCreateAccount: (data: any) => void;
 }
 
 export function AccountCreationStep({
-    registerName,
-    setRegisterName,
-    registerEmail,
-    setRegisterEmail,
-    registerPhone,
-    setRegisterPhone,
-    registerCompany,
-    setRegisterCompany,
-    registerPassword,
-    setRegisterPassword,
-    registerPasswordConfirm,
-    setRegisterPasswordConfirm,
-    canCreateAccount,
+ 
     isCreating,
     onCreateAccount,
 }: AccountCreationStepProps) {
     const { t } = useTranslation();
+
+    const fields: MagicFormGroupProps[] = useMemo(() => [
+        {
+            group: "",
+            groupTitle: t('subscriptionCheckout.personalInfo', 'Personal information'),
+            layout: {
+                type: "grid",
+                columns: 2
+            },
+            fields: [
+                {
+                    name: "name",
+                    label: t('subscriptionCheckout.fullName', 'Full name'),
+                    type: "text",
+                    placeholder: "John Doe",
+                    required: true
+                },
+                {
+                    name: "email",
+                    label: t('subscriptionCheckout.email', 'Email'),
+                    type: "text",
+                    placeholder: "you@example.com",
+                    required: true
+                },
+                {
+                    name: "phone",
+                    label: t('subscriptionCheckout.phone', 'Phone number'),
+                    type: "text",
+                    placeholder: "+1 XXX XXX XXXX",
+                    required: true
+                },
+           
+            ]
+        },
+        {
+            group: "security",
+            groupTitle: t('subscriptionCheckout.securitySection', 'Security'),
+            layout: {
+                type: "grid",
+                columns: 2
+            },
+            fields: [
+                {
+                    name: "password",
+                    label: t('subscriptionCheckout.password', 'Password'),
+                    type: "text",
+                    placeholder: "••••••••",
+                    required: true
+                },
+                {
+                    name: "password_confirmation",
+                    label: t('subscriptionCheckout.passwordConfirm', 'Confirm password'),
+                    type: "text",
+                    placeholder: "••••••••",
+                    required: true
+                }
+            ]
+        }
+    ], [t]);
 
     return (
         <Card className='overflow-hidden border-0 shadow-xl'>
@@ -59,117 +91,20 @@ export function AccountCreationStep({
                     </div>
                 </div>
             </div>
-            <CardContent className='p-6 space-y-6'>
-                {/* Personal info */}
-                <div className='space-y-4'>
-                    <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
-                        {t('subscriptionCheckout.personalInfo', 'Personal information')}
-                    </h3>
-                    <div className='grid gap-4 md:grid-cols-2'>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-name'>{t('subscriptionCheckout.fullName', 'Full name')}</Label>
-                            <div className='relative'>
-                                <User className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                <Input
-                                    id='reg-name'
-                                    className='pl-10'
-                                    value={registerName}
-                                    onChange={(e) => setRegisterName(e.target.value)}
-                                    placeholder='John Doe'
-                                />
-                            </div>
-                        </div>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-email'>{t('subscriptionCheckout.email', 'Email')}</Label>
-                            <div className='relative'>
-                                <Mail className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                <Input
-                                    id='reg-email'
-                                    type='email'
-                                    className='pl-10'
-                                    value={registerEmail}
-                                    onChange={(e) => setRegisterEmail(e.target.value)}
-                                    placeholder='you@example.com'
-                                />
-                            </div>
-                        </div>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-phone'>{t('subscriptionCheckout.phone', 'Phone number')}</Label>
-                            <div className='relative'>
-                                <Phone className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                <Input
-                                    id='reg-phone'
-                                    className='pl-10'
-                                    value={registerPhone}
-                                    onChange={(e) => setRegisterPhone(e.target.value)}
-                                    placeholder='+1 XXX XXX XXXX'
-                                />
-                            </div>
-                        </div>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-company'>{t('subscriptionCheckout.company', 'Company')}</Label>
-                            <div className='relative'>
-                                <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                                <Input
-                                    id='reg-company'
-                                    className='pl-10'
-                                    value={registerCompany}
-                                    onChange={(e) => setRegisterCompany(e.target.value)}
-                                    placeholder={t('subscriptionCheckout.companyPlaceholder', 'Your company')}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <Separator />
-
-                {/* Password */}
-                <div className='space-y-4'>
-                    <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
-                        {t('subscriptionCheckout.securitySection', 'Security')}
-                    </h3>
-                    <div className='grid gap-4 md:grid-cols-2'>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-password'>{t('subscriptionCheckout.password', 'Password')}</Label>
-                            <PasswordInput
-                                id='reg-password'
-                                value={registerPassword}
-                                onChange={(e) => setRegisterPassword(e.target.value)}
-                                placeholder='••••••••'
-                            />
-                            <p className='text-xs text-muted-foreground'>
-                                {t('subscriptionCheckout.passwordHint', 'Minimum 6 characters')}
-                            </p>
-                        </div>
-                        <div className='space-y-2'>
-                            <Label htmlFor='reg-password-confirm'>{t('subscriptionCheckout.passwordConfirm', 'Confirm password')}</Label>
-                            <PasswordInput
-                                id='reg-password-confirm'
-                                value={registerPasswordConfirm}
-                                onChange={(e) => setRegisterPasswordConfirm(e.target.value)}
-                                placeholder='••••••••'
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className='flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground'>
+            <CardContent className='p-6 space-y-4'>
+                <MagicForm
+                    fields={fields}
+                     onSubmit={onCreateAccount}
+                    button={isCreating ? t('subscriptionCheckout.creatingAccount', 'Creating account...') : t('subscriptionCheckout.createAndContinue', 'Create account and continue')}
+                    loading={isCreating}
+                    showButton={true}
+                    title=''
+                />
+                
+                <div className='flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground mt-4'>
                     <Lock className='h-4 w-4 shrink-0' />
                     {t('subscriptionCheckout.privacyNote', 'Your information is secure and will never be shared with third parties.')}
                 </div>
-
-                <Button
-                    className='w-full h-12 text-base'
-                    disabled={!canCreateAccount || isCreating}
-                    onClick={onCreateAccount}
-                >
-                    {isCreating ? (
-                        <><Loader2 className='mr-2 h-4 w-4 animate-spin' />{t('subscriptionCheckout.creatingAccount', 'Creating account...')}</>
-                    ) : (
-                        <>{t('subscriptionCheckout.createAndContinue', 'Create account and continue')}<ArrowRight className='ml-2 h-4 w-4' /></>
-                    )}
-                </Button>
             </CardContent>
         </Card>
     );

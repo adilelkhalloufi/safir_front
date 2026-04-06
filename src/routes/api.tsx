@@ -88,7 +88,8 @@ export const apiRoutes = {
   subscriptionPlans: `${API_URL}/subscription-plans`,
   subscriptions: `${API_URL}/subscriptions`,
   subscriptionById: (id: number) => `${API_URL}/subscriptions/${id}`,
-  subscriptionPayment: `${API_URL}/subscriptions/payment`,
+  subscriptionBookings: (id: number) => `${API_URL}/subscriptions/${id}/bookings`,
+    subscriptionPayment: `${API_URL}/subscriptions/payment`,
   subscriptionMembers: (id: number) => `${API_URL}/subscriptions/${id}/members`,
   subscriptionMemberByUser: (id: number, userId: number) => `${API_URL}/subscriptions/${id}/members/${userId}`,
   guestBookings: `${API_URL}/guest-bookings`,
@@ -104,4 +105,5 @@ export const apiRoutes = {
   resources: `${API_URL}/resources/availability`,
   settings: `${API_URL}/admin/settings`,
   Getsettings: `${API_URL}/Getsettings`,
-};
+
+ };

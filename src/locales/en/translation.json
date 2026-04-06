@@ -778,7 +778,30 @@
     "memberRemoveError": "Could not remove member",
     "add": "Add",
     "remove": "Remove",
-    "noMembers": "No members found"
+    "noMembers": "No members found",
+    "bookSession": "Book a session",
+    "viewDetails": "View bookings"
+  },
+  "subscriptionBooking": {
+    "title": "Book a session",
+    "selectDate": "Select a date",
+    "pickDate": "Pick a date",
+    "availableSlots": "Available time slots",
+    "noSlots": "No available slots for this date. Please try another date.",
+    "confirm": "Confirm reservation",
+    "booking": "Booking...",
+    "success": "Reservation confirmed!",
+    "error": "Booking failed. Please try again."
+  },
+  "subscriptionDetails": {
+    "title": "Booking history",
+    "noBookings": "No bookings yet for this subscription.",
+    "status": {
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
   },
   "subscriptionPlansAdmin": {
     "title": "Subscription plans",

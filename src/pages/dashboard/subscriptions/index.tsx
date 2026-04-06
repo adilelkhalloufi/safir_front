@@ -63,7 +63,8 @@ export default function SubscriptionsIndex() {
     http
       .get(apiRoutes.adminSubscriptions)
       .then((res) => {
-        setData(res.data.subscriptions || res.data);
+        const payload = res.data?.data ?? res.data?.subscriptions ?? res.data;
+        setData(Array.isArray(payload) ? payload : []);
         if (res.data.stats) {
           setStats(res.data.stats);
         }
@@ -186,9 +187,9 @@ export default function SubscriptionsIndex() {
             {t('subscriptions.subtitle', 'Track and manage subscription packages')}
           </p>
         </div>
-        <Button onClick={() => navigate(webRoutes.subscriptions.add)}>
+        {/* <Button onClick={() => navigate(webRoutes.subscriptions.add)}>
           {t('subscriptions.createManual', 'Create Manual Subscription')}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Stats Cards */}

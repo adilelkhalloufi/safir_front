@@ -117,7 +117,6 @@ export function PaymentStep({
                 </Button>
                 <Button
                     className='h-12 px-8 text-base'
-                    disabled={!squareReady || !cardName.trim() || paymentProcessing || isProcessing}
                     onClick={onPay}
                 >
                     {(paymentProcessing || isProcessing) ? (
