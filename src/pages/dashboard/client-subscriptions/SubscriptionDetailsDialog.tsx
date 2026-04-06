@@ -10,8 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { apiRoutes } from '@/routes/api'
+ import { apiRoutes } from '@/routes/api'
 import http from '@/utils/http'
 
 interface SubscriptionDetailsDialogProps {
@@ -39,21 +38,7 @@ export default function SubscriptionDetailsDialog({
         },
         enabled: open && subscriptionId > 0,
     })
-
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case 'confirmed': return 'default'
-            case 'pending': return 'outline'
-            case 'cancelled': return 'destructive'
-            case 'completed': return 'secondary'
-            default: return 'outline'
-        }
-    }
-
-    const getStatusLabel = (status: string) => {
-        return t(`subscriptionDetails.status.${status}`, status)
-    }
-
+ 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className='max-h-[85vh] overflow-y-auto sm:max-w-lg'>

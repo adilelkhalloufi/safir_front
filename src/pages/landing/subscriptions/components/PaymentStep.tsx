@@ -5,15 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { CreditCard, Loader2, Lock, Shield, User, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-interface SubscriptionPlan {
-    id: number;
-    name_fr: string;
-    name_en: string;
-    total_sessions: number;
-    price: string;
-    duration_days: number;
-}
+import { SubscriptionPlan } from '@/interfaces/models/subscriptionPlan';
 
 interface PaymentStepProps {
     plan: SubscriptionPlan;

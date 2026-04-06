@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, Edit, Plus, Ban, RefreshCw } from 'lucide-react';
+import { MoreHorizontal, Eye} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -76,10 +76,6 @@ const getStatus = (sub: Subscription): keyof typeof statusConfig => {
 
 export const GetSubscriptionColumns = ({
   onView,
-  onEdit,
-  onExtend,
-  onAddSessions,
-  onSuspend,
 }: SubscriptionColumnsProps): ColumnDef<Subscription>[] => {
   const lang = (i18next.language || 'fr') as 'fr' | 'en';
 
@@ -182,9 +178,9 @@ export const GetSubscriptionColumns = ({
     id: 'actions',
     cell: ({ row }) => {
       const subscription = row.original;
-      const status = getStatus(subscription);
-      const canExtend = status === 'active' || status === 'expired';
-      const canSuspend = status === 'active';
+      // const status = getStatus(subscription);
+      // const canExtend = status === 'active' || status === 'expired';
+      // const canSuspend = status === 'active';
 
       return (
         <DropdownMenu>

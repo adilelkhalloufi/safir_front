@@ -108,7 +108,7 @@ export default function ClientSubscriptionsPage() {
         setPageTitle(t('clientSubscriptions.title', 'My subscriptions'));
     }, [t]);
 
-    const { data: subscriptions = [], isLoading, refetch } = useQuery<ClientSubscription[]>({
+    const { data: subscriptions = [], isLoading } = useQuery<ClientSubscription[]>({
         queryKey: ['client-subscriptions'],
         queryFn: async () => {
             const response = await http.get(apiRoutes.subscriptions);

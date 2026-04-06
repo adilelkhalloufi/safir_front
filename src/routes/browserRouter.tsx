@@ -210,9 +210,7 @@ const ClientSubscriptionsPage = loadable(() => import('../pages/dashboard/client
   fallback: fallbackElement,
 });
 
-const ClientSubscriptionMembersPage = loadable(() => import('../pages/dashboard/client-subscriptions/members'), {
-  fallback: fallbackElement,
-});
+ 
 
 const SubscriptionPlansAdminIndex = loadable(() => import('../pages/dashboard/subscription-plans'), {
   fallback: fallbackElement,
@@ -322,14 +320,7 @@ export const browserRouter = createBrowserRouter([
           </RequireRole>
         ),
       },
-      {
-        path: webRoutes.client.subscriptionMembers,
-        element: (
-          <RequireRole allowedRoles={[RoleEnum.Client]}>
-            <ClientSubscriptionMembersPage />
-          </RequireRole>
-        ),
-      },
+ 
       {
         path: webRoutes.docs,
         element: (
