@@ -18,7 +18,6 @@ import type {
     Service,
 } from '../../../interfaces/models/service'
 import type {
-    CreateGuestBookingRequest,
     GuestBookingResponse,
     AvailabilitySlotsRequest,
 } from '../../../interfaces/models/booking'
@@ -116,21 +115,48 @@ export default function BookingWizard() {
 
     // Create guest booking mutation
     const createBookingMutation = useMutation({
-        mutationFn: async (bookingData: CreateGuestBookingRequest) => {
+        mutationFn: async (bookingData: Record<string, unknown>) => {
             const response = await defaultHttp.post(apiRoutes.guestBookings, bookingData)
-            return response.data as GuestBookingResponse
+            const result = response.data as GuestBookingResponse & {
+                status?: string
+                payment_status?: string
+                payment?: { status?: string }
+                data?: GuestBookingResponse['data'] & {
+                    payment_status?: string
+                    payment?: { status?: string }
+                }
+            }
+
+            const normalizedPaymentStatus = String(
+                result?.data?.payment?.status ??
+                result?.data?.payment_status ??
+                result?.payment?.status ??
+                result?.payment_status ??
+                result?.status ??
+                ''
+            ).toLowerCase()
+
+            const bookingConfirmed = result?.success !== false && Boolean(result?.data)
+            const paymentConfirmed = normalizedPaymentStatus
+                ? ['paid', 'success', 'succeeded', 'completed', 'approved'].includes(normalizedPaymentStatus)
+                : result?.success !== false
+
+            if (!bookingConfirmed || !paymentConfirmed) {
+                throw new Error(result?.message || t('bookingWizard.bookingCreateError'))
+            }
+
+            return result
         },
-        onSuccess: () => {
-
-            showNotification(t('bookingWizard.bookingCreated'), NotificationType.SUCCESS)
+        onSuccess: (result) => {
+            showNotification(
+                result?.message || 'Payment and booking confirmed successfully.',
+                NotificationType.SUCCESS
+            )
             dispatch(resetBooking())
-
-
-
         },
         onError: (error: any) => {
             showNotification(
-                error?.response?.data?.message || t('bookingWizard.bookingCreateError'),
+                error?.response?.data?.message || error?.message || t('bookingWizard.bookingCreateError'),
                 NotificationType.ERROR
             )
         }
@@ -274,8 +300,7 @@ export default function BookingWizard() {
                                 customerInfo={customerInfo}
                                 isSubmitting={createBookingMutation.isPending}
                                 onConfirm={(bookingSummary) => {
-
-                                    createBookingMutation.mutate(bookingSummary)
+                                    return createBookingMutation.mutateAsync(bookingSummary)
                                 }}
                                 onPrev={handlePrev}
                             />

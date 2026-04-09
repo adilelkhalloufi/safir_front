@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   CheckCircle2,
   Calendar,
@@ -8,10 +11,14 @@ import {
   Users,
   Sparkles,
   Loader2,
+  Shield,
+  CreditCard as CreditCardIcon,
 } from 'lucide-react'
+import { CreditCard as SquareCreditCard, PaymentForm } from 'react-square-web-payments-sdk'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import type { Service } from '@/interfaces/models/service'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import { CustomerInfo } from './types'
@@ -37,6 +44,19 @@ export function Review({
 }: ReviewProps) {
   const { i18n, t } = useTranslation()
   const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
+  const dateLocale = currentLang === 'fr' ? fr : undefined
+  const squareApplicationId = import.meta.env.VITE_SQUARE_APP_ID
+  const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID
+  const squareConfigured = Boolean(squareApplicationId && squareLocationId)
+  const [cardHolderName, setCardHolderName] = useState(customerInfo.name || '')
+  console.log('squareApplicationId', squareApplicationId)
+  console.log('squareLocationId', squareLocationId)
+
+  useEffect(() => {
+    if (!cardHolderName && customerInfo.name) {
+      setCardHolderName(customerInfo.name)
+    }
+  }, [customerInfo.name, cardHolderName])
 
   // Helper function to get service details from slot
   const getServiceDetails = (service: any) => {
@@ -115,6 +135,31 @@ export function Review({
     totalStaffAssigned: serviceDetails.reduce((total, detail) => total + detail.staff_count, 0),
     language: currentLang,
   }
+
+  const handleCardTokenizeResponseReceived = async (tokenResult: any, verifiedBuyer?: any) => {
+    if (!cardHolderName.trim()) {
+      toast.error('Please enter the card holder name.')
+      return
+    }
+
+    if (tokenResult?.status !== 'OK' || !tokenResult?.token) {
+      const message = tokenResult?.errors?.map((error: any) => error.message).filter(Boolean).join(', ')
+        || t('subscriptionCheckout.cardError', 'Card processing error')
+      toast.error(message)
+      return
+    }
+
+    await Promise.resolve(
+      onConfirm({
+        ...bookingSummary,
+        source_id: tokenResult.token,
+        payment_method: 'card',
+        card_holder: cardHolderName.trim(),
+        ...(verifiedBuyer?.token ? { verification_token: verifiedBuyer.token } : {}),
+      })
+    )
+  }
+
   return (
     <Card className='border-none bg-white/80 shadow-xl backdrop-blur'>
       <CardHeader>
@@ -149,7 +194,7 @@ export function Review({
                         ? new Date(selectedDate)
                         : selectedDate,
                       'EEEE d MMMM yyyy',
-                      { locale: fr }
+                      { locale: dateLocale }
                     )}
                 </span>
               </div>
@@ -250,7 +295,7 @@ export function Review({
                       <div className='flex items-center gap-2'>
                         <Calendar className='h-3.5 w-3.5 text-amber-600' />
                         <p className='text-muted-foreground'>
-                          {format(startDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                          {format(startDate, 'EEEE d MMMM yyyy', { locale: dateLocale })}
                         </p>
                       </div>
                       <div className='flex items-center gap-2'>
@@ -331,6 +376,82 @@ export function Review({
             </div>
           </div>
 
+          <div className='rounded-lg border-2 border-gray-200 bg-white p-4'>
+            <div className='mb-4 flex items-center gap-2'>
+              <CreditCardIcon className='h-5 w-5 text-amber-600' />
+              <h3 className='font-semibold'>
+                {t('bookingWizard.guarantee.securePayment', 'Secure payment')}
+              </h3>
+            </div>
+
+            <div className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='booking-card-holder'>
+                  {t('subscriptionCheckout.cardHolder', 'Card holder name')}
+                </Label>
+                <Input
+                  id='booking-card-holder'
+                  value={cardHolderName}
+                  onChange={(event) => setCardHolderName(event.target.value)}
+                  placeholder={t('subscriptionCheckout.cardHolderPlaceholder', 'Name on card')}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {squareConfigured ? (
+                <PaymentForm
+                  applicationId={squareApplicationId!}
+                  locationId={squareLocationId!}
+                  cardTokenizeResponseReceived={handleCardTokenizeResponseReceived}
+                  createVerificationDetails={() => {
+                    const fallbackName = (cardHolderName || customerInfo.name || 'Guest User').trim()
+                    const [givenName, ...familyNameParts] = fallbackName.split(' ')
+
+                    return {
+                      amount: totalPrice.toFixed(2),
+                      currencyCode: import.meta.env.VITE_SQUARE_CURRENCY || 'CAD',
+                      intent: 'CHARGE',
+                      billingContact: {
+                        givenName,
+                        familyName: familyNameParts.join(' '),
+                        email: customerInfo.email,
+                        phone: customerInfo.phone,
+                        countryCode: 'MA',
+                      },
+                    }
+                  }}
+                >
+                  <SquareCreditCard
+                    buttonProps={{
+                      isLoading: isSubmitting,
+                      className: 'mt-4 w-full',
+                    }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className='mr-2 inline h-4 w-4 animate-spin' />
+                        {t('bookingWizard.review.confirming')}
+                      </>
+                    ) : (
+                      t('bookingWizard.review.confirm')
+                    )}
+                  </SquareCreditCard>
+                </PaymentForm>
+              ) : (
+                <Alert>
+                  <AlertDescription className='text-sm'>
+                    Add `VITE_SQUARE_APP_ID` and `VITE_SQUARE_LOCATION_ID` to your Vite env to enable card payments.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className='flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800'>
+                <Shield className='h-4 w-4 shrink-0' />
+                {t('bookingWizard.guarantee.securedBy', 'Secured payment by Square')}
+              </div>
+            </div>
+          </div>
+
           <Alert>
             <AlertDescription className='text-sm'>
               {t('bookingWizard.review.termsAccept')}
@@ -338,7 +459,7 @@ export function Review({
           </Alert>
         </div>
 
-        <div className='mt-6 flex justify-between'>
+        <div className='mt-6 flex justify-start'>
           <Button
             variant='outline'
             onClick={onPrev}
@@ -346,24 +467,6 @@ export function Review({
             disabled={isSubmitting}
           >
             {t('bookingWizard.review.back')}
-          </Button>
-          <Button
-            onClick={() => onConfirm(bookingSummary)}
-            disabled={isSubmitting}
-            size='lg'
-            className='bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                {t('bookingWizard.review.confirming')}
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className='mr-2 h-4 w-4' />
-                {t('bookingWizard.review.confirm')}
-              </>
-            )}
           </Button>
         </div>
       </CardContent>
