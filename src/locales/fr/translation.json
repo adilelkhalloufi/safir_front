@@ -276,6 +276,7 @@
       "notes": "Notes:",
       "total": "Total",
       "guaranteePaid": "{{amount}} $ de garantie payés • Solde à régler sur place",
+      "partialPaymentNote": "Nous ne prélevons que 20 $ maintenant pour confirmer votre réservation. Le reste du paiement pourra être effectué après que vous ayez profité du service. Merci.",
       "termsAccept": "En confirmant cette réservation, vous acceptez nos conditions générales et notre politique d'annulation.",
       "back": "Retour",
       "confirm": "Confirmer la réservation",

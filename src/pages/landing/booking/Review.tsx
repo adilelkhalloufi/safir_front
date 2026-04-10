@@ -49,8 +49,7 @@ export function Review({
   const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID
   const squareConfigured = Boolean(squareApplicationId && squareLocationId)
   const [cardHolderName, setCardHolderName] = useState(customerInfo.name || '')
-  console.log('squareApplicationId', squareApplicationId)
-  console.log('squareLocationId', squareLocationId)
+ 
 
   useEffect(() => {
     if (!cardHolderName && customerInfo.name) {
@@ -132,6 +131,7 @@ export function Review({
       notes: customerInfo.notes || '',
     },
     totalPrice,
+    partialPayment: 20,
     totalStaffAssigned: serviceDetails.reduce((total, detail) => total + detail.staff_count, 0),
     language: currentLang,
   }
@@ -170,6 +170,7 @@ export function Review({
         <p className='text-sm text-muted-foreground'>
           {t('bookingWizard.review.subtitle')}
         </p>
+    
       </CardHeader>
       <CardContent>
         <div className='space-y-6'>
@@ -397,7 +398,9 @@ export function Review({
                   disabled={isSubmitting}
                 />
               </div>
-
+            <div className='mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900'>
+                  {t('bookingWizard.review.partialPaymentNote')}
+                </div>
               {squareConfigured ? (
                 <PaymentForm
                   applicationId={squareApplicationId!}
@@ -406,9 +409,9 @@ export function Review({
                   createVerificationDetails={() => {
                     const fallbackName = (cardHolderName || customerInfo.name || 'Guest User').trim()
                     const [givenName, ...familyNameParts] = fallbackName.split(' ')
-
+                    const referencePrice = 20
                     return {
-                      amount: totalPrice.toFixed(2),
+                      amount: referencePrice.toFixed(2),
                       currencyCode: import.meta.env.VITE_SQUARE_CURRENCY || 'CAD',
                       intent: 'CHARGE',
                       billingContact: {
@@ -416,7 +419,7 @@ export function Review({
                         familyName: familyNameParts.join(' '),
                         email: customerInfo.email,
                         phone: customerInfo.phone,
-                        countryCode: 'MA',
+                        countryCode: 'CA',
                       },
                     }
                   }}

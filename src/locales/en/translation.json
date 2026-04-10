@@ -669,6 +669,7 @@
       "notes": "Notes:",
       "total": "Total",
       "guaranteePaid": "{{amount}} $ guarantee paid • Balance payable on site",
+      "partialPaymentNote": "We will take only $20 now to confirm your booking. The remaining payment can be made after you enjoy the service. Thank you.",
       "termsAccept": "By confirming this booking, you accept our terms and conditions and our cancellation policy.",
       "back": "Back",
       "confirm": "Confirm booking",
