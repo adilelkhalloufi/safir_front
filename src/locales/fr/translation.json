@@ -85,6 +85,13 @@
     "goToHealthForm": "Remplir le formulaire",
     "paymentHistory": "Historique des paiements",
     "viewReceipt": "Voir le reçu",
+    "addPayment": "Ajouter un paiement",
+    "addPaymentDescription": "Créer un paiement pour cette réservation",
+    "totalPrice": "Prix total",
+    "amountPaid": "Montant payé",
+    "remainingBalance": "Solde restant",
+    "paymentSuccess": "Paiement créé avec succès",
+    "paymentError": "Échec de la création du paiement",
     "cancel": {
       "confirmTitle": "Annuler la réservation",
       "confirmMessage": "Êtes-vous sûr de vouloir annuler cette réservation ?",

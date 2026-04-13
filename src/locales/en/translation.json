@@ -85,6 +85,13 @@
     "goToHealthForm": "Fill Health Form",
     "paymentHistory": "Payment History",
     "viewReceipt": "View Receipt",
+    "addPayment": "Add Payment",
+    "addPaymentDescription": "Create a payment for this booking",
+    "totalPrice": "Total Price",
+    "amountPaid": "Amount Paid",
+    "remainingBalance": "Remaining Balance",
+    "paymentSuccess": "Payment created successfully",
+    "paymentError": "Failed to create payment",
     "cancel": {
       "confirmTitle": "Cancel Booking",
       "confirmMessage": "Are you sure you want to cancel this booking?",

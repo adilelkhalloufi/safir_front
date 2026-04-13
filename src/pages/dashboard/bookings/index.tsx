@@ -387,15 +387,34 @@ export default function BookingsIndex() {
             <DialogTitle>{t('bookings.addPayment', 'Add Payment')}</DialogTitle>
             <DialogDescription>
               {t('bookings.addPaymentDescription', `Create a payment for booking #${paymentDialog.booking?.id}`)}
-              {paymentDialog.booking && (
-                <div className="mt-2 text-sm">
-                  <p><strong>Total:</strong> {paymentDialog.booking.total_price} DH</p>
-                </div>
-              )}
+              {paymentDialog.booking && (() => {
+                const totalPaid = paymentDialog.booking.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
+                const remainingBalance = paymentDialog.booking.total_price - totalPaid;
+                return (
+                  <div className="mt-3 space-y-1 text-sm bg-muted/50 p-3 rounded-md">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('bookings.totalPrice', 'Total Price')}:</span>
+                      <span className="font-medium">{paymentDialog.booking.total_price} $</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('bookings.amountPaid', 'Amount Paid')}:</span>
+                      <span className="font-medium text-green-600">{totalPaid} $</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-1 mt-1">
+                      <span className="text-muted-foreground font-semibold">{t('bookings.remainingBalance', 'Remaining Balance')}:</span>
+                      <span className="font-bold text-lg">{remainingBalance} $</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </DialogDescription>
           </DialogHeader>
-          {paymentDialog.booking && (
+          {paymentDialog.booking && (() => {
+            const totalPaid = paymentDialog.booking.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
+            const remainingBalance = paymentDialog.booking.total_price - totalPaid;
+            return (
             <MagicForm
+            title=''
               fields={[
                 {
                   group: 'payment',
@@ -406,7 +425,7 @@ export default function BookingsIndex() {
                       type: 'number',
                       required: true,
                       placeholder: t('payments.amountPlaceholder', 'Enter amount'),
-                      defaultValue: paymentDialog.booking.total_price,
+                      defaultValue: remainingBalance,
                       width: 'full',
                     },
                     {
@@ -440,10 +459,11 @@ export default function BookingsIndex() {
                 },
               ]}
               onSubmit={handlePaymentSubmit}
-              button={t('common.submit', 'Submit')}
+              button={t('common.submit', 'Create Payment')}
               loading={paymentLoading}
             />
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>

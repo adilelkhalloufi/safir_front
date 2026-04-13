@@ -71,6 +71,21 @@ export interface Booking {
     order_index: number;
     notes: string | null;
   }>;
+  payments?: Array<{
+    id: number;
+    booking_id: number;
+    amount: number;
+    currency: string;
+    payment_method: string;
+    payment_type: string;
+    status: string;
+    square_payment_id?: string;
+    square_receipt_url?: string;
+    notes?: string;
+    paid_at: string;
+    created_at: string;
+    updated_at: string;
+  }>;
   created_at: string;
   updated_at: string;
 }
