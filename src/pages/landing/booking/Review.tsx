@@ -107,22 +107,34 @@ export function Review({
     )
     : ''
 
+  const bookingServices = serviceDetails.map(detail => {
+      const selectedService = selectedServices.find(s => s.id === detail.service_id)
+
+      return {
+        id: detail.service_id,
+        slot_id: detail.slot_id,
+        quantity: detail.quantity,
+        start_datetime: detail.start_datetime,
+        end_datetime: detail.end_datetime,
+        minimum_booking_deposit: selectedService?.minimum_booking_deposit || 0,
+        assigned_staff: detail.assigned_staff.map((staff: any) => ({
+          staff_id: staff.staff_id,
+          staff_name: staff.staff_name,
+        })),
+        ...(selectedService?.has_sessions && {
+          preferred_gender: selectedService?.preferred_gender
+        })
+      }
+    })
+
+  const referencePrice = bookingServices.reduce(
+    (sum, service) => sum + (Number(service.minimum_booking_deposit) || 0) * (Number(service.quantity) || 1),
+    0
+  )
+
   // Prepare booking summary
   const bookingSummary = {
-    services: serviceDetails.map(detail => ({
-      id: detail.service_id,
-      slot_id: detail.slot_id,
-      quantity: detail.quantity,
-      start_datetime: detail.start_datetime,
-      end_datetime: detail.end_datetime,
-      assigned_staff: detail.assigned_staff.map((staff: any) => ({
-        staff_id: staff.staff_id,
-        staff_name: staff.staff_name,
-      })),
-      ...(selectedServices.find(s => s.id === detail.service_id)?.has_sessions && {
-        preferred_gender: selectedServices.find(s => s.id === detail.service_id)?.preferred_gender
-      })
-    })),
+    services: bookingServices,
     date: formattedDate,
     customer: {
       name: customerInfo.name,
@@ -131,11 +143,12 @@ export function Review({
       notes: customerInfo.notes || '',
     },
     totalPrice,
-    partialPayment: 20,
+    partialPayment: referencePrice,
     totalStaffAssigned: serviceDetails.reduce((total, detail) => total + detail.staff_count, 0),
     language: currentLang,
   }
 
+  console.log('Booking Summary:', bookingSummary) 
   const handleCardTokenizeResponseReceived = async (tokenResult: any, verifiedBuyer?: any) => {
     if (!cardHolderName.trim()) {
       toast.error('Please enter the card holder name.')
@@ -398,8 +411,8 @@ export function Review({
                   disabled={isSubmitting}
                 />
               </div>
-            <div className='mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900'>
-                  {t('bookingWizard.review.partialPaymentNote')}
+              <div className='mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900'>
+                  {t('bookingWizard.review.partialPaymentNote', { amount: referencePrice })}
                 </div>
               {squareConfigured ? (
                 <PaymentForm
@@ -409,7 +422,6 @@ export function Review({
                   createVerificationDetails={() => {
                     const fallbackName = (cardHolderName || customerInfo.name || 'Guest User').trim()
                     const [givenName, ...familyNameParts] = fallbackName.split(' ')
-                    const referencePrice = 20
                     return {
                       amount: referencePrice.toFixed(2),
                       currencyCode: import.meta.env.VITE_SQUARE_CURRENCY || 'CAD',

@@ -35,10 +35,12 @@ export default function PaymentsView() {
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {
             success: 'bg-green-500',
+            completed: 'bg-green-500',
             pending: 'bg-yellow-500',
             failed: 'bg-red-500',
             refunded: 'bg-gray-500',
             cancelled: 'bg-orange-500',
+            deposit_paid: 'bg-emerald-500',
         };
         return colors[status] || 'bg-gray-500';
     };
@@ -167,7 +169,7 @@ export default function PaymentsView() {
                                 </p>
                             </div>
                             <div className="text-right">
-                                <Badge>{payment.booking.status}</Badge>
+                                <Badge>{t(`bookings.status_${payment.booking.status}`) as string}</Badge>
                                 <Button
                                     variant="outline"
                                     size="sm"

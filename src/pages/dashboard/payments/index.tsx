@@ -19,6 +19,8 @@ import { PaymentsDataTable } from './data-table';
 import { Payment, GetPaymentColumns } from './columns';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { format } from 'date-fns';
 
 export default function PaymentsPage() {
   const { t } = useTranslation();
@@ -31,11 +33,29 @@ export default function PaymentsPage() {
     amount: 0,
     reason: '',
   });
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    dateFrom: undefined as Date | undefined,
+    dateTo: undefined as Date | undefined,
+  });
+  const [appliedFilters, setAppliedFilters] = useState({
+    dateFrom: undefined as Date | undefined,
+    dateTo: undefined as Date | undefined,
+  });
 
   // Fetch payments
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
-    queryKey: ['payments'],
-    queryFn: () => http.get(apiRoutes.adminPayments).then((res) => res.data.data),
+    queryKey: ['payments', appliedFilters],
+    queryFn: () => {
+      const params: any = {};
+      if (appliedFilters.dateFrom) {
+        params.date_from = format(appliedFilters.dateFrom, 'yyyy-MM-dd');
+      }
+      if (appliedFilters.dateTo) {
+        params.date_to = format(appliedFilters.dateTo, 'yyyy-MM-dd');
+      }
+      return http.get(apiRoutes.adminPayments, { params }).then((res) => res.data.data);
+    },
   });
 
   // Refund mutation
@@ -88,9 +108,25 @@ export default function PaymentsPage() {
     onRefund: handleRefund,
   });
 
+  const applyFilters = () => {
+    setAppliedFilters(filters);
+    setShowFilters(false);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      dateFrom: undefined,
+      dateTo: undefined,
+    });
+    setAppliedFilters({
+      dateFrom: undefined,
+      dateTo: undefined,
+    });
+  };
+
   // Calculate stats
   const totalRevenue = payments
-    .filter((p) => p.status === 'completed')
+    .filter((p) => ['completed', 'deposit_paid'].includes(p.status))
     .reduce((sum, p) => sum + p.amount, 0);
   // const successfulPayments = payments.filter((p) => p.status === 'completed').length;
   // const pendingPayments = payments.filter((p) => p.status === 'pending').length;
@@ -121,6 +157,77 @@ export default function PaymentsPage() {
         {/* <Button onClick={() => navigate(webRoutes.payments.add)}>
           {t('payments.addNew', 'Add New Payment')}
         </Button> */}
+      </div>
+
+      {/* Filters */}
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <Button variant='outline' onClick={() => setShowFilters(!showFilters)}>
+            <CalendarIcon className='mr-2 h-4 w-4' />
+            {t('payments.filters', 'Filters')}
+            {(appliedFilters.dateFrom || appliedFilters.dateTo) && (
+              <span className='ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground'>
+                Active
+              </span>
+            )}
+          </Button>
+          {(appliedFilters.dateFrom || appliedFilters.dateTo) && (
+            <Button variant='ghost' onClick={clearFilters} className='gap-2'>
+              <X className='h-4 w-4' />
+              {t('payments.clearFilters', 'Clear')}
+            </Button>
+          )}
+        </div>
+
+        {showFilters && (
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-base'>{t('payments.filterByDate', 'Filter by Date Range')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className='grid gap-4 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label htmlFor='dateFrom'>{t('payments.dateFrom', 'Date From')}</Label>
+                  <Input
+                    id='dateFrom'
+                    type='date'
+                    value={filters.dateFrom ? format(filters.dateFrom, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => {
+                      const newFilters = {
+                        ...filters,
+                        dateFrom: e.target.value ? new Date(e.target.value) : undefined,
+                      };
+                      setFilters(newFilters);
+                    }}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='dateTo'>{t('payments.dateTo', 'Date To')}</Label>
+                  <Input
+                    id='dateTo'
+                    type='date'
+                    value={filters.dateTo ? format(filters.dateTo, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => {
+                      const newFilters = {
+                        ...filters,
+                        dateTo: e.target.value ? new Date(e.target.value) : undefined,
+                      };
+                      setFilters(newFilters);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className='mt-4 flex justify-end gap-2'>
+                <Button variant='outline' onClick={() => setShowFilters(false)}>
+                  {t('common.cancel', 'Cancel')}
+                </Button>
+                <Button onClick={applyFilters}>
+                  {t('payments.applyFilters', 'Apply Filters')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Stats Cards */}

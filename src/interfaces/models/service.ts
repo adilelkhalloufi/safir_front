@@ -64,7 +64,7 @@ export interface Service {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
-  
+  minimum_booking_deposit?: number;
   health_questions?: HealthQuestion[];  
   staff?: Staff[];
   // Additional fields for booking context

@@ -53,6 +53,7 @@ export default function BookingsView() {
         const colors: Record<string, string> = {
             draft: 'bg-gray-500',
             confirmed: 'bg-blue-500',
+            deposit_paid: 'bg-emerald-500',
             cancelled: 'bg-red-500',
             'no-show': 'bg-orange-500',
             completed: 'bg-green-500',

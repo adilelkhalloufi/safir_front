@@ -323,6 +323,7 @@ export default function BookingsIndex() {
                           { value: 'all', name: t('bookings.allStatus', 'All Status') },
                           { value: 'draft', name: t('bookings.status_draft', 'Draft') },
                           { value: 'confirmed', name: t('bookings.status_confirmed', 'Confirmed') },
+                          { value: 'deposit_paid', name: t('bookings.status_deposit_paid', 'Deposit Paid') },
                           { value: 'completed', name: t('bookings.status_completed', 'Completed') },
                           { value: 'cancelled', name: t('bookings.status_cancelled', 'Cancelled') },
                           { value: 'no-show', name: t('bookings.status_no-show', 'No-show') },

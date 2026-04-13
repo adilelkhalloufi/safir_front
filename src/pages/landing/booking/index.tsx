@@ -117,6 +117,7 @@ export default function BookingWizard() {
     const createBookingMutation = useMutation({
         mutationFn: async (bookingData: Record<string, unknown>) => {
             const response = await defaultHttp.post(apiRoutes.guestBookings, bookingData)
+            const responseStatus = response.status
             const result = response.data as GuestBookingResponse & {
                 status?: string
                 payment_status?: string
@@ -136,12 +137,11 @@ export default function BookingWizard() {
                 ''
             ).toLowerCase()
 
-            const bookingConfirmed = result?.success !== false && Boolean(result?.data)
-            const paymentConfirmed = normalizedPaymentStatus
-                ? ['paid', 'success', 'succeeded', 'completed', 'approved'].includes(normalizedPaymentStatus)
-                : result?.success !== false
+            const paymentRejected = ['failed', 'declined', 'canceled', 'cancelled'].includes(normalizedPaymentStatus)
+            const hasSuccessHttpStatus = responseStatus >= 200 && responseStatus < 300
+            const bookingCreated = hasSuccessHttpStatus && result?.success !== false
 
-            if (!bookingConfirmed || !paymentConfirmed) {
+            if (!bookingCreated || paymentRejected) {
                 throw new Error(result?.message || t('bookingWizard.bookingCreateError'))
             }
 

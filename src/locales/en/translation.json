@@ -77,6 +77,7 @@
     "noShowError": "Failed to mark booking as no-show",
     "status_draft": "Draft",
     "status_confirmed": "Confirmed",
+    "status_deposit_paid": "Deposit Paid",
     "status_completed": "Completed",
     "status_cancelled": "Cancelled",
     "status_no-show": "No-show",
@@ -394,7 +395,13 @@
     "refundSuccess": "Refund processed successfully",
     "refundSuccessDesc": "The refund has been initiated.",
     "refundError": "Error",
-    "refundErrorDesc": "Failed to process refund. Please try again."
+    "refundErrorDesc": "Failed to process refund. Please try again.",
+    "filters": "Filters",
+    "clearFilters": "Clear",
+    "filterByDate": "Filter by Date Range",
+    "dateFrom": "Date From",
+    "dateTo": "Date To",
+    "applyFilters": "Apply Filters"
   },
   "communications": {
     "title": "Communications",
@@ -669,7 +676,7 @@
       "notes": "Notes:",
       "total": "Total",
       "guaranteePaid": "{{amount}} $ guarantee paid • Balance payable on site",
-      "partialPaymentNote": "We will take only $20 now to confirm your booking. The remaining payment can be made after you enjoy the service. Thank you.",
+      "partialPaymentNote": "We will take only ${{amount}} now to confirm your booking. The remaining payment can be made after you enjoy the service. Thank you.",
       "termsAccept": "By confirming this booking, you accept our terms and conditions and our cancellation policy.",
       "back": "Back",
       "confirm": "Confirm booking",

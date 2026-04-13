@@ -53,6 +53,7 @@ const methodConfig: Record<string, { label: string; color: string }> = {
 
 const statusConfig: Record<string, { label: string; variant: any }> = {
   completed: { label: 'Completed', variant: 'default' },
+  deposit_paid: { label: 'Deposit Paid', variant: 'default' },
   pending: { label: 'Pending', variant: 'secondary' },
   failed: { label: 'Failed', variant: 'destructive' },
   refunded: { label: 'Refunded', variant: 'outline' },
@@ -153,7 +154,7 @@ export const GetPaymentColumns = ({ onView, onRefund }: PaymentColumnsProps): Co
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            {payment.status === 'completed' && onRefund && (
+            {['completed', 'deposit_paid'].includes(payment.status) && onRefund && (
               <DropdownMenuItem onClick={() => onRefund(payment)}>
                 <RefreshCw className='mr-2 h-4 w-4' />
                 Process Refund

@@ -22,7 +22,7 @@ export interface Booking {
     email: string;
     phone: string;
   };
-  status: 'draft' | 'confirmed' | 'completed' | 'cancelled' | 'no-show';
+  status: 'draft' | 'confirmed' | 'deposit_paid' | 'completed' | 'cancelled' | 'no-show';
   language: string;
   group_size: number;
   total_duration_minutes: number;
@@ -87,6 +87,7 @@ interface BookingColumnsProps {
 const statusConfig = {
   draft: { label: 'Draft', variant: 'secondary' as const, color: 'text-gray-600' },
   confirmed: { label: 'Confirmed', variant: 'default' as const, color: 'text-green-600' },
+  deposit_paid: { label: 'Deposit Paid', variant: 'default' as const, color: 'text-emerald-600' },
   completed: { label: 'Completed', variant: 'outline' as const, color: 'text-blue-600' },
   cancelled: { label: 'Cancelled', variant: 'destructive' as const, color: 'text-red-600' },
   'no-show': { label: 'No-show', variant: 'secondary' as const, color: 'text-orange-600' },
@@ -194,9 +195,10 @@ export const GetBookingColumns = ({
       id: 'actions',
       cell: ({ row }) => {
         const booking = row.original;
-        const canComplete = booking.status === 'confirmed';
-        const canCancel = ['draft', 'confirmed'].includes(booking.status);
-        const canNoShow = booking.status === 'confirmed';
+        const canPayment = ['draft', 'confirmed', 'deposit_paid'].includes(booking.status);
+        const canComplete = ['confirmed', 'deposit_paid'].includes(booking.status);
+        const canCancel = ['draft', 'confirmed', 'deposit_paid'].includes(booking.status);
+        const canNoShow = ['confirmed', 'deposit_paid'].includes(booking.status);
 
         return (
           <DropdownMenu>
@@ -221,7 +223,7 @@ export const GetBookingColumns = ({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              {onPayment && (
+              {canPayment && onPayment && (
                 <DropdownMenuItem onClick={() => onPayment(booking)}>
                   <CreditCard className='mr-2 h-4 w-4 text-blue-600' />
                   Add Payment
