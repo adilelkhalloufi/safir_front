@@ -83,6 +83,8 @@
     "status_no-show": "Absent",
     "healthFormRequired": "Formulaire de santé requis",
     "goToHealthForm": "Remplir le formulaire",
+    "paymentHistory": "Historique des paiements",
+    "viewReceipt": "Voir le reçu",
     "cancel": {
       "confirmTitle": "Annuler la réservation",
       "confirmMessage": "Êtes-vous sûr de vouloir annuler cette réservation ?",

@@ -83,6 +83,8 @@
     "status_no-show": "No-show",
     "healthFormRequired": "Health Form Required",
     "goToHealthForm": "Fill Health Form",
+    "paymentHistory": "Payment History",
+    "viewReceipt": "View Receipt",
     "cancel": {
       "confirmTitle": "Cancel Booking",
       "confirmMessage": "Are you sure you want to cancel this booking?",

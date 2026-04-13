@@ -259,6 +259,65 @@ export default function BookingsView() {
                 </Card>
             )}
 
+            {booking.payments && booking.payments.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <CreditCard className="h-5 w-5" />
+                            {t('bookings.paymentHistory', 'Payment History')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {booking.payments.map((payment: any) => (
+                                <div key={payment.id} className="flex justify-between items-start p-4 border rounded-lg">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Badge variant={payment.status === 'completed' || payment.status === 'deposit_paid' ? 'default' : payment.status === 'pending' ? 'secondary' : 'destructive'}>
+                                                {payment.status}
+                                            </Badge>
+                                            <span className="text-sm text-muted-foreground">
+                                                {payment.payment_method.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        {payment.notes && (
+                                            <p className="text-sm text-muted-foreground mb-2">{payment.notes}</p>
+                                        )}
+                                        <div className="flex flex-col gap-1 text-sm">
+                                            {payment.paid_at && (
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="h-4 w-4" />
+                                                    {format(new Date(payment.paid_at), 'PPP p')}
+                                                </span>
+                                            )}
+                                            {payment.square_payment_id && (
+                                                <span className="text-muted-foreground font-mono text-xs">
+                                                    ID: {payment.square_payment_id}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="text-right flex flex-col gap-2 items-end">
+                                        <p className="text-xl font-bold">{payment.amount} {payment.currency}</p>
+                                        {payment.square_receipt_url && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => window.open(payment.square_receipt_url, '_blank')}
+                                                className="flex items-center gap-1"
+                                            >
+                                                <ExternalLink className="h-4 w-4" />
+                                                {t('bookings.viewReceipt', 'View Receipt')}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {booking.notes && (
                 <Card>
                     <CardHeader>
