@@ -7,7 +7,7 @@ import http, { defaultHttp } from '@/utils/http';
 import { setPageTitle } from '@/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CreditCard, User } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -31,10 +31,6 @@ export default function SubscriptionCheckoutPage() {
 
     const selectedPlanId = Number(searchParams.get('plan_id') || '0');
     const [cardName, setCardName] = useState('');
-    const [squareCard, setSquareCard] = useState<any>(null);
-    const [squareReady, setSquareReady] = useState(false);
-    const [paymentProcessing, setPaymentProcessing] = useState(false);
-    const cardContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setPageTitle(t('subscriptionCheckout.title', 'Subscription checkout'));
@@ -60,46 +56,6 @@ export default function SubscriptionCheckoutPage() {
     const selectedPlan = useMemo(() => {
         return plans.find((plan) => plan.id === selectedPlanId) || null;
     }, [plans, selectedPlanId]);
-
-    // --- Square Web Payments SDK initialization ---
-    const initializeSquareCard = useCallback(async () => {
-        if (squareCard) return;
-        const Square = (window as any).Square;
-        if (!Square) {
-            console.error('Square SDK not loaded');
-            return;
-        }
-        try {
-            const payments = Square.payments(
-                import.meta.env.VITE_SQUARE_APP_ID,
-                import.meta.env.VITE_SQUARE_LOCATION_ID,
-            );
-            const card = await payments.card();
-            if (cardContainerRef.current) {
-                await card.attach(cardContainerRef.current);
-                setSquareCard(card);
-                setSquareReady(true);
-            }
-        } catch (err) {
-            console.error('Square card init error', err);
-        }
-    }, [squareCard]);
-
-    useEffect(() => {
-        if (isAuthenticated && !squareCard) {
-            const timer = setTimeout(() => initializeSquareCard(), 300);
-            return () => clearTimeout(timer);
-        }
-    }, [isAuthenticated, squareCard, initializeSquareCard]);
-
-    // Cleanup Square card on unmount
-    useEffect(() => {
-        return () => {
-            if (squareCard) {
-                try { squareCard.destroy(); } catch (_) { /* noop */ }
-            }
-        };
-    }, [squareCard]);
 
     const createAccountMutation = useMutation({
         mutationFn: async (formData: any) => {
@@ -127,8 +83,6 @@ export default function SubscriptionCheckoutPage() {
             };
             dispatch(login(authData));
             toast.success(t('subscriptionCheckout.accountCreated', 'Account created successfully'));
-            // Initialize Square card after successful account creation
-            setTimeout(() => initializeSquareCard(), 300);
         },
         onError: (error: any) => {
             toast.error(error?.message || t('subscriptionCheckout.accountCreationError', 'Could not create account'));
@@ -136,11 +90,12 @@ export default function SubscriptionCheckoutPage() {
     });
 
     const createSubscriptionMutation = useMutation({
-        mutationFn: async (sourceId: string) => {
+        mutationFn: async (payload: { sourceId: string; verificationToken?: string }) => {
             return http.post(apiRoutes.subscriptions, {
                 subscription_plan_id: selectedPlanId,
-                source_id: sourceId,
+                source_id: payload.sourceId,
                 card_holder: cardName,
+                ...(payload.verificationToken ? { verification_token: payload.verificationToken } : {}),
             });
         },
         onSuccess: () => {
@@ -152,16 +107,25 @@ export default function SubscriptionCheckoutPage() {
         },
     });
 
-    const handleSquarePayment = async () => {
-        // For testing: Skip Square payment and create subscription directly
-        setPaymentProcessing(true);
-        try {
-            createSubscriptionMutation.mutate('test_token_' + Date.now());
-        } catch (err: any) {
-            toast.error(err?.message || t('subscriptionCheckout.cardError', 'Card processing error'));
-        } finally {
-            setPaymentProcessing(false);
+    const handleCardTokenizeResponseReceived = async (tokenResult: any, verifiedBuyer?: any) => {
+        if (!cardName.trim()) {
+            toast.error(t('subscriptionCheckout.cardHolderRequired', 'Please enter the card holder name.'));
+            return;
         }
+
+        if (tokenResult?.status !== 'OK' || !tokenResult?.token) {
+            const message = tokenResult?.errors?.map((error: any) => error.message).filter(Boolean).join(', ')
+                || t('subscriptionCheckout.cardError', 'Card processing error');
+            toast.error(message);
+            return;
+        }
+
+        await Promise.resolve(
+            createSubscriptionMutation.mutate({
+                sourceId: tokenResult.token,
+                ...(verifiedBuyer?.token ? { verificationToken: verifiedBuyer.token } : {}),
+            })
+        );
     };
 
     const getPlanName = (plan: SubscriptionPlan) => {
@@ -208,12 +172,11 @@ export default function SubscriptionCheckoutPage() {
                         plan={selectedPlan}
                         cardName={cardName}
                         setCardName={setCardName}
-                        cardContainerRef={cardContainerRef}
-                        squareReady={squareReady}
-                        paymentProcessing={paymentProcessing}
                         isProcessing={createSubscriptionMutation.isPending}
+                        customerEmail={admin?.user?.email || ''}
+                        customerPhone={admin?.user?.phone || ''}
                         onBack={() => navigate(-1)}
-                        onPay={handleSquarePayment}
+                        onCardTokenizeResponseReceived={handleCardTokenizeResponseReceived}
                         getPlanName={getPlanName}
                     />
                 )}

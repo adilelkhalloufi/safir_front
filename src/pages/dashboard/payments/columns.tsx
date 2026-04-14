@@ -59,6 +59,11 @@ const statusConfig: Record<string, { label: string; variant: any }> = {
   refunded: { label: 'Refunded', variant: 'outline' },
 };
 
+const typeConfig: Record<string, { label: string; color: string }> = {
+  booking: { label: 'Booking', color: 'bg-amber-100 text-amber-800' },
+  subscription: { label: 'Subscription', color: 'bg-indigo-100 text-indigo-800' },
+};
+
 interface PaymentColumnsProps {
   onView: (payment: Payment) => void;
   onRefund: (payment: Payment) => void;
@@ -89,6 +94,19 @@ export const GetPaymentColumns = ({ onView, onRefund }: PaymentColumnsProps): Co
     cell: ({ row }) => {
       const bookingId = row.getValue('booking_id') as number | null;
       return <div className='text-sm'>{bookingId ? `#${bookingId}` : '-'}</div>;
+    },
+  },
+  {
+    accessorKey: 'payment_type',
+    header: 'Type',
+    cell: ({ row }) => {
+      const type = row.getValue('payment_type') as string;
+      const config = typeConfig[type] || { label: type, color: 'bg-gray-100 text-gray-800' };
+      return (
+        <Badge variant='outline' className={config.color}>
+          {config.label}
+        </Badge>
+      );
     },
   },
   {

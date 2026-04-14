@@ -3,20 +3,21 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CreditCard, Loader2, Lock, Shield, User, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SubscriptionPlan } from '@/interfaces/models/subscriptionPlan';
+import { CreditCard as SquareCreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 
 interface PaymentStepProps {
     plan: SubscriptionPlan;
     cardName: string;
     setCardName: (val: string) => void;
-    cardContainerRef: React.RefObject<HTMLDivElement>;
-    squareReady: boolean;
-    paymentProcessing: boolean;
     isProcessing: boolean;
+    customerEmail: string;
+    customerPhone: string;
     onBack: () => void;
-    onPay: () => void;
+    onCardTokenizeResponseReceived: (tokenResult: any, verifiedBuyer?: any) => void;
     getPlanName: (plan: SubscriptionPlan) => string;
 }
 
@@ -24,15 +25,18 @@ export function PaymentStep({
     plan,
     cardName,
     setCardName,
-    cardContainerRef,
-    squareReady,
-    paymentProcessing,
     isProcessing,
+    customerEmail,
+    customerPhone,
     onBack,
-    onPay,
+    onCardTokenizeResponseReceived,
     getPlanName,
 }: PaymentStepProps) {
     const { t } = useTranslation();
+
+    const squareApplicationId = import.meta.env.VITE_SQUARE_APP_ID;
+    const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID;
+    const squareConfigured = Boolean(squareApplicationId && squareLocationId);
 
     return (
         <Card className='border-0 shadow-xl overflow-hidden'>
@@ -79,43 +83,71 @@ export function PaymentStep({
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value)}
                             placeholder={t('subscriptionCheckout.cardHolderPlaceholder', 'Name on card')}
+                            disabled={isProcessing}
                         />
                     </div>
                 </div>
 
-                {/* Square card container */}
-                <div className='space-y-2'>
-                    <Label>{t('subscriptionCheckout.cardDetails', 'Card details')}</Label>
-                    <div
-                        ref={cardContainerRef}
-                        className='min-h-[90px] rounded-lg border-2 border-dashed bg-white p-4 transition-colors focus-within:border-primary'
-                    />
-                    {!squareReady && (
-                        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                            {t('subscriptionCheckout.loadingCard', 'Loading secure card form...')}
-                        </div>
+                {/* Square Payment Form */}
+                <div className='space-y-4'>
+                    {squareConfigured ? (
+                        <PaymentForm
+                            applicationId={squareApplicationId!}
+                            locationId={squareLocationId!}
+                            cardTokenizeResponseReceived={onCardTokenizeResponseReceived}
+                            createVerificationDetails={() => {
+                                const fallbackName = (cardName || 'Guest User').trim();
+                                const [givenName, ...familyNameParts] = fallbackName.split(' ');
+                                return {
+                                    amount: String(plan.price),
+                                    currencyCode: import.meta.env.VITE_SQUARE_CURRENCY || 'CAD',
+                                    intent: 'CHARGE',
+                                    billingContact: {
+                                        givenName,
+                                        familyName: familyNameParts.join(' ') || givenName,
+                                        email: customerEmail,
+                                        phone: customerPhone,
+                                        countryCode: 'CA',
+                                    },
+                                };
+                            }}
+                        >
+                            <SquareCreditCard
+                                buttonProps={{
+                                    isLoading: isProcessing,
+                                    className: 'mt-4 w-full h-12 px-8 text-base',
+                                }}
+                            >
+                                {isProcessing ? (
+                                    <>
+                                        <Loader2 className='mr-2 inline h-4 w-4 animate-spin' />
+                                        {t('subscriptionCheckout.processing', 'Processing...')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Lock className='mr-2 inline h-4 w-4' />
+                                        {t('subscriptionCheckout.payAndActivate', 'Pay and activate subscription')}
+                                    </>
+                                )}
+                            </SquareCreditCard>
+                        </PaymentForm>
+                    ) : (
+                        <Alert>
+                            <AlertDescription className='text-sm'>
+                                Add `VITE_SQUARE_APP_ID` and `VITE_SQUARE_LOCATION_ID` to your Vite env to enable card payments.
+                            </AlertDescription>
+                        </Alert>
                     )}
-                </div>
 
-                <div className='flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800'>
-                    <Shield className='h-4 w-4 shrink-0' />
-                    {t('subscriptionCheckout.securedBy', 'Secured payment by Square')}
+                    <div className='flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800'>
+                        <Shield className='h-4 w-4 shrink-0' />
+                        {t('subscriptionCheckout.securedBy', 'Secured payment by Square')}
+                    </div>
                 </div>
             </CardContent>
             <CardContent className='flex justify-between p-6 pt-0'>
-                <Button variant='outline' onClick={onBack}>
+                <Button variant='outline' onClick={onBack} disabled={isProcessing}>
                     <ArrowLeft className='mr-2 h-4 w-4' />{t('subscriptionCheckout.back', 'Back')}
-                </Button>
-                <Button
-                    className='h-12 px-8 text-base'
-                    onClick={onPay}
-                >
-                    {(paymentProcessing || isProcessing) ? (
-                        <><Loader2 className='mr-2 h-4 w-4 animate-spin' />{t('subscriptionCheckout.processing', 'Processing...')}</>
-                    ) : (
-                        <><Lock className='mr-2 h-4 w-4' />{t('subscriptionCheckout.payAndActivate', 'Pay and activate subscription')}</>
-                    )}
                 </Button>
             </CardContent>
         </Card>
