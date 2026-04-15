@@ -198,6 +198,78 @@ export default function TypeServicesAdd() {
                 },
             ],
         },
+        {
+            group: t('typeServices.emailTemplates', 'Email Templates'),
+            card: true,
+            fields: [
+                {
+                    name: 'email_subject_en',
+                    label: t('typeServices.emailSubjectEn', 'Email Subject (EN)'),
+                    type: 'text',
+                    placeholder: t('typeServices.emailSubjectPlaceholder', 'e.g., Booking Confirmation'),
+                },
+                {
+                    name: 'email_subject_fr',
+                    label: t('typeServices.emailSubjectFr', 'Email Subject (FR)'),
+                    type: 'text',
+                    placeholder: t('typeServices.emailSubjectPlaceholder', 'e.g., Confirmation de réservation'),
+                },
+                {
+                    name: 'email_template_en',
+                    label: t('typeServices.emailTemplateEn', 'Email Template (EN)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.emailTemplatePlaceholder', 'Enter email template in English...'),
+                },
+                {
+                    name: 'email_template_fr',
+                    label: t('typeServices.emailTemplateFr', 'Email Template (FR)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.emailTemplatePlaceholder', 'Entrez le modèle d\'email en français...'),
+                },
+            ],
+        },
+        {
+            group: t('typeServices.smsTemplates', 'SMS Templates'),
+            card: true,
+            fields: [
+                {
+                    name: 'sms_confirmation_en',
+                    label: t('typeServices.smsConfirmationEn', 'SMS Confirmation (EN)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.smsConfirmationPlaceholder', 'Enter SMS confirmation text...'),
+                },
+                {
+                    name: 'sms_confirmation_fr',
+                    label: t('typeServices.smsConfirmationFr', 'SMS Confirmation (FR)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.smsConfirmationPlaceholder', 'Entrez le texte de confirmation SMS...'),
+                },
+                {
+                    name: 'sms_reminder_en',
+                    label: t('typeServices.smsReminderEn', 'SMS Reminder (EN)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.smsReminderPlaceholder', 'Enter SMS reminder text...'),
+                },
+                {
+                    name: 'sms_reminder_fr',
+                    label: t('typeServices.smsReminderFr', 'SMS Reminder (FR)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.smsReminderPlaceholder', 'Entrez le texte de rappel SMS...'),
+                },
+                {
+                    name: 'sms_4hour_reminder_en',
+                    label: t('typeServices.sms4hourReminderEn', 'SMS 4-Hour Reminder (EN)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.sms4hourReminderPlaceholder', 'Enter SMS 4-hour reminder text...'),
+                },
+                {
+                    name: 'sms_4hour_reminder_fr',
+                    label: t('typeServices.sms4hourReminderFr', 'SMS 4-Hour Reminder (FR)'),
+                    type: 'textarea',
+                    placeholder: t('typeServices.sms4hourReminderPlaceholder', 'Entrez le texte de rappel SMS 4 heures...'),
+                },
+            ],
+        },
     ];
 
     return (
@@ -218,6 +290,16 @@ export default function TypeServicesAdd() {
                 display_order: 0,
                 requires_health_form: false,
                 health_questions: [],
+                email_subject_en: '',
+                email_subject_fr: '',
+                email_template_en: '',
+                email_template_fr: '',
+                sms_confirmation_en: '',
+                sms_confirmation_fr: '',
+                sms_reminder_en: '',
+                sms_reminder_fr: '',
+                sms_4hour_reminder_en: '',
+                sms_4hour_reminder_fr: '',
             }}
             loading={loading}
         />
