@@ -102,13 +102,13 @@ export const sidelinks: SideLink[] = [
     icon: <IconMassage size={18} />,
     roles: [RoleEnum.Admin],
   },
-  {
-    title: 'Resources',
-    label: '',
-    href: webRoutes.resources.index,
-    icon: <IconHome size={18} />,
-    roles: [RoleEnum.Admin],
-  },
+  // {
+  //   title: 'Resources',
+  //   label: '',
+  //   href: webRoutes.resources.index,
+  //   icon: <IconHome size={18} />,
+  //   roles: [RoleEnum.Admin],
+  // },
   // {
   //   title: 'Hammam Sessions',
   //   label: '',

@@ -31,11 +31,11 @@ export default function SignIn() {
 
           <div className='relative z-20  '>
             <blockquote className='space-y-2'>
-              <p className='text-lg'>
+              {/* <p className='text-lg'>
                 {t("website")}
                 {t("website.description")}
-              </p>
-              <footer className='text-sm'><a href='https://www.adev.ma' target='_blank'>Adev.ma</a></footer>
+              </p> */}
+              {/* <footer className='text-sm'><a href='https://www.adev.ma' target='_blank'>Adev.ma</a></footer> */}
             </blockquote>
           </div>
         </div>
