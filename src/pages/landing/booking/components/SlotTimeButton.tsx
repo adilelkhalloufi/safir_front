@@ -9,6 +9,7 @@ interface SlotTimeButtonProps {
   disabled?: boolean
   insufficient?: boolean
   onClick?: (e?: React.MouseEvent) => void
+  requestedQuantity?: number
 }
 
 export default function SlotTimeButton({
@@ -16,13 +17,27 @@ export default function SlotTimeButton({
   isSelected = false,
   disabled = false,
   insufficient = false,
-   onClick,
+  onClick,
+  requestedQuantity = 1
 }: SlotTimeButtonProps) {
   const { t } = useTranslation()
   
   // Check if slot has no staff available
   const noStaff = !slot.available_staff || slot.available_staff.length === 0
-  const isDisabled = disabled || noStaff
+  
+  // Calculate staff capacity
+  const staffWithCapacity = (slot.available_staff || []).map((staff: any) => ({
+    ...staff,
+    remainingCapacity: (staff.max_concurrent_bookings || 0) - (staff.current_bookings || 0)
+  }))
+  
+  // Sort by priority (descending)
+  const sortedStaff = staffWithCapacity
+    .filter((staff: any) => staff.remainingCapacity > 0)
+    .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
+  
+  const totalStaffCapacity = sortedStaff.reduce((sum: number, staff: any) => sum + staff.remainingCapacity, 0)
+  const isDisabled = disabled || noStaff || totalStaffCapacity === 0
 
   return (
     <button
@@ -45,22 +60,27 @@ export default function SlotTimeButton({
         {slot.start_time} - {slot.end_time}
       </div>
 
-      {noStaff ? (
+      {noStaff || totalStaffCapacity === 0 ? (
         <div className="mb-2 text-xs font-medium text-gray-400">
-          Indisponible
+          {t('bookingWizard.selectDateTime.unavailable', 'Indisponible')}
         </div>
       ) : (
         <>
           <div className={cn('mb-2 text-[10px]', isSelected ? 'text-amber-600' : 'text-gray-500')}>
-            {slot.available_staff?.slice(0, 2).map((s: any) => s.staff_name).join(', ')}
-            {slot.available_staff && slot.available_staff.length > 2 ? ` +${slot.available_staff.length - 2}` : ''}
+            {sortedStaff.slice(0, 2).map((s: any) => s.staff_name).join(', ')}
+            {sortedStaff.length > 2 ? ` +${sortedStaff.length - 2}` : ''}
           </div>
 
-          {/* {(slot.available_capacity || 0) > 0 && (
+          {/* Show total staff capacity */}
+          {totalStaffCapacity > 0 && (
             <div className={cn('text-[9px] font-medium', insufficient ? 'text-red-600' : 'text-gray-500')}>
-              {slot.available_capacity} {t('bookingWizard.selectDateTime.places')}
+              {insufficient ? (
+                <span>{t('bookingWizard.selectDateTime.capacity', 'Capacité')}: {totalStaffCapacity}/{requestedQuantity}</span>
+              ) : (
+                <span>{t('bookingWizard.selectDateTime.available', 'Disponible')}: {totalStaffCapacity}</span>
+              )}
             </div>
-          )} */}
+          )}
 
           {insufficient && (
             <div className="mt-1 text-xs text-red-600">{t('bookingWizard.selectDateTime.insufficientCapacityShort')}</div>

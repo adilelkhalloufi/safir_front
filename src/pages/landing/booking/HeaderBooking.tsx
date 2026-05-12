@@ -13,41 +13,9 @@ export default function HeaderBooking() {
   const navigate = useNavigate();
   const admin = useSelector((state: RootState) => state.admin);
   return (
-    <header className="fixed top-0 left-0 right-0 bg-primary flex items-center justify-between p-4 min-h-24">
-      <div className="w-12 hidden md:block"></div>
-      <div className="flex flex-row gap-4 md:hidden">
-        <Button
-          variant="secondary"
-          onClick={() => {
-            navigate(webRoutes.subscriptionPlans);
-          }}
-        >
-          <IconTicket className="mr-2 w-5 h-5" />
-          {t("subscriptionPublic.subscribe", "Subscribe")}
-        </Button>
-        {admin && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              navigate(webRoutes.Dashboard);
-            }}
-          >
-            <IconUser />
-          </Button>
-        )}
-        {!admin && (<Button
-          onClick={() => {
-            navigate(webRoutes.login);
-          }}
-        >
-          <IconLogin className="mr-2 w-5 h-5" />
-          {t("login")}
-        </Button>)}
-      </div>
-      <img src="/logo.png" alt="Booking Header" className="absolute left-1/2 transform -translate-x-1/2 h-20" />
-      <div className="flex flex-row gap-4">
-        <LangToggleFlags />
-        <div className="hidden md:flex flex-row gap-4">
+    <header className="fixed top-0 left-0 right-0 bg-primary z-20">
+      <div className="relative flex items-center justify-center px-4 py-3 min-h-[5.5rem]">
+        <div className="absolute left-4 top-1/2 flex -translate-y-1/2 items-center gap-2 md:hidden">
           <Button
             variant="secondary"
             onClick={() => {
@@ -55,7 +23,7 @@ export default function HeaderBooking() {
             }}
           >
             <IconTicket className="mr-2 w-5 h-5" />
-            {t("subscriptionPublic.subscribe", "Subscribe")}
+            <span className="hidden md:inline">{t("subscriptionPublic.subscribe", "Subscribe")}</span>
           </Button>
           {admin && (
             <Button
@@ -67,14 +35,57 @@ export default function HeaderBooking() {
               <IconUser />
             </Button>
           )}
-          {!admin && (<Button
-            onClick={() => {
-              navigate(webRoutes.login);
-            }}
-          >
-            <IconLogin className="mr-2 w-5 h-5" />
-            {t("login")}
-          </Button>)}
+          {!admin && (
+            <Button
+              onClick={() => {
+                navigate(webRoutes.login);
+              }}
+            >
+              <IconLogin className="mr-2 w-5 h-5" />
+              {t("login")}
+            </Button>
+          )}
+        </div>
+
+        <img
+          src="/logo.png"
+          alt="Booking Header"
+          className="h-16 md:h-20 z-10"
+        />
+
+        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-2">
+          <LangToggleFlags />
+          <div className="hidden md:flex flex-row gap-4">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                navigate(webRoutes.subscriptionPlans);
+              }}
+            >
+              <IconTicket className="mr-2 w-5 h-5" />
+              {t("subscriptionPublic.subscribe", "Subscribe")}
+            </Button>
+            {admin && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  navigate(webRoutes.Dashboard);
+                }}
+              >
+                <IconUser />
+              </Button>
+            )}
+            {!admin && (
+              <Button
+                onClick={() => {
+                  navigate(webRoutes.login);
+                }}
+              >
+                <IconLogin className="mr-2 w-5 h-5" />
+                {t("login")}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </header>

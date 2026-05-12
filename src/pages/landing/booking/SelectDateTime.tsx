@@ -51,6 +51,37 @@ interface SelectDateTimeProps {
   mobileBasket?: React.ReactNode
 }
 
+/**
+ * Calculate available staff capacity for a slot
+ * @param availableStaff Array of staff with capacity info
+ * @param requestedQuantity Number of people booking
+ * @returns Object with canAccommodate flag and available staff sorted by priority
+ */
+const calculateStaffCapacity = (availableStaff: any[], requestedQuantity: number) => {
+  if (!availableStaff || availableStaff.length === 0) {
+    return { canAccommodate: false, availableStaff: [] }
+  }
+
+  // Calculate remaining capacity for each staff member
+  const staffWithCapacity = availableStaff.map(staff => ({
+    ...staff,
+    remainingCapacity: (staff.max_concurrent_bookings || 0) - (staff.current_bookings || 0)
+  }))
+
+  // Sort by priority (descending) - higher priority = better choice
+  const sortedStaff = staffWithCapacity
+    .filter(staff => staff.remainingCapacity > 0)
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+
+  // Calculate total available capacity
+  const totalCapacity = sortedStaff.reduce((sum, staff) => sum + staff.remainingCapacity, 0)
+
+  return {
+    canAccommodate: totalCapacity >= requestedQuantity,
+    availableStaff: sortedStaff,
+    totalCapacity
+  }
+}
 
 export function SelectDateTime({
   selectedDate,
@@ -396,8 +427,17 @@ export function SelectDateTime({
                                 {slots.map((slot: any) => {
                                   const isSelected = isSlotEqual(service.slot, slot)
                                   const personCount = service.quantity || 1
+                                  
+                                  // Check staff capacity
+                                  const staffCapacity = calculateStaffCapacity(
+                                    slot.available_staff || [],
+                                    personCount
+                                  )
+                                  
+                                  // Slot is insufficient if either general capacity or staff capacity is not enough
                                   const insufficient =
-                                    (slot.available_capacity || 0) < personCount
+                                    (slot.available_capacity || 0) < personCount ||
+                                    !staffCapacity.canAccommodate
 
                                   const disabled = insufficient
 
@@ -405,10 +445,10 @@ export function SelectDateTime({
                                     <SlotTimeButton
                                       key={slot.slot_id}
                                       slot={slot}
-
                                       isSelected={isSelected}
                                       disabled={disabled}
                                       insufficient={insufficient}
+                                      requestedQuantity={personCount}
                                       onClick={() => handleServiceSlotClick(service, slot)}
                                     />
                                   )
