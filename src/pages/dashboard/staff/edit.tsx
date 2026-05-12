@@ -160,7 +160,6 @@ export default function EditStaff() {
           type: 'number',
           defaultValue: 2,
           placeholder: '2',
-          helperText: t('staff.maxConcurrentBookingsHelp', 'Maximum number of clients this staff member can handle at the same time'),
         },
         {
           name: 'priority',
@@ -168,7 +167,6 @@ export default function EditStaff() {
           type: 'number',
           defaultValue: 5,
           placeholder: '5',
-          helperText: t('staff.priorityHelp', 'Higher priority staff will be assigned first (e.g., 10 = highest priority)'),
         },
         {
           name: 'is_active',
