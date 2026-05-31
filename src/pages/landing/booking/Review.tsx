@@ -49,7 +49,8 @@ export function Review({
   const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID
   const squareConfigured = Boolean(squareApplicationId && squareLocationId)
   const [cardHolderName, setCardHolderName] = useState(customerInfo.name || '')
- 
+  const [paymentFormKey, setPaymentFormKey] = useState(0) // Force re-render of payment form
+
 
   useEffect(() => {
     if (!cardHolderName && customerInfo.name) {
@@ -108,24 +109,24 @@ export function Review({
     : ''
 
   const bookingServices = serviceDetails.map(detail => {
-      const selectedService = selectedServices.find(s => s.id === detail.service_id)
+    const selectedService = selectedServices.find(s => s.id === detail.service_id)
 
-      return {
-        id: detail.service_id,
-        slot_id: detail.slot_id,
-        quantity: detail.quantity,
-        start_datetime: detail.start_datetime,
-        end_datetime: detail.end_datetime,
-        minimum_booking_deposit: selectedService?.minimum_booking_deposit || 0,
-        assigned_staff: detail.assigned_staff.map((staff: any) => ({
-          staff_id: staff.staff_id,
-          staff_name: staff.staff_name,
-        })),
-        ...(selectedService?.has_sessions && {
-          preferred_gender: selectedService?.preferred_gender
-        })
-      }
-    })
+    return {
+      id: detail.service_id,
+      slot_id: detail.slot_id,
+      quantity: detail.quantity,
+      start_datetime: detail.start_datetime,
+      end_datetime: detail.end_datetime,
+      minimum_booking_deposit: selectedService?.minimum_booking_deposit || 0,
+      assigned_staff: detail.assigned_staff.map((staff: any) => ({
+        staff_id: staff.staff_id,
+        staff_name: staff.staff_name,
+      })),
+      ...(selectedService?.has_sessions && {
+        preferred_gender: selectedService?.preferred_gender
+      })
+    }
+  })
 
   const referencePrice = bookingServices.reduce(
     (sum, service) => sum + (Number(service.minimum_booking_deposit) || 0) * (Number(service.quantity) || 1),
@@ -148,29 +149,59 @@ export function Review({
     language: currentLang,
   }
 
-  console.log('Booking Summary:', bookingSummary) 
+  console.log('Booking Summary:', bookingSummary)
   const handleCardTokenizeResponseReceived = async (tokenResult: any, verifiedBuyer?: any) => {
     if (!cardHolderName.trim()) {
-      toast.error('Please enter the card holder name.')
+      toast.error(t('subscriptionCheckout.cardHolderRequired', 'Please enter the card holder name.'))
       return
     }
 
     if (tokenResult?.status !== 'OK' || !tokenResult?.token) {
-      const message = tokenResult?.errors?.map((error: any) => error.message).filter(Boolean).join(', ')
-        || t('subscriptionCheckout.cardError', 'Card processing error')
-      toast.error(message)
+      const errorMessages = tokenResult?.errors?.map((error: any) => error.message).filter(Boolean) || []
+      const errorString = errorMessages.join(', ').toLowerCase()
+
+      // Check if this is a session expiration error
+      const isSessionExpired = errorString.includes('expired') ||
+        errorString.includes('session') ||
+        errorString.includes('timeout')
+
+      if (isSessionExpired) {
+        toast.error(
+          t('bookingWizard.payment.sessionExpired',
+            'Your payment session has expired. The form has been reset - please enter your card details again.')
+        )
+        // Reset the payment form to generate a fresh session
+        setPaymentFormKey(prev => prev + 1)
+      } else {
+        const message = errorMessages.join(', ') || t('subscriptionCheckout.cardError', 'Card processing error')
+        toast.error(message)
+      }
       return
     }
 
-    await Promise.resolve(
-      onConfirm({
-        ...bookingSummary,
-        source_id: tokenResult.token,
-        payment_method: 'card',
-        card_holder: cardHolderName.trim(),
-        ...(verifiedBuyer?.token ? { verification_token: verifiedBuyer.token } : {}),
-      })
-    )
+    try {
+      await Promise.resolve(
+        onConfirm({
+          ...bookingSummary,
+          source_id: tokenResult.token,
+          payment_method: 'card',
+          card_holder: cardHolderName.trim(),
+          ...(verifiedBuyer?.token ? { verification_token: verifiedBuyer.token } : {}),
+        })
+      )
+    } catch (error: any) {
+      // If booking submission fails, reset the form for retry
+      if (error?.message?.toLowerCase().includes('expired') ||
+        error?.message?.toLowerCase().includes('token')) {
+        toast.error(
+          t('bookingWizard.payment.tokenExpired',
+            'Payment token expired. Please try again with your card details.')
+        )
+        setPaymentFormKey(prev => prev + 1)
+      } else {
+        toast.error(error?.message || t('bookingWizard.payment.error', 'Payment failed. Please try again.'))
+      }
+    }
   }
 
   return (
@@ -183,7 +214,7 @@ export function Review({
         <p className='text-sm text-muted-foreground'>
           {t('bookingWizard.review.subtitle')}
         </p>
-    
+
       </CardHeader>
       <CardContent>
         <div className='space-y-6'>
@@ -412,10 +443,16 @@ export function Review({
                 />
               </div>
               <div className='mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900'>
-                  {t('bookingWizard.review.partialPaymentNote', { amount: referencePrice })}
-                </div>
+                {t('bookingWizard.review.partialPaymentNote', { amount: referencePrice })}
+              </div>
+              <div className='mt-2 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800'>
+                <Clock className='h-4 w-4 shrink-0' />
+                {t('bookingWizard.payment.timeoutWarning',
+                  'Please complete your payment within a few minutes to avoid session timeout.')}
+              </div>
               {squareConfigured ? (
                 <PaymentForm
+                  key={paymentFormKey}
                   applicationId={squareApplicationId!}
                   locationId={squareLocationId!}
                   cardTokenizeResponseReceived={handleCardTokenizeResponseReceived}

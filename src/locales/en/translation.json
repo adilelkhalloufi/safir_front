@@ -727,6 +727,12 @@
       "confirming": "Confirmation...",
       "person": "person",
       "persons": "persons"
+    },
+    "payment": {
+      "sessionExpired": "Your payment session has expired. The form has been reset - please enter your card details again.",
+      "tokenExpired": "Payment token expired. Please try again with your card details.",
+      "timeoutWarning": "Please complete your payment within a few minutes to avoid session timeout.",
+      "error": "Payment failed. Please try again."
     }
   },
   "calendar": {
@@ -794,6 +800,7 @@
     "paymentDescription": "Enter your card details below to complete payment via Square.",
     "cardHolder": "Card holder name",
     "cardHolderPlaceholder": "Name on card",
+    "cardHolderRequired": "Please enter the card holder name.",
     "cardDetails": "Card details",
     "loadingCard": "Loading secure card form...",
     "securedBy": "Secured payment by Square",

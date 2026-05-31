@@ -328,6 +328,12 @@
       "confirming": "Confirmation...",
       "person": "personne",
       "persons": "personnes"
+    },
+    "payment": {
+      "sessionExpired": "Votre session de paiement a expiré. Le formulaire a été réinitialisé - veuillez saisir à nouveau les détails de votre carte.",
+      "tokenExpired": "Le jeton de paiement a expiré. Veuillez réessayer avec les détails de votre carte.",
+      "timeoutWarning": "Veuillez finaliser votre paiement dans quelques minutes pour éviter l'expiration de la session.",
+      "error": "Le paiement a échoué. Veuillez réessayer."
     }
   },
   "calendar": {
@@ -654,6 +660,7 @@
     "paymentDescription": "Entrez les détails de votre carte ci-dessous pour effectuer le paiement via Square.",
     "cardHolder": "Nom du titulaire de la carte",
     "cardHolderPlaceholder": "Nom sur la carte",
+    "cardHolderRequired": "Veuillez saisir le nom du titulaire de la carte.",
     "cardDetails": "Détails de la carte",
     "loadingCard": "Chargement du formulaire sécurisé...",
     "securedBy": "Paiement sécurisé par Square",
