@@ -99,5 +99,11 @@ export const webRoutes = {
   profile: {
     index: '/dashboard/profile',
   },
+  blockedSlots: {
+    index: '/dashboard/blocked-time-slots',
+    view: '/dashboard/blocked-time-slots/:id',
+    add: '/dashboard/blocked-time-slots/add',
+    edit: '/dashboard/blocked-time-slots/:id/edit',
+  },
 };
 

@@ -106,4 +106,11 @@ export const apiRoutes = {
   settings: `${API_URL}/admin/settings`,
   Getsettings: `${API_URL}/Getsettings`,
 
+  // Blocked Time Slots
+  adminBlockedTimeSlots: `${API_URL}/admin/blocked-time-slots`,
+  adminBlockedTimeSlotsById: (id: number) => `${API_URL}/admin/blocked-time-slots/${id}`,
+  adminBlockedTimeSlotsByStaffDate: (staffId: number, date: string) => `${API_URL}/admin/blocked-time-slots/staff/${staffId}/date/${date}`,
+  adminBlockedTimeSlotsByServiceDate: (serviceId: number, date: string) => `${API_URL}/admin/blocked-time-slots/service/${serviceId}/date/${date}`,
+  adminBlockedTimeSlotsRange: `${API_URL}/admin/blocked-time-slots/range/between`,
+
  };

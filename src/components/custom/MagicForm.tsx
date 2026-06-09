@@ -23,7 +23,7 @@ export interface MagicFormFieldProps {
   error?: string;
   value?: any;
   defaultValue?: any;
-  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "table" | "label" | "color" | "iconpicker" | "rating";
+  type: "checkbox" | "select" | "text" | "textarea" | "radio" | "image" | "number" | "date" | "time" | "datetime-local" | "table" | "label" | "color" | "iconpicker" | "rating";
   required?: boolean;
   order?: number;
   options?: MagicFormOptionProps[] | any[]; // Updated to any[]
@@ -356,9 +356,10 @@ const MagicForm = memo(({
     // For color and time types, use specific input types
     const inputType = col.type === "color" ? "color" :
       col.type === "time" ? "time" :
-        col.type === "date" ? "date" :
-          col.type === "number" ? "number" :
-            "text";
+        col.type === "datetime-local" ? "datetime-local" :
+          col.type === "date" ? "date" :
+            col.type === "number" ? "number" :
+              "text";
 
     return (
       <div className="flex flex-col gap-1">
@@ -468,6 +469,14 @@ const MagicForm = memo(({
             value={formData[name] ?? ""}
             onChange={(e) => handleChange(e, name)}
             placeholder={placeholder || "HH:MM"}
+            className={errors[name] ? "border-red-500" : ""}
+          />
+        ) : type === "datetime-local" ? (
+          <Input
+            disabled={disabled}
+            type="datetime-local"
+            value={formData[name] ?? ""}
+            onChange={(e) => handleChange(e, name)}
             className={errors[name] ? "border-red-500" : ""}
           />
         ) : type === "color" ? (

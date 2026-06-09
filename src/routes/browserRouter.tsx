@@ -189,6 +189,22 @@ const SettingsIndex = loadable(() => import('../pages/dashboard/settings'), {
   fallback: fallbackElement,
 });
 
+const BlockedTimeSlotsIndex = loadable(() => import('../pages/dashboard/blocked-time-slots'), {
+  fallback: fallbackElement,
+});
+
+const BlockedTimeSlotsAdd = loadable(() => import('../pages/dashboard/blocked-time-slots/add'), {
+  fallback: fallbackElement,
+});
+
+const BlockedTimeSlotsEdit = loadable(() => import('../pages/dashboard/blocked-time-slots/edit'), {
+  fallback: fallbackElement,
+});
+
+const BlockedTimeSlotsView = loadable(() => import('../pages/dashboard/blocked-time-slots/view'), {
+  fallback: fallbackElement,
+});
+
 const Register = loadable(() => import('../pages/auth/components/register'), {
   fallback: fallbackElement,
 });
@@ -671,6 +687,38 @@ export const browserRouter = createBrowserRouter([
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin]}>
             <SettingsIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.blockedSlots.index,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <BlockedTimeSlotsIndex />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.blockedSlots.add,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <BlockedTimeSlotsAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.blockedSlots.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <BlockedTimeSlotsEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.blockedSlots.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+            <BlockedTimeSlotsView />
           </RequireRole>
         ),
       },

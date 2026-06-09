@@ -10,6 +10,7 @@ import {
   IconCreditCard,
   IconMessage,
   IconTicket,
+  IconClock,
 } from '@tabler/icons-react';
 import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
@@ -129,6 +130,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconMessage size={18} />,
     roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
+
   // {
   //   title: 'Reports',
   //   label: '',
@@ -161,7 +163,14 @@ export const sidelinks: SideLink[] = [
         title: 'General Settings',
         href: webRoutes.settings.index,
         icon: <IconUserCog size={18} />,
-      }
+      },
+        {
+    title: 'Blocked Time Slots',
+  
+    href: webRoutes.blockedSlots.index,
+    icon: <IconClock size={18} />,
+     
+  },
     ],
   },
 

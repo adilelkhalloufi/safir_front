@@ -18,5 +18,8 @@ export * from './payment';
 // Resource
 export * from './resource';
 
+// Blocked Time Slots
+export * from './blockedTimeSlot';
+
 // Settings
 export * from './settings';
