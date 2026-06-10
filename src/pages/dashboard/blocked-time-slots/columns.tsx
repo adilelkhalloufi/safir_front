@@ -10,8 +10,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import i18next from '@/i18n';
-import { BlockedTimeSlot, BlockedSlotReason } from '@/interfaces/models/blockedTimeSlot';
+ import { BlockedTimeSlot, BlockedSlotReason } from '@/interfaces/models/blockedTimeSlot';
 
 interface BlockedTimeSlotsColumnsProps {
   onView?: (slot: BlockedTimeSlot) => void;

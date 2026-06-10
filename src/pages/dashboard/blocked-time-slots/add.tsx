@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LayoutSh as Layout } from '@/components/custom/layout';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+ import { useToast } from '@/components/ui/use-toast';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
-import { IconArrowLeft } from '@tabler/icons-react';
-import { setPageTitle, handleErrorResponse } from '@/utils';
+ import { setPageTitle, handleErrorResponse } from '@/utils';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 
 export default function AddBlockedTimeSlot() {
@@ -204,16 +202,7 @@ export default function AddBlockedTimeSlot() {
   return (
     <Layout
       title={t('blockedSlots.addBlockedSlot', 'Add Blocked Time Slot')}
-      description={t('blockedSlots.addBlockedSlotDesc', 'Create a new blocked time slot')}
-      actionButton={
-        <Button
-          variant="outline"
-          onClick={() => navigate(webRoutes.blockedSlots.index)}
-        >
-          <IconArrowLeft className="mr-2 h-4 w-4" />
-          {t('common.back', 'Back')}
-        </Button>
-      }
+ 
     >
       <MagicForm
         fields={formGroups}

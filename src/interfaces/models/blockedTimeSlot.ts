@@ -26,6 +26,8 @@ export interface BlockedTimeSlot {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  service?: any; // This can be further defined based on the actual service structure
+  type_service?: any; // This can be further defined based on the actual service structure
 }
 
 export interface BlockedTimeSlotFormData {

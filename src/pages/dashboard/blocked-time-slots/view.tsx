@@ -147,14 +147,14 @@ export default function ViewBlockedTimeSlot() {
                         {t('blockedSlots.serviceType', 'Service Type')}
                       </label>
                       <div className="mt-1 text-sm font-medium">
-                        {slot.type_service ? (
+                        {slot?.type_service ? (
                           slot.type_service.name_en || slot.type_service.name_fr || 'N/A'
                         ) : (
                           'N/A'
                         )}
                       </div>
                     </div>
-                    {slot.service && (
+                    {slot?.service && (
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">
                           {t('blockedSlots.service', 'Service')}

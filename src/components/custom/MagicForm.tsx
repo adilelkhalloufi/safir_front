@@ -37,6 +37,7 @@ export interface MagicFormFieldProps {
   disabled?: boolean; // Add this line
   returnFullObject?: boolean; // Add this line
   showIf?: (data: any) => boolean; // Conditional rendering
+  condition?: (values: any) => boolean; // Add this line for conditional rendering based on other field values
 }
 
 export interface MagicFormGroupProps {
