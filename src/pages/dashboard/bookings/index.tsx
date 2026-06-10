@@ -237,6 +237,13 @@ export default function BookingsIndex() {
             </p>
           </div>
           <div className='flex gap-2'>
+            <Button
+              onClick={() => navigate(webRoutes.bookings.add)}
+              className='gap-2'
+            >
+              <span>+</span>
+              {t('bookings.createNew', 'Create Booking')}
+            </Button>
             <div className='flex rounded-md border'>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}

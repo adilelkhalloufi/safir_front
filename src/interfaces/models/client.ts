@@ -4,8 +4,8 @@ export type UserStatus = 'active' | 'inactive' | 'suspended';
 
 export interface Client {
   id: number;
-  first_name: string;
-  last_name: string;
+  name: string;
+  
   email: string;
   phone?: string;
   address?: string;

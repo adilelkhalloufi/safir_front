@@ -137,6 +137,7 @@ export const GetBookingColumns = ({
       },
     },
     {
+      id: 'dateTime',
       accessorKey: 'booking_items',
       header: 'Date/Time',
       cell: ({ row }) => {
@@ -167,17 +168,25 @@ export const GetBookingColumns = ({
       },
     },
     {
-      accessorKey: 'booking_items',
+      accessorKey: 'services',
+      id: 'services',
       header: 'Services',
       cell: ({ row }) => {
-        const { booking_items } = row.original;
+        const booking = row.original;
+        const items = booking?.booking_items || [];
+        if (!Array.isArray(items) || items.length === 0) {
+          return <div className='text-muted-foreground'>-</div>;
+        }
         return (
           <div className='flex flex-wrap gap-1'>
-            {booking_items.map((item, idx) => (
-              <Badge key={idx} variant='outline' className='text-xs'>
-                {item.service.name.en}
-              </Badge>
-            ))}
+            {items.map((item) => {
+              if (!item?.id || !item?.service?.name?.en) return null;
+              return (
+                <Badge key={item.id} variant='outline' className='text-xs'>
+                  {item.service.name.en}
+                </Badge>
+              );
+            })}
           </div>
         );
       },
@@ -194,7 +203,7 @@ export const GetBookingColumns = ({
       header: 'Status',
       cell: ({ row }) => {
         const status = row.getValue('status') as keyof typeof statusConfig;
-        const config = statusConfig[status];
+        const config = statusConfig[status] || { label: status || 'Unknown', variant: 'secondary' as const };
         return <Badge variant={config.variant}>{config.label}</Badge>;
       },
     },
