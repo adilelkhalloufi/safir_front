@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   CheckCircle2,
   Calendar,
@@ -23,6 +26,9 @@ import type { Service } from '@/interfaces/models/service'
 import { getLocalizedValue } from '@/interfaces/models/booking'
 import { CustomerInfo } from './types'
 import { IconUserFilled } from '@tabler/icons-react'
+import { setTermsAccepted } from '@/store/slices/bookingSlice'
+import { RootState } from '@/store'
+import { webRoutes } from '@/routes/web'
 
 interface ReviewProps {
   selectedServices: Service[]
@@ -43,6 +49,9 @@ export function Review({
   onPrev,
 }: ReviewProps) {
   const { i18n, t } = useTranslation()
+  const dispatch = useDispatch()
+  const { termsAccepted } = useSelector((state: RootState) => state.booking)
+
   const currentLang = (i18n.language || 'fr') as 'fr' | 'en'
   const dateLocale = currentLang === 'fr' ? fr : undefined
   const squareApplicationId = import.meta.env.VITE_SQUARE_APP_ID
@@ -151,6 +160,11 @@ export function Review({
 
   console.log('Booking Summary:', bookingSummary)
   const handleCardTokenizeResponseReceived = async (tokenResult: any, verifiedBuyer?: any) => {
+    if (!termsAccepted) {
+      toast.error(t('bookingWizard.review.mustAcceptTerms', 'You must accept the terms and policy to proceed.'))
+      return
+    }
+
     if (!cardHolderName.trim()) {
       toast.error(t('subscriptionCheckout.cardHolderRequired', 'Please enter the card holder name.'))
       return
@@ -445,11 +459,38 @@ export function Review({
               <div className='mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900'>
                 {t('bookingWizard.review.partialPaymentNote', { amount: referencePrice })}
               </div>
-              <div className='mt-2 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800'>
-                <Clock className='h-4 w-4 shrink-0' />
-                {t('bookingWizard.payment.timeoutWarning',
-                  'Please complete your payment within a few minutes to avoid session timeout.')}
+
+
+              {/* Terms and Conditions Checkbox */}
+              <div className='space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4'>
+                <div className='flex items-start space-x-3'>
+                  <Checkbox
+                    id='terms-acceptance'
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => {
+                      dispatch(setTermsAccepted(checked === true))
+                    }}
+                    disabled={isSubmitting}
+                    className='mt-1'
+                  />
+                  <div className='flex-1'>
+                    <label
+                      htmlFor='terms-acceptance'
+                      className='text-sm font-medium leading-relaxed text-amber-900 cursor-pointer'
+                    >
+                      {t('bookingWizard.review.acceptPolicy', 'I accept the ')}{' '}
+                      <Link
+                        to={webRoutes.policy}
+                        target='_blank'
+                        className='font-semibold text-amber-700 underline hover:text-amber-900'
+                      >
+                        {t('bookingWizard.review.policyLink', 'terms and policy')}
+                      </Link>
+                    </label>
+                  </div>
+                </div>
               </div>
+
               {squareConfigured ? (
                 <PaymentForm
                   key={paymentFormKey}
@@ -477,6 +518,7 @@ export function Review({
                     buttonProps={{
                       isLoading: isSubmitting,
                       className: 'mt-4 w-full',
+                      disabled: !termsAccepted || isSubmitting,
                     }}
                   >
                     {isSubmitting ? (
@@ -484,6 +526,8 @@ export function Review({
                         <Loader2 className='mr-2 inline h-4 w-4 animate-spin' />
                         {t('bookingWizard.review.confirming')}
                       </>
+                    ) : !termsAccepted ? (
+                      t('bookingWizard.review.acceptTermsToConfirm', 'Accept terms to confirm')
                     ) : (
                       t('bookingWizard.review.confirm')
                     )}
@@ -504,11 +548,6 @@ export function Review({
             </div>
           </div>
 
-          <Alert>
-            <AlertDescription className='text-sm'>
-              {t('bookingWizard.review.termsAccept')}
-            </AlertDescription>
-          </Alert>
         </div>
 
         <div className='mt-6 flex justify-start'>

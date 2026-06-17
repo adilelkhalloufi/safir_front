@@ -226,7 +226,7 @@ const ClientSubscriptionsPage = loadable(() => import('../pages/dashboard/client
   fallback: fallbackElement,
 });
 
- 
+
 
 const SubscriptionPlansAdminIndex = loadable(() => import('../pages/dashboard/subscription-plans'), {
   fallback: fallbackElement,
@@ -244,6 +244,13 @@ const SubscriptionPlansAdminView = loadable(() => import('../pages/dashboard/sub
   fallback: fallbackElement,
 });
 
+const PolicyPage = loadable(() => import('../pages/landing/policy'), {
+  fallback: fallbackElement,
+});
+
+const StaffPage = loadable(() => import('../pages/landing/staff'), {
+  fallback: fallbackElement,
+});
 
 const Docs = loadable(() => import('../pages/docs'), {
   fallback: fallbackElement,
@@ -295,6 +302,16 @@ export const browserRouter = createBrowserRouter([
     errorElement: errorElement,
   },
   {
+    path: webRoutes.policy,
+    element: <PolicyPage />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.staffLanding,
+    element: <StaffPage />,
+    errorElement: errorElement,
+  },
+  {
     path: webRoutes.login,
     element: <Login />,
     errorElement: errorElement,
@@ -336,7 +353,7 @@ export const browserRouter = createBrowserRouter([
           </RequireRole>
         ),
       },
- 
+
       {
         path: webRoutes.docs,
         element: (

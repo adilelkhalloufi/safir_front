@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Service, ServiceSlot  } from '../../interfaces/models/service';
+import type { Service, ServiceSlot } from '../../interfaces/models/service';
 import type { Step, CustomerInfo } from '../../pages/landing/booking/types';
 
 export interface BookingState {
@@ -7,6 +7,7 @@ export interface BookingState {
     selectedServices: Service[];
     selectedDate: string | undefined;
     customerInfo: CustomerInfo;
+    termsAccepted: boolean;
 }
 
 const initialState: BookingState = {
@@ -19,7 +20,8 @@ const initialState: BookingState = {
         email: '',
         phone: '',
         notes: ''
-    }
+    },
+    termsAccepted: false
 };
 
 export const bookingSlice = createSlice({
@@ -44,7 +46,7 @@ export const bookingSlice = createSlice({
             const index = state.selectedServices.findIndex(s => s.id === serviceId);
             if (index > -1) {
                 state.selectedServices.splice(index, 1);
-             } else {
+            } else {
                 const newService = { ...service };
                 if (newService.has_sessions && !newService.preferred_gender) {
                     newService.preferred_gender = 'mixed';
@@ -63,7 +65,7 @@ export const bookingSlice = createSlice({
             const { serviceId, preference } = action.payload;
             const service = state.selectedServices.find(s => s.id === serviceId);
             if (service) {
-               
+
                 service.preferred_gender = preference;
             }
         },
@@ -75,25 +77,28 @@ export const bookingSlice = createSlice({
             } else {
                 state.selectedDate = action.payload;
             }
-        
+
         },
-      
-       setServiceSlot: (state, action: PayloadAction<{ serviceId: number; slot: ServiceSlot | null }>) => {
+
+        setServiceSlot: (state, action: PayloadAction<{ serviceId: number; slot: ServiceSlot | null }>) => {
             const { serviceId, slot } = action.payload;
             const service = state.selectedServices.find(s => s.id === serviceId);
             if (service) {
-               
+
                 service.slot = slot as any;
             }
-        },        setServiceSelected: (state, action: PayloadAction<{ serviceId: number; selected: boolean }>) => {
+        }, setServiceSelected: (state, action: PayloadAction<{ serviceId: number; selected: boolean }>) => {
             const { serviceId, selected } = action.payload;
             const service = state.selectedServices.find(s => s.id === serviceId);
             if (service) {
                 (service as any).selected = selected;
             }
-        },        updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
+        }, updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
             const { field, value } = action.payload;
             state.customerInfo[field] = value;
+        },
+        setTermsAccepted: (state, action: PayloadAction<boolean>) => {
+            state.termsAccepted = action.payload;
         },
         resetBooking: () => {
             return initialState;
@@ -112,6 +117,7 @@ export const {
     setServiceSlot,
     setServiceSelected,
     updateCustomerInfo,
+    setTermsAccepted,
     resetBooking
 } = bookingSlice.actions;
 
