@@ -491,7 +491,13 @@ export function Review({
                 </div>
               </div>
 
-              {squareConfigured ? (
+              {!termsAccepted ? (
+                <div className='rounded-lg border border-amber-300 bg-amber-50 p-4 text-center'>
+                  <p className='text-sm font-medium text-amber-900'>
+                    {t('bookingWizard.review.acceptTermsToConfirm', 'Accept terms to confirm')}
+                  </p>
+                </div>
+              ) : squareConfigured ? (
                 <PaymentForm
                   key={paymentFormKey}
                   applicationId={squareApplicationId!}
@@ -518,7 +524,6 @@ export function Review({
                     buttonProps={{
                       isLoading: isSubmitting,
                       className: 'mt-4 w-full',
-                      disabled: !termsAccepted || isSubmitting,
                     }}
                   >
                     {isSubmitting ? (
@@ -526,8 +531,6 @@ export function Review({
                         <Loader2 className='mr-2 inline h-4 w-4 animate-spin' />
                         {t('bookingWizard.review.confirming')}
                       </>
-                    ) : !termsAccepted ? (
-                      t('bookingWizard.review.acceptTermsToConfirm', 'Accept terms to confirm')
                     ) : (
                       t('bookingWizard.review.confirm')
                     )}
