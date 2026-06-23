@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect } from 'react';
 import { setPageTitle } from '@/utils';
+import HeaderBooking from '../booking/HeaderBooking';
 
 export default function PolicyPage() {
     const { t } = useTranslation();
@@ -11,7 +12,9 @@ export default function PolicyPage() {
     }, [t]);
 
     return (
-        <div className='min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12 px-4 md:px-8'>
+        <>
+        <HeaderBooking/>
+         <div className='min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12 px-4 md:px-8 mt-20'>
             <div className='mx-auto max-w-4xl space-y-6'>
                 {/* Header */}
                 <div className='space-y-2 text-center'>
@@ -107,5 +110,7 @@ export default function PolicyPage() {
                 </Card>
             </div>
         </div>
-    );
+    
+        </>);
+       
 }
