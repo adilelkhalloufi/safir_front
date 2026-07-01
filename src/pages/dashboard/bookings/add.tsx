@@ -10,11 +10,13 @@ import { toast } from '@/components/ui/use-toast';
 import { setPageTitle } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Combobox } from '@/components/ui/combobox';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, ChevronRight, Plus } from 'lucide-react';
+import { CalendarIcon, ChevronRight, CreditCard, Lock, Loader2, Plus, Shield } from 'lucide-react';
+import { CreditCard as SquareCreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -60,11 +62,20 @@ export default function BookingsAdd() {
     const [serviceSlots, setServiceSlots] = useState<Record<number, any>>({});
     const [serviceGenders, setServiceGenders] = useState<Record<number, 'female' | 'male' | 'mixed'>>({});
     const [selectedStaff, setSelectedStaff] = useState<Record<number, any>>({});
+    const [serviceQuantities, setServiceQuantities] = useState<Record<number, number>>({});
     const [formData, setFormData] = useState<BookingFormData>({
         services: [],
         group_size: 1,
         language: 'en',
     });
+    const [paymentType, setPaymentType] = useState<'cash' | 'card' | 'bank_transfer' | 'online'>('cash');
+    const [paymentAmount, setPaymentAmount] = useState<string>('');
+    const [cardHolderName, setCardHolderName] = useState<string>('');
+    const [paymentFormKey, setPaymentFormKey] = useState(0);
+
+    const squareApplicationId = import.meta.env.VITE_SQUARE_APP_ID;
+    const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID;
+    const squareConfigured = Boolean(squareApplicationId && squareLocationId);
 
     useEffect(() => {
         setPageTitle(t('bookings.addTitle', 'Create New Booking'));
@@ -88,9 +99,15 @@ export default function BookingsAdd() {
         },
     });
 
+    const serviceDepositTotal = Array.from(selectedServiceIds).reduce((sum, serviceId) => {
+        const svc = services.find((s: any) => s.id === serviceId);
+        const qty = serviceQuantities[serviceId] || 1;
+        return sum + ((Number(svc?.minimum_booking_deposit) || 0) * qty);
+    }, 0);
+
     // Fetch available slots for selected services
     const { data: availableSlots = {} } = useQuery({
-        queryKey: ['available-slots', Array.from(selectedServiceIds), Object.values(serviceDates)],
+        queryKey: ['available-slots', Array.from(selectedServiceIds), Object.values(serviceDates), Array.from(selectedServiceIds).map(id => serviceQuantities[id] || 1)],
         queryFn: async () => {
             if (selectedServiceIds.size === 0) return {};
             
@@ -103,7 +120,7 @@ export default function BookingsAdd() {
                     services: [
                         {
                             service_id: serviceId,
-                            group_size: formData.group_size || 1,
+                            group_size: serviceQuantities[serviceId] || 1,
                         }
                     ],
                     date: format(date, 'yyyy-MM-dd'),
@@ -165,22 +182,21 @@ export default function BookingsAdd() {
         const servicesArray = Array.from(selectedServiceIds).map(serviceId => {
             const slot = serviceSlots[serviceId];
             const selectedSvc = services.find((s: any) => s.id === serviceId);
-            let staff = selectedStaff[serviceId];
+            const quantity = serviceQuantities[serviceId] || 1;
+            let assignedStaff = [];
 
-            // If no staff manually selected, auto-select highest priority staff
-            if (!staff && slot.available_staff && slot.available_staff.length > 0) {
-                const highestPriorityStaff = slot.available_staff.reduce((prev: any, current: any) => 
-                    (current.priority > prev.priority) ? current : prev
-                );
-                staff = highestPriorityStaff;
+            if (selectedStaff[serviceId]) {
+                assignedStaff = [{ staff_id: selectedStaff[serviceId].staff_id }];
+            } else if (slot.available_staff && slot.available_staff.length > 0) {
+                assignedStaff = slot.available_staff.slice(0, quantity).map((st: any) => ({ staff_id: st.staff_id }));
             }
 
             const service: any = {
                 id: serviceId,
-                quantity: formData.group_size,
+                quantity,
                 start_datetime: slot.start_datetime,
                 end_datetime: slot.end_datetime,
-                assigned_staff: staff ? [{ staff_id: staff.staff_id }] : [],
+                assigned_staff: assignedStaff,
             };
 
             // Add gender preference for hammam services
@@ -193,8 +209,10 @@ export default function BookingsAdd() {
 
         setFormData({
             ...formData,
+            group_size: Object.values(serviceQuantities).reduce((sum, count) => sum + count, 0) || 1,
             services: servicesArray,
         });
+        setPaymentAmount(serviceDepositTotal.toFixed(2));
         setStep('payment');
     };
 
@@ -238,12 +256,24 @@ export default function BookingsAdd() {
             return;
         }
 
+        if (!paymentData.amount || Number(paymentData.amount) <= 0) {
+            toast({
+                variant: 'destructive',
+                title: t('common.error', 'Error'),
+                description: t('payments.amountRequired', 'Please enter a valid payment amount'),
+            });
+            return;
+        }
+
         const bookingData: BookingFormData = {
             ...formData,
             payment: {
                 type: paymentData.type,
                 amount: parseFloat(paymentData.amount),
                 partial: false,
+                ...(paymentData.source_id ? { source_id: paymentData.source_id } : {}),
+                ...(paymentData.card_holder ? { card_holder: paymentData.card_holder } : {}),
+                ...(paymentData.verification_token ? { verification_token: paymentData.verification_token } : {}),
             },
         };
 
@@ -420,44 +450,109 @@ export default function BookingsAdd() {
                             <div className="border rounded-lg p-4 space-y-3 bg-card">
                                 <h3 className="font-semibold">{t('bookings.selectService', 'Select Services')}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {services.map((svc: any) => (
-                                        <div key={svc.id} className="flex items-center space-x-2 p-3 border rounded hover:bg-muted/50 cursor-pointer">
-                                            <Checkbox
-                                                id={`service-${svc.id}`}
-                                                checked={selectedServiceIds.has(svc.id)}
-                                                onCheckedChange={(checked) => {
-                                                    const newIds = new Set(selectedServiceIds);
-                                                    if (checked) {
-                                                        newIds.add(svc.id);
-                                                        // Set default gender to mixed for new services
-                                                        if (svc.has_sessions && !serviceGenders[svc.id]) {
-                                                            setServiceGenders({ ...serviceGenders, [svc.id]: 'mixed' });
-                                                        }
-                                                    } else {
-                                                        newIds.delete(svc.id);
-                                                        const newDates = { ...serviceDates };
-                                                        const newSlts = { ...serviceSlots };
-                                                        const newGenders = { ...serviceGenders };
-                                                        const newStaff = { ...selectedStaff };
-                                                        delete newDates[svc.id];
-                                                        delete newSlts[svc.id];
-                                                        delete newGenders[svc.id];
-                                                        delete newStaff[svc.id];
-                                                        setServiceDates(newDates);
-                                                        setServiceSlots(newSlts);
-                                                        setServiceGenders(newGenders);
-                                                        setSelectedStaff(newStaff);
-                                                    }
-                                                    setSelectedServiceIds(newIds);
-                                                }}
-                                            />
-                                            <label htmlFor={`service-${svc.id}`} className="flex-1 cursor-pointer space-y-1">
-                                                <div>{(svc.type.name?.en || '')}</div>
-                                                <div className="font-semibold">{typeof svc.name === 'string' ? svc.name : (svc.name?.en || '')}</div>
-                                                <div className="text-sm text-muted-foreground">{svc.price} $ • {svc.duration_minutes} min</div>
-                                            </label>
-                                        </div>
-                                    ))}
+                                    {services.map((svc: any) => {
+                                        const qty = serviceQuantities[svc.id] || 1;
+                                        const selected = selectedServiceIds.has(svc.id);
+                                        return (
+                                            <div key={svc.id} className="rounded-lg border p-3 hover:bg-muted/50">
+                                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                                    <div className="flex items-start gap-3">
+                                                        <Checkbox
+                                                            id={`service-${svc.id}`}
+                                                            checked={selected}
+                                                            onCheckedChange={(checked) => {
+                                                                const newIds = new Set(selectedServiceIds);
+                                                                const newQuantities = { ...serviceQuantities };
+                                                                if (checked) {
+                                                                    newIds.add(svc.id);
+                                                                    newQuantities[svc.id] = newQuantities[svc.id] || 1;
+                                                                    if (svc.has_sessions && !serviceGenders[svc.id]) {
+                                                                        setServiceGenders({ ...serviceGenders, [svc.id]: 'mixed' });
+                                                                    }
+                                                                } else {
+                                                                    newIds.delete(svc.id);
+                                                                    const newDates = { ...serviceDates };
+                                                                    const newSlts = { ...serviceSlots };
+                                                                    const newGenders = { ...serviceGenders };
+                                                                    const newStaff = { ...selectedStaff };
+                                                                    delete newDates[svc.id];
+                                                                    delete newSlts[svc.id];
+                                                                    delete newGenders[svc.id];
+                                                                    delete newStaff[svc.id];
+                                                                    delete newQuantities[svc.id];
+                                                                    setServiceDates(newDates);
+                                                                    setServiceSlots(newSlts);
+                                                                    setServiceGenders(newGenders);
+                                                                    setSelectedStaff(newStaff);
+                                                                }
+                                                                setServiceQuantities(newQuantities);
+                                                                setSelectedServiceIds(newIds);
+                                                            }}
+                                                        />
+                                                        <div className="space-y-1">
+                                                            <div className="text-sm text-muted-foreground">{(svc.type.name?.en || '')}</div>
+                                                            <div className="font-semibold">{typeof svc.name === 'string' ? svc.name : (svc.name?.en || '')}</div>
+                                                            <div className="text-sm text-muted-foreground">{svc.price} $ • {svc.duration_minutes} min</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid gap-2 text-sm md:text-right">
+                                                        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">{t('bookings.quantity', 'Quantity')}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-9 w-9 p-0"
+                                                                disabled={!selected || qty <= 1}
+                                                                onClick={() => {
+                                                                    const value = Math.max(1, qty - 1);
+                                                                    setServiceQuantities({
+                                                                        ...serviceQuantities,
+                                                                        [svc.id]: value,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                -
+                                                            </Button>
+                                                            <input
+                                                                id={`service-qty-${svc.id}`}
+                                                                type='number'
+                                                                min='1'
+                                                                value={qty}
+                                                                disabled={!selected}
+                                                                onChange={(event) => {
+                                                                    const value = Math.max(1, Number(event.target.value) || 1);
+                                                                    setServiceQuantities({
+                                                                        ...serviceQuantities,
+                                                                        [svc.id]: value,
+                                                                    });
+                                                                }}
+                                                                className='w-20 rounded-lg border border-input bg-white px-2 py-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-amber-500'
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-9 w-9 p-0"
+                                                                disabled={!selected}
+                                                                onClick={() => {
+                                                                    setServiceQuantities({
+                                                                        ...serviceQuantities,
+                                                                        [svc.id]: qty + 1,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                +
+                                                            </Button>
+                                                        </div>
+                                                        {!selected && (
+                                                            <div className='text-xs text-muted-foreground'>Select the service to enable quantity</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -670,42 +765,184 @@ export default function BookingsAdd() {
                             </div>
 
                             {/* Payment Form */}
-                            <MagicForm
-                                title={t('bookings.paymentDetails', 'Payment Details')}
-                                fields={[
-                                    {
-                                        group: 'payment',
-                                        fields: [
-                                            {
-                                                name: 'amount',
-                                                label: t('payments.amount', 'Amount'),
-                                                type: 'number',
-                                                required: true,
-                                                placeholder: '0.00',
-                                                width: 'half',
-                                            },
-                                            {
-                                                name: 'type',
-                                                label: t('payments.method', 'Payment Method'),
-                                                type: 'select',
-                                                required: true,
-                                                width: 'half',
-                                                defaultValue: 'cash',
-                                                options: [
-                                                    { value: 'cash', name: t('payments.method_cash', 'Cash') },
-                                                    { value: 'card', name: t('payments.method_card', 'Card') },
-                                                    { value: 'bank_transfer', name: t('payments.method_transfer', 'Bank Transfer') },
-                                                    { value: 'online', name: t('payments.method_online', 'Online') },
-                                                ],
-                                            },
+                            <div className='space-y-6'>
+                                <div className='grid gap-4 md:grid-cols-2'>
+                                    <div className='space-y-2'>
+                                        <Label htmlFor='payment-amount'>{t('payments.amount', 'Amount')}</Label>
+                                        <input
+                                            id='payment-amount'
+                                            type='number'
+                                            min='0'
+                                            value={paymentAmount}
+                                            onChange={(event) => setPaymentAmount(event.target.value)}
+                                            placeholder={serviceDepositTotal > 0 ? `${serviceDepositTotal.toFixed(2)}` : '0.00'}
+                                            className='w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500'
+                                        />
+                                        {serviceDepositTotal > 0 && (
+                                            <p className='text-sm text-muted-foreground'>
+                                                {t('bookings.depositRequired', 'Deposit required')}:{' '}
+                                                <strong>{serviceDepositTotal.toFixed(2)} $</strong>
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className='space-y-2'>
+                                        <Label htmlFor='payment-type'>{t('payments.method', 'Payment Method')}</Label>
+                                        <select
+                                            id='payment-type'
+                                            value={paymentType}
+                                            onChange={(event) => setPaymentType(event.target.value as any)}
+                                            className='w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500'
+                                        >
+                                            <option value='cash'>{t('payments.method_cash', 'Cash')}</option>
+                                            <option value='card'>{t('payments.method_card', 'Card')}</option>
+                                            <option value='bank_transfer'>{t('payments.method_transfer', 'Bank Transfer')}</option>
+                                            <option value='online'>{t('payments.method_online', 'Online')}</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                                        ],
-                                    },
-                                ]}
-                                onSubmit={handleSubmitBooking}
-                                button={t('bookings.createBooking', 'Create Booking')}
-                                loading={createBookingMutation.isPending}
-                            />
+                                {paymentType === 'card' ? (
+                                    <div className='rounded-xl border border-amber-200 bg-white p-4 shadow-sm'>
+                                        <div className='mb-4 flex items-center gap-3'>
+                                            <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-900'>
+                                                <CreditCard className='h-5 w-5' />
+                                            </div>
+                                            <div>
+                                                <p className='text-base font-semibold text-amber-900'>
+                                                    {t('bookingWizard.review.securePayment', 'Secure payment')}
+                                                </p>
+                                                <p className='text-sm text-muted-foreground'>
+                                                    {t('bookingWizard.review.paymentDescription', 'Enter your card details below to complete your booking payment.')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className='space-y-4'>
+                                            <div className='space-y-2'>
+                                                <Label htmlFor='card-holder-name'>{t('subscriptionCheckout.cardHolder', 'Card holder name')}</Label>
+                                                <input
+                                                    id='card-holder-name'
+                                                    value={cardHolderName}
+                                                    onChange={(event) => setCardHolderName(event.target.value)}
+                                                    placeholder={t('subscriptionCheckout.cardHolderPlaceholder', 'Name on card')}
+                                                    className='w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500'
+                                                />
+                                            </div>
+
+                                            {squareConfigured ? (
+                                                <PaymentForm
+                                                    key={paymentFormKey}
+                                                    applicationId={squareApplicationId!}
+                                                    locationId={squareLocationId!}
+                                                    cardTokenizeResponseReceived={(tokenResult: any, verifiedBuyer?: any) => {
+                                                        if (!paymentAmount || Number(paymentAmount) <= 0) {
+                                                            toast({
+                                                                variant: 'destructive',
+                                                                title: t('common.error', 'Error'),
+                                                                description: t('payments.amountRequired', 'Please enter a valid payment amount'),
+                                                            });
+                                                            return;
+                                                        }
+
+                                                        if (!cardHolderName.trim()) {
+                                                            toast({
+                                                                variant: 'destructive',
+                                                                title: t('common.error', 'Error'),
+                                                                description: t('subscriptionCheckout.cardHolderRequired', 'Please enter the card holder name.'),
+                                                            });
+                                                            return;
+                                                        }
+
+                                                        if (tokenResult?.status !== 'OK' || !tokenResult?.token) {
+                                                            const errorMessages = tokenResult?.errors?.map((error: any) => error.message).filter(Boolean) || [];
+                                                            const errorString = errorMessages.join(', ').toLowerCase();
+                                                            const isSessionExpired = errorString.includes('expired') || errorString.includes('session') || errorString.includes('timeout');
+
+                                                            if (isSessionExpired) {
+                                                                toast({
+                                                                    variant: 'destructive',
+                                                                    title: t('common.error', 'Error'),
+                                                                    description: t('bookingWizard.payment.sessionExpired', 'Your payment session has expired. Please enter your card details again.'),
+                                                                });
+                                                                setPaymentFormKey(prev => prev + 1);
+                                                            } else {
+                                                                toast({
+                                                                    variant: 'destructive',
+                                                                    title: t('common.error', 'Error'),
+                                                                    description: errorMessages.join(', ') || t('subscriptionCheckout.cardError', 'Card processing error'),
+                                                                });
+                                                            }
+                                                            return;
+                                                        }
+
+                                                        handleSubmitBooking({
+                                                            type: 'card',
+                                                            amount: paymentAmount,
+                                                            source_id: tokenResult.token,
+                                                            card_holder: cardHolderName.trim(),
+                                                            verification_token: verifiedBuyer?.token,
+                                                        });
+                                                    }}
+                                                    createVerificationDetails={() => {
+                                                        const fallbackName = (cardHolderName || selectedClient?.name || 'Guest User').trim();
+                                                        const [givenName, ...familyNameParts] = fallbackName.split(' ');
+                                                        return {
+                                                            amount: String(paymentAmount),
+                                                            currencyCode: import.meta.env.VITE_SQUARE_CURRENCY || 'CAD',
+                                                            intent: 'CHARGE',
+                                                            billingContact: {
+                                                                givenName,
+                                                                familyName: familyNameParts.join(' ') || givenName,
+                                                                email: selectedClient?.email || '',
+                                                                phone: selectedClient?.phone || '',
+                                                                countryCode: 'CA',
+                                                            },
+                                                        };
+                                                    }}
+                                                >
+                                                    <SquareCreditCard
+                                                        buttonProps={{
+                                                            isLoading: createBookingMutation.isPending,
+                                                            className: 'mt-4 w-full h-12 rounded-lg bg-amber-600 text-white hover:bg-amber-700',
+                                                        }}
+                                                        className='w-full rounded-2xl border border-slate-200 bg-slate-50 p-4'
+                                                    >
+                                                        {createBookingMutation.isPending ? (
+                                                            <>
+                                                                <Loader2 className='mr-2 inline h-4 w-4 animate-spin' />
+                                                                {t('bookingWizard.review.confirming', 'Confirming...')}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Lock className='mr-2 inline h-4 w-4' />
+                                                                {t('bookings.payWithCard', 'Pay with card')}
+                                                            </>
+                                                        )}
+                                                    </SquareCreditCard>
+                                                </PaymentForm>
+                                            ) : (
+                                                <Alert>
+                                                    <AlertDescription className='text-sm'>
+                                                        Add `VITE_SQUARE_APP_ID` and `VITE_SQUARE_LOCATION_ID` to your Vite env to enable card payments.
+                                                    </AlertDescription>
+                                                </Alert>
+                                            )}
+
+                                            <div className='flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800'>
+                                                <Shield className='h-4 w-4 shrink-0' />
+                                                {t('bookingWizard.guarantee.securedBy', 'Secured payment by Square')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        onClick={() => handleSubmitBooking({ type: paymentType, amount: paymentAmount })}
+                                        disabled={createBookingMutation.isPending}
+                                    >
+                                        {t('bookings.createBooking', 'Create Booking')}
+                                    </Button>
+                                )}
+                            </div>
 
                             {/* Block Slots Checkbox */}
                             <div className="border-t pt-4 space-y-4">
