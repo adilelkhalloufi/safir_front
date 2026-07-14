@@ -148,6 +148,13 @@ export default function BookingWizard() {
             return result
         },
         onSuccess: (result) => {
+            if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
+                ;(window as any).fbq('track', 'Purchase', {
+                    value: 0,
+                    currency: 'CAD'
+                })
+            }
+
             showNotification(
                 result?.message || 'Payment and booking confirmed successfully.',
                 NotificationType.SUCCESS
