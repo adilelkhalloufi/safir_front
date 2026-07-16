@@ -189,6 +189,10 @@ const SettingsIndex = loadable(() => import('../pages/dashboard/settings'), {
   fallback: fallbackElement,
 });
 
+const ProfileIndex = loadable(() => import('../pages/dashboard/profile'), {
+  fallback: fallbackElement,
+});
+
 const BlockedTimeSlotsIndex = loadable(() => import('../pages/dashboard/blocked-time-slots'), {
   fallback: fallbackElement,
 });
@@ -706,6 +710,10 @@ export const browserRouter = createBrowserRouter([
             <SettingsIndex />
           </RequireRole>
         ),
+      },
+      {
+        path: webRoutes.profile.index,
+        element: <ProfileIndex />,
       },
       {
         path: webRoutes.blockedSlots.index,

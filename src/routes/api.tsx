@@ -89,7 +89,7 @@ export const apiRoutes = {
   subscriptions: `${API_URL}/subscriptions`,
   subscriptionById: (id: number) => `${API_URL}/subscriptions/${id}`,
   subscriptionBookings: (id: number) => `${API_URL}/subscriptions/${id}/bookings`,
-    subscriptionPayment: `${API_URL}/subscriptions/payment`,
+  subscriptionPayment: `${API_URL}/subscriptions/payment`,
   subscriptionMembers: (id: number) => `${API_URL}/subscriptions/${id}/members`,
   subscriptionMemberByUser: (id: number, userId: number) => `${API_URL}/subscriptions/${id}/members/${userId}`,
   guestBookings: `${API_URL}/guest-bookings`,
@@ -106,6 +106,10 @@ export const apiRoutes = {
   settings: `${API_URL}/admin/settings`,
   Getsettings: `${API_URL}/Getsettings`,
 
+  // Profile
+  updateProfile: `${API_URL}/profile`,
+  updatePassword: `${API_URL}/password`,
+
   // Blocked Time Slots
   adminBlockedTimeSlots: `${API_URL}/admin/blocked-time-slots`,
   adminBlockedTimeSlotsById: (id: number) => `${API_URL}/admin/blocked-time-slots/${id}`,
@@ -113,4 +117,4 @@ export const apiRoutes = {
   adminBlockedTimeSlotsByServiceDate: (serviceId: number, date: string) => `${API_URL}/admin/blocked-time-slots/service/${serviceId}/date/${date}`,
   adminBlockedTimeSlotsRange: `${API_URL}/admin/blocked-time-slots/range/between`,
 
- };
+};

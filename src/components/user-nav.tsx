@@ -71,7 +71,7 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => navigate(webRoutes.login)}>
+                    <DropdownMenuItem onClick={() => navigate(webRoutes.profile.index)}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
