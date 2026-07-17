@@ -233,7 +233,7 @@ export default function SubscriptionsAdd() {
                                                         }}
                                                     />
                                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                        {typeof service.name === 'string' ? service.name : (service.name?.fr || service.name?.en || '')} - {service.price} DH - {service.duration_minutes} min
+                                                        {typeof service.name === 'string' ? service.name : (service.name?.fr || service.name?.en || '')} - {service.price} $ - {service.duration_minutes} min
                                                     </label>
                                                 </div>
                                             ))}

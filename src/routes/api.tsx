@@ -16,6 +16,7 @@ export const apiRoutes = {
   // Admin API
   adminBookings: `${API_URL}/admin/bookings`,
   adminBookingById: (id: number) => `${API_URL}/admin/bookings/${id}`,
+  adminBookingItemUpdate: (bookingId: number, itemId: number) => `${API_URL}/admin/bookings/${bookingId}/items/${itemId}`,
   adminBookingCancel: (id: number) => `${API_URL}/admin/bookings/${id}/cancel`,
   adminBookingComplete: (id: number) => `${API_URL}/admin/bookings/${id}/complete`,
   adminBookingNoShow: (id: number) => `${API_URL}/admin/bookings/${id}/no-show`,
