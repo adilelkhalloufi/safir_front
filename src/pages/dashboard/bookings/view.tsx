@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { Calendar, Clock, User, Package, CreditCard, FileText, ExternalLink, Edit } from 'lucide-react';
@@ -46,6 +47,7 @@ export default function BookingsView() {
     const [editDate, setEditDate] = useState<Date | undefined>(undefined);
     const [editStartTime, setEditStartTime] = useState('');
     const [editEndTime, setEditEndTime] = useState('');
+    const [editServiceId, setEditServiceId] = useState<number | undefined>(undefined);
 
     const handleItemClick = (item: any) => {
         if (item.healthForm) {
@@ -54,18 +56,27 @@ export default function BookingsView() {
         }
     };
 
+    const { data: services } = useQuery({
+        queryKey: ['services'],
+        queryFn: async () => {
+            const response = await http.get(apiRoutes.adminServices);
+            return response.data.data;
+        },
+    });
+
     const handleEditDateClick = (item: any) => {
         const startDate = new Date(item.start_datetime);
         setEditingItem(item);
         setEditDate(startDate);
         setEditStartTime(format(startDate, 'HH:mm'));
         setEditEndTime(format(new Date(item.end_datetime), 'HH:mm'));
+        setEditServiceId(item.service?.id || item.service_id);
         setIsEditDateDialogOpen(true);
     };
 
     const updateBookingMutation = useMutation({
-        mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string }) => {
-            const { itemId, date, startTime, endTime } = data;
+        mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string; serviceId?: number }) => {
+            const { itemId, date, startTime, endTime, serviceId } = data;
 
             // Format date as YYYY-MM-DD
             const year = date.getFullYear();
@@ -77,24 +88,30 @@ export default function BookingsView() {
             const startDateTimeStr = `${dateStr}T${startTime}:00`;
             const endDateTimeStr = `${dateStr}T${endTime}:00`;
 
-            const response = await http.patch(apiRoutes.adminBookingItemUpdate(parseInt(id!), itemId), {
+            const payload: any = {
                 start_datetime: startDateTimeStr,
                 end_datetime: endDateTimeStr,
-            });
+            };
+
+            if (serviceId) {
+                payload.service_id = serviceId;
+            }
+
+            const response = await http.patch(apiRoutes.adminBookingItemUpdate(parseInt(id!), itemId), payload);
             return response.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['booking', id] });
             toast({
                 title: t('common.success', 'Success'),
-                description: t('bookings.dateUpdated', 'Booking date and time updated successfully'),
+                description: t('bookings.serviceUpdated', 'Booking updated successfully'),
             });
             setIsEditDateDialogOpen(false);
         },
         onError: (error: any) => {
             toast({
                 title: t('common.error', 'Error'),
-                description: error?.response?.data?.message || t('bookings.dateUpdateError', 'Failed to update booking date and time'),
+                description: error?.response?.data?.message || t('bookings.serviceUpdateError', 'Failed to update booking'),
                 variant: 'destructive',
             });
         },
@@ -115,6 +132,7 @@ export default function BookingsView() {
             date: editDate,
             startTime: editStartTime,
             endTime: editEndTime,
+            serviceId: editServiceId,
         });
     };
 
@@ -324,7 +342,7 @@ export default function BookingsView() {
                                         className="flex items-center gap-1"
                                     >
                                         <Edit className="h-4 w-4" />
-                                        {t('bookings.modifyDate', 'Modify Date & Time')}
+                                        {t('bookings.changeService', 'Change Service')}
                                     </Button>
                                 </div>
                             </div>
@@ -460,7 +478,7 @@ export default function BookingsView() {
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>
-                            {t('bookings.modifyDateTime', 'Modify Date & Time')}
+                            {t('bookings.changeService', 'Change Service')}
                             {editingItem && (
                                 <span className="block text-sm font-normal text-muted-foreground mt-1">
                                     {editingItem.service?.name?.[booking?.language] || editingItem.service?.name?.en}
@@ -469,6 +487,21 @@ export default function BookingsView() {
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-service">{t('bookings.service', 'Service')}</Label>
+                            <Select value={editServiceId?.toString()} onValueChange={(value) => setEditServiceId(parseInt(value))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder={t('bookings.selectService', 'Select a service')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {services?.map((service: any) => (
+                                        <SelectItem key={service.id} value={service.id.toString()}>
+                                            {service.name?.[booking?.language] || service.name?.en}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="edit-date">{t('bookings.date', 'Date')}</Label>
                             <DatePicker
