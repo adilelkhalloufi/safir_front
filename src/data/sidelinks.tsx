@@ -42,6 +42,13 @@ export const sidelinks: SideLink[] = [
     roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   {
+    title: 'Bookings (test)',
+    label: '',
+    href: webRoutes.bookings.index2,
+    icon: <IconCalendar size={18} />,
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
+  },
+  {
     title: 'Clients',
     label: '',
     href: webRoutes.clients.index,
@@ -164,13 +171,13 @@ export const sidelinks: SideLink[] = [
         href: webRoutes.settings.index,
         icon: <IconUserCog size={18} />,
       },
-        {
-    title: 'Blocked Time Slots',
-  
-    href: webRoutes.blockedSlots.index,
-    icon: <IconClock size={18} />,
-     
-  },
+      {
+        title: 'Blocked Time Slots',
+
+        href: webRoutes.blockedSlots.index,
+        icon: <IconClock size={18} />,
+
+      },
     ],
   },
 

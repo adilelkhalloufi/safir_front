@@ -20,6 +20,7 @@ export const webRoutes = {
   // Admin routes
   bookings: {
     index: '/dashboard/bookings',
+    index2: '/dashboard/bookings2',
     view: '/dashboard/bookings/:id',
     add: '/dashboard/bookings/add',
     edit: '/dashboard/bookings/:id/edit',

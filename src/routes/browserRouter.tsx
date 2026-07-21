@@ -268,6 +268,9 @@ const ReviewsClient = loadable(() => import('../pages/reviewsClient'), {
   fallback: fallbackElement,
 });
 
+const BookingIndex2 = loadable(() => import('../pages/dashboard/bookings2'), {
+  fallback: fallbackElement,
+});
 
 export const browserRouter = createBrowserRouter([
   {
@@ -280,6 +283,7 @@ export const browserRouter = createBrowserRouter([
     element: <LandingPage />,
     errorElement: errorElement,
   },
+
   {
     path: webRoutes.subscriptionPlans,
     element: <SubscriptionPlansPage />,
@@ -373,6 +377,14 @@ export const browserRouter = createBrowserRouter([
             <BookingsIndex />
           </RequireRole>
         ),
+      },
+      {
+        path: webRoutes.bookings.index2,
+        element:
+
+          (<RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+            <BookingIndex2 />
+          </RequireRole>),
       },
       {
         path: webRoutes.bookings.add,
