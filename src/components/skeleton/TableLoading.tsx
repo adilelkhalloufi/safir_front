@@ -1,79 +1,23 @@
- import { Skeleton } from "../ui/skeleton";
-import { TableCell, TableRow } from "../ui/table";
- 
-export default function TableLoading() {
+import { TableCell, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+
+type Props = {
+  rows?: number;
+  cols?: number;
+};
+
+export default function TableLoading({ rows = 5, cols = 6 }: Props) {
   return (
     <>
-      <TableRow>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell className="text-right">
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell className="text-right">
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell className="text-right">
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell className="text-right">
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell>
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-        <TableCell className="text-right">
-          <Skeleton className="h-4 w-[100px]" />
-        </TableCell>
-      </TableRow>
+      {Array.from({ length: rows }).map((_, rowIndex) => (
+        <TableRow key={rowIndex}>
+          {Array.from({ length: cols }).map((_, colIndex) => (
+            <TableCell key={colIndex}>
+              <Skeleton className='h-4 w-full' />
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
     </>
   );
 }

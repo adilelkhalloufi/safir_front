@@ -40,7 +40,7 @@ interface DataTableProps<TData, TValue> {
 export function BookingsDataTable<TData, TValue>({
   columns,
   data,
-  loading,
+  loading = false,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -67,63 +67,62 @@ export function BookingsDataTable<TData, TValue>({
     },
   });
 
-
   return (
     <div className='space-y-4'>
-
-
       <div className='rounded-md border'>
-        {loading ? (
-          <TableLoading />
-        ) : (
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                    </TableHead>
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {loading ? (
+              <TableLoading rows={5} cols={columns.length} />
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                   ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24 text-center'>
-                    <EmptyStateComponent
-                      icon='database'
-                      title={t('bookings.noBookings', 'No bookings found')}
-                      description={t('bookings.noBookingsDesc', 'No bookings match your search criteria')}
-                    />
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className='h-24 text-center'>
+                  <EmptyStateComponent
+                    icon='database'
+                    title={t('bookings.noBookings', 'No bookings found')}
+                    description={t(
+                      'bookings.noBookingsDesc',
+                      'No bookings match your search criteria'
+                    )}
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <div className='flex items-center justify-between px-2'>
@@ -131,6 +130,7 @@ export function BookingsDataTable<TData, TValue>({
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
+
         <div className='flex items-center space-x-6 lg:space-x-8'>
           <div className='flex items-center space-x-2'>
             <p className='text-sm font-medium'>Rows per page</p>
@@ -152,10 +152,12 @@ export function BookingsDataTable<TData, TValue>({
               </SelectContent>
             </Select>
           </div>
+
           <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </div>
+
           <div className='flex items-center space-x-2'>
             <Button
               variant='outline'
