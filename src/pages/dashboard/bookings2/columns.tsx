@@ -1,16 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Eye, CheckCircle, XCircle, Ban, CreditCard, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+ import { Button } from '@/components/ui/button';
+ 
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
 import { IconMail, IconPhone } from '@tabler/icons-react';
 
 export interface Booking {
@@ -110,11 +101,7 @@ const statusConfig = {
 
 export const GetBookingColumns = ({
   onView,
-  onComplete,
-  onCancel,
-  onNoShow,
-  onPayment,
-  onWriteReview,
+ 
 }: BookingColumnsProps): ColumnDef<Booking>[] => [
     {
       accessorKey: 'reference',
@@ -146,8 +133,8 @@ export const GetBookingColumns = ({
         if (!firstItem) return <div>-</div>;
         return (
           <div>
-            <div className='font-medium'>{format(new Date(firstItem.start_datetime), 'MMM dd, yyyy')}</div>
-            <div className='text-sm text-muted-foreground'>{format(new Date(firstItem.start_datetime), 'HH:mm')}</div>
+            <div className='font-medium'>{new Date(firstItem.start_datetime).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
+            <div className='text-sm text-muted-foreground'>{new Date(firstItem.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
         );
       },
@@ -214,66 +201,5 @@ export const GetBookingColumns = ({
         const amount = row.getValue('total_price') as number;
         return <div className='font-medium'>{amount} $</div>;
       },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const booking = row.original;
-        const canPayment = ['draft', 'confirmed', 'deposit_paid'].includes(booking.status);
-        const canComplete = ['confirmed', 'deposit_paid'].includes(booking.status);
-        const canCancel = ['draft', 'confirmed', 'deposit_paid'].includes(booking.status);
-        const canNoShow = ['confirmed', 'deposit_paid'].includes(booking.status);
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-8 w-8 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {onView && (
-                <DropdownMenuItem onClick={() => onView(booking)}>
-                  <Eye className='mr-2 h-4 w-4' />
-                  View Details
-                </DropdownMenuItem>
-              )}
-              {onWriteReview && (
-                <DropdownMenuItem onClick={() => onWriteReview(booking)}>
-                  <Star className='mr-2 h-4 w-4 text-yellow-600' />
-                  Write Review
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              {canPayment && onPayment && (
-                <DropdownMenuItem onClick={() => onPayment(booking)}>
-                  <CreditCard className='mr-2 h-4 w-4 text-blue-600' />
-                  Add Payment
-                </DropdownMenuItem>
-              )}
-              {canComplete && onComplete && (
-                <DropdownMenuItem onClick={() => onComplete(booking)}>
-                  <CheckCircle className='mr-2 h-4 w-4 text-green-600' />
-                  Mark Completed
-                </DropdownMenuItem>
-              )}
-              {canNoShow && onNoShow && (
-                <DropdownMenuItem onClick={() => onNoShow(booking)}>
-                  <Ban className='mr-2 h-4 w-4 text-gray-600' />
-                  Mark No-show
-                </DropdownMenuItem>
-              )}
-              {canCancel && onCancel && (
-                <DropdownMenuItem onClick={() => onCancel(booking)}>
-                  <XCircle className='mr-2 h-4 w-4 text-red-600' />
-                  Cancel Booking
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
+    } 
   ];
