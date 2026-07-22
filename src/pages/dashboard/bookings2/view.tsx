@@ -17,8 +17,44 @@ import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { format } from 'date-fns';
 import { Calendar, Clock, User, Package, CreditCard, FileText, ExternalLink, Edit } from 'lucide-react';
+
+// Helper function to safely parse and format dates by hand for Safari compatibility
+const formatDateTimeByHand = (dateString: string, formatType: 'full' | 'time' | 'time24' = 'full') => {
+    if (!dateString) return '';
+
+    // Safari fix: convert "YYYY-MM-DD HH:mm:ss" to "YYYY-MM-DDTHH:mm:ss"
+    const safeString = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
+    const d = new Date(safeString);
+
+    if (isNaN(d.getTime())) return dateString;
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    if (formatType === 'time24') {
+        return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    let hours = d.getHours();
+    const minutes = pad(d.getMinutes());
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours || 12; // convert 0 to 12
+
+    const timeString = `${hours}:${minutes} ${ampm}`;
+
+    if (formatType === 'time') {
+        return timeString;
+    }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[d.getMonth()];
+    const day = d.getDate();
+    const year = d.getFullYear();
+
+    // Equivalent to 'PPP p' format
+    return `${month} ${day}, ${year}, ${timeString}`;
+};
 
 export default function BookingsView() {
     const { t } = useTranslation();
@@ -65,11 +101,14 @@ export default function BookingsView() {
     });
 
     const handleEditDateClick = (item: any) => {
-        const startDate = new Date(item.start_datetime);
+        // Safari fix: ensure the date string has a 'T' before passing to new Date()
+        const safeDateStr = item.start_datetime.includes('T') ? item.start_datetime : item.start_datetime.replace(' ', 'T');
+        const startDate = new Date(safeDateStr);
+
         setEditingItem(item);
         setEditDate(startDate);
-        setEditStartTime(format(startDate, 'HH:mm'));
-        setEditEndTime(format(new Date(item.end_datetime), 'HH:mm'));
+        setEditStartTime(formatDateTimeByHand(item.start_datetime, 'time24'));
+        setEditEndTime(formatDateTimeByHand(item.end_datetime, 'time24'));
         setEditServiceId(item.service?.id || item.service_id);
         setIsEditDateDialogOpen(true);
     };
@@ -189,9 +228,6 @@ export default function BookingsView() {
                     <Button variant="outline" onClick={() => navigate(webRoutes.bookings.index)}>
                         {t('common.back', 'Back')}
                     </Button>
-                    {/* <Button onClick={() => navigate(webRoutes.bookings.edit.replace(':id', id!))}>
-                        {t('common.edit', 'Edit')}
-                    </Button> */}
                 </div>
             </div>
 
@@ -217,12 +253,12 @@ export default function BookingsView() {
                             <>
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">{t('bookings.startDateTime', 'Start Date & Time')}</p>
-                                    <p className="text-base">{format(new Date(booking.booking_items[0].start_datetime), 'PPP p')}</p>
+                                    <p className="text-base">{formatDateTimeByHand(booking.booking_items[0].start_datetime, 'full')}</p>
                                 </div>
 
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">{t('bookings.endDateTime', 'End Date & Time')}</p>
-                                    <p className="text-base">{format(new Date(booking.booking_items[0].end_datetime), 'PPP p')}</p>
+                                    <p className="text-base">{formatDateTimeByHand(booking.booking_items[0].end_datetime, 'full')}</p>
                                 </div>
                             </>
                         )}
@@ -312,7 +348,7 @@ export default function BookingsView() {
                                             )}
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="h-4 w-4" />
-                                                {format(new Date(item.start_datetime), 'PPP p')} - {format(new Date(item.end_datetime), 'p')}
+                                                {formatDateTimeByHand(item.start_datetime, 'full')} - {formatDateTimeByHand(item.end_datetime, 'time')}
                                             </span>
                                         </div>
                                     </div>
@@ -397,7 +433,7 @@ export default function BookingsView() {
                                             {payment.paid_at && (
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="h-4 w-4" />
-                                                    {format(new Date(payment.paid_at), 'PPP p')}
+                                                    {formatDateTimeByHand(payment.paid_at, 'full')}
                                                 </span>
                                             )}
                                             {payment.square_payment_id && (
