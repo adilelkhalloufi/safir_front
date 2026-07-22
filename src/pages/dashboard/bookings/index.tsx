@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MagicForm from '@/components/custom/MagicForm';
 import BookingCalendarView from './calendar-view';
-import { Calendar as CalendarIcon, List, X } from 'lucide-react';
+import { Calendar as CalendarIcon, List, X, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function BookingsIndex() {
@@ -39,6 +39,41 @@ export default function BookingsIndex() {
     booking: null,
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [servicesForce, setServicesForce] = useState<{ id: number; name: string }[]>([]);
+  const [staffForce, setStaffForce] = useState<{ id: number; name: string }[]>([]);
+
+  // --- NEW: Force Reservation State ---
+  const [forceDialog, setForceDialog] = useState(false);
+  const [forceLoading, setForceLoading] = useState(false);
+  const GetServicesForForceReservation = () => {
+    http
+      .get(apiRoutes.adminServices)
+      .then((res) => {
+        setServicesForce(res.data.data);
+      })
+      .catch(() => {
+        toast({
+          variant: 'destructive',
+          title: t('common.error', 'Error'),
+          description: t('bookings.fetchServicesError', 'Failed to fetch services for force reservation'),
+        });
+      });
+  };
+  const GetStaffForForceReservation = () => {
+    http
+      .get(apiRoutes.adminStaff)
+      .then((res) => {
+        setStaffForce(res.data.data);
+      }
+      ).catch(() => {
+        toast({
+          variant: 'destructive',
+          title: t('common.error', 'Error'),
+          description: t('bookings.fetchStaffError', 'Failed to fetch staff for force reservation'),
+        });
+      });
+  };
+
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [filters, setFilters] = useState({
     dateFrom: undefined as Date | undefined,
@@ -51,6 +86,8 @@ export default function BookingsIndex() {
   useEffect(() => {
     setPageTitle(t('bookings.title', 'Bookings Management'));
     fetchBookings();
+    GetServicesForForceReservation();
+    GetStaffForForceReservation();
   }, [t]);
 
   const fetchBookings = (filterParams?: any) => {
@@ -194,6 +231,32 @@ export default function BookingsIndex() {
       });
   };
 
+  // --- NEW: Force Reservation Submit Handler ---
+  const handleForceSubmit = (formData: any) => {
+    setForceLoading(true);
+    // Remember to add adminBookingsForce route in your apiRoutes file
+    http
+      .post(apiRoutes.adminBookingsForce || '/api/admin/bookings/force', formData)
+      .then(() => {
+        toast({
+          title: t('common.success', 'Success'),
+          description: t('bookings.forceSuccess', 'Forced reservation created successfully'),
+        });
+        fetchBookings();
+        setForceDialog(false);
+      })
+      .catch(() => {
+        toast({
+          variant: 'destructive',
+          title: t('common.error', 'Error'),
+          description: t('bookings.forceError', 'Failed to create forced reservation'),
+        });
+      })
+      .finally(() => {
+        setForceLoading(false);
+      });
+  };
+
   const handleFilterSubmit = (filterData: any) => {
     setFilters({
       dateFrom: filterData.date_from ? new Date(filterData.date_from) : undefined,
@@ -237,6 +300,16 @@ export default function BookingsIndex() {
             </p>
           </div>
           <div className='flex gap-2'>
+            {/* NEW: Force Reservation Button */}
+            <Button
+              variant="secondary"
+              onClick={() => setForceDialog(true)}
+              className='gap-2'
+            >
+              <Zap className='h-4 w-4' />
+              {t('bookings.forceReservation', 'Force Reservation')}
+            </Button>
+
             <Button
               onClick={() => navigate(webRoutes.bookings.add)}
               className='gap-2'
@@ -355,6 +428,67 @@ export default function BookingsIndex() {
         <BookingCalendarView bookings={data} />
       )}
 
+      {/* NEW: Force Reservation Dialog */}
+      <Dialog open={forceDialog} onOpenChange={setForceDialog}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{t('bookings.forceReservationTitle', 'Force Reservation')}</DialogTitle>
+            <DialogDescription>
+              {t('bookings.forceReservationDescription', 'Manually override schedule and force a reservation.')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <MagicForm
+              title=''
+              fields={[
+                {
+                  group: 'force_reservation',
+                  fields: [
+                    {
+                      name: 'service_id',
+                      label: t('bookings.service', 'Service'),
+                      type: 'select',
+                      required: true,
+                      placeholder: t('bookings.selectService', 'Select Service'),
+                      // TODO: Fetch your services from Laravel API and populate this array
+                      options: servicesForce.map(service => ({ value: service.id.toString(), name: service.name?.fr })),
+                      width: 'half',
+                    },
+                    {
+                      name: 'staff_id',
+                      label: t('bookings.staff', 'Staff'),
+                      type: 'select',
+                      required: true,
+                      placeholder: t('bookings.selectStaff', 'Select Staff'),
+                      // TODO: Fetch your staff members from Laravel API and populate this array
+                      options: staffForce.map(staff => ({ value: staff.id.toString(), name: staff.user.name })),
+                      width: 'half',
+                    },
+                    {
+                      name: 'date',
+                      label: t('bookings.date', 'Date'),
+                      type: 'date',
+                      required: true,
+                      width: 'half',
+                    },
+                    {
+                      name: 'start_time',
+                      label: t('bookings.startTime', 'Heure départ'),
+                      type: 'time',
+                      required: true,
+                      width: 'half',
+                    },
+                  ],
+                },
+              ]}
+              onSubmit={handleForceSubmit}
+              button={t('common.submit', 'Force Reservation')}
+              loading={forceLoading}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Cancel Dialog */}
       <Dialog open={cancelDialog.open} onOpenChange={(open) => setCancelDialog({ open, booking: null })}>
         <DialogContent>
@@ -420,55 +554,55 @@ export default function BookingsIndex() {
             const totalPaid = paymentDialog.booking.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
             const remainingBalance = paymentDialog.booking.total_price - totalPaid;
             return (
-            <MagicForm
-            title=''
-              fields={[
-                {
-                  group: 'payment',
-                  fields: [
-                    {
-                      name: 'amount',
-                      label: t('payments.amount', 'Amount'),
-                      type: 'number',
-                      required: true,
-                      placeholder: t('payments.amountPlaceholder', 'Enter amount'),
-                      defaultValue: remainingBalance,
-                      width: 'full',
-                    },
-                    {
-                      name: 'payment_method',
-                      label: t('payments.method', 'Payment Method'),
-                      type: 'select',
-                      required: true,
-                      options: [
-                        { value: 'cash', name: 'Cash' },
-                        { value: 'card', name: 'Card' },
-                        { value: 'bank_transfer', name: 'Bank Transfer' },
-                        { value: 'online', name: 'Online' },
-                      ],
-                      width: 'full',
-                    },
-                    {
-                      name: 'transaction_id',
-                      label: t('payments.transactionId', 'Transaction ID'),
-                      type: 'text',
-                      placeholder: t('payments.transactionIdPlaceholder', 'Optional'),
-                      width: 'full',
-                    },
-                    {
-                      name: 'notes',
-                      label: t('payments.notes', 'Notes'),
-                      type: 'textarea',
-                      placeholder: t('payments.notesPlaceholder', 'Additional notes...'),
-                      width: 'full',
-                    },
-                  ],
-                },
-              ]}
-              onSubmit={handlePaymentSubmit}
-              button={t('common.submit', 'Create Payment')}
-              loading={paymentLoading}
-            />
+              <MagicForm
+                title=''
+                fields={[
+                  {
+                    group: 'payment',
+                    fields: [
+                      {
+                        name: 'amount',
+                        label: t('payments.amount', 'Amount'),
+                        type: 'number',
+                        required: true,
+                        placeholder: t('payments.amountPlaceholder', 'Enter amount'),
+                        defaultValue: remainingBalance,
+                        width: 'full',
+                      },
+                      {
+                        name: 'payment_method',
+                        label: t('payments.method', 'Payment Method'),
+                        type: 'select',
+                        required: true,
+                        options: [
+                          { value: 'cash', name: 'Cash' },
+                          { value: 'card', name: 'Card' },
+                          { value: 'bank_transfer', name: 'Bank Transfer' },
+                          { value: 'online', name: 'Online' },
+                        ],
+                        width: 'full',
+                      },
+                      {
+                        name: 'transaction_id',
+                        label: t('payments.transactionId', 'Transaction ID'),
+                        type: 'text',
+                        placeholder: t('payments.transactionIdPlaceholder', 'Optional'),
+                        width: 'full',
+                      },
+                      {
+                        name: 'notes',
+                        label: t('payments.notes', 'Notes'),
+                        type: 'textarea',
+                        placeholder: t('payments.notesPlaceholder', 'Additional notes...'),
+                        width: 'full',
+                      },
+                    ],
+                  },
+                ]}
+                onSubmit={handlePaymentSubmit}
+                button={t('common.submit', 'Create Payment')}
+                loading={paymentLoading}
+              />
             );
           })()}
         </DialogContent>
