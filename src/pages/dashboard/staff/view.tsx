@@ -160,6 +160,10 @@ export default function ViewStaff() {
                 <p className="text-sm font-medium text-muted-foreground">Default Break (minutes)</p>
                 <p className="text-base mt-1">{staff?.default_break_minutes || '-'}</p>
               </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t('staff.maxConcurrentBookings', 'Max Concurrent Bookings')}</p>
+                <p className="text-base mt-1">{staff?.max_concurrent_bookings ?? '-'}</p>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -49,6 +49,26 @@ export default function BookingsView() {
     const [editEndTime, setEditEndTime] = useState('');
     const [editServiceId, setEditServiceId] = useState<number | undefined>(undefined);
 
+    const parseDate = (value?: string | number | Date | null): Date | null => {
+        if (!value) return null;
+        if (value instanceof Date) {
+            return isNaN(value.getTime()) ? null : value;
+        }
+
+        const dateString = String(value).trim();
+        const normalized = dateString.includes(' ') && !dateString.includes('T')
+            ? dateString.replace(' ', 'T')
+            : dateString;
+
+        const parsed = new Date(normalized);
+        return isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const formatDateTime = (value?: string | number | Date | null, pattern = 'PPP p') => {
+        const date = parseDate(value);
+        return date ? format(date, pattern) : '-';
+    };
+
     const handleItemClick = (item: any) => {
         if (item.healthForm) {
             setSelectedItem(item);
@@ -65,11 +85,12 @@ export default function BookingsView() {
     });
 
     const handleEditDateClick = (item: any) => {
-        const startDate = new Date(item.start_datetime);
+        const startDate = parseDate(item.start_datetime) || new Date();
+        const endDate = parseDate(item.end_datetime) || new Date();
         setEditingItem(item);
         setEditDate(startDate);
         setEditStartTime(format(startDate, 'HH:mm'));
-        setEditEndTime(format(new Date(item.end_datetime), 'HH:mm'));
+        setEditEndTime(format(endDate, 'HH:mm'));
         setEditServiceId(item.service?.id || item.service_id);
         setIsEditDateDialogOpen(true);
     };
@@ -217,12 +238,12 @@ export default function BookingsView() {
                             <>
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">{t('bookings.startDateTime', 'Start Date & Time')}</p>
-                                    <p className="text-base">{format(new Date(booking.booking_items[0].start_datetime), 'PPP p')}</p>
+                                    <p className="text-base">{formatDateTime(booking.booking_items[0].start_datetime)}</p>
                                 </div>
 
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">{t('bookings.endDateTime', 'End Date & Time')}</p>
-                                    <p className="text-base">{format(new Date(booking.booking_items[0].end_datetime), 'PPP p')}</p>
+                                    <p className="text-base">{formatDateTime(booking.booking_items[0].end_datetime)}</p>
                                 </div>
                             </>
                         )}
@@ -312,7 +333,7 @@ export default function BookingsView() {
                                             )}
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="h-4 w-4" />
-                                                {format(new Date(item.start_datetime), 'PPP p')} - {format(new Date(item.end_datetime), 'p')}
+                                                {formatDateTime(item.start_datetime)} - {formatDateTime(item.end_datetime, 'p')}
                                             </span>
                                         </div>
                                     </div>
@@ -397,7 +418,7 @@ export default function BookingsView() {
                                             {payment.paid_at && (
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="h-4 w-4" />
-                                                    {format(new Date(payment.paid_at), 'PPP p')}
+                                                    {formatDateTime(payment.paid_at)}
                                                 </span>
                                             )}
                                             {payment.square_payment_id && (

@@ -808,6 +808,7 @@
   },
   "clientSubscriptions": {
     "title": "Mes abonnements",
+    "renewSubscription": "Renouveler l'abonnement",
     "subtitle": "Suivez vos séances et gérez les membres partagés",
     "total": "Mes abonnements",
     "active": "Actif",

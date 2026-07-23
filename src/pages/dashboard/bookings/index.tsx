@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MagicForm from '@/components/custom/MagicForm';
 import BookingCalendarView from './calendar-view';
+import ForceReservationDialog from './ForceReservationDialog';
 import { Calendar as CalendarIcon, List, X, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -39,40 +40,8 @@ export default function BookingsIndex() {
     booking: null,
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [servicesForce, setServicesForce] = useState<{ id: number; name: string }[]>([]);
-  const [staffForce, setStaffForce] = useState<{ id: number; name: string }[]>([]);
-
-  // --- NEW: Force Reservation State ---
   const [forceDialog, setForceDialog] = useState(false);
   const [forceLoading, setForceLoading] = useState(false);
-  const GetServicesForForceReservation = () => {
-    http
-      .get(apiRoutes.adminServices)
-      .then((res) => {
-        setServicesForce(res.data.data);
-      })
-      .catch(() => {
-        toast({
-          variant: 'destructive',
-          title: t('common.error', 'Error'),
-          description: t('bookings.fetchServicesError', 'Failed to fetch services for force reservation'),
-        });
-      });
-  };
-  const GetStaffForForceReservation = () => {
-    http
-      .get(apiRoutes.adminStaff)
-      .then((res) => {
-        setStaffForce(res.data.data);
-      }
-      ).catch(() => {
-        toast({
-          variant: 'destructive',
-          title: t('common.error', 'Error'),
-          description: t('bookings.fetchStaffError', 'Failed to fetch staff for force reservation'),
-        });
-      });
-  };
 
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [filters, setFilters] = useState({
@@ -86,8 +55,6 @@ export default function BookingsIndex() {
   useEffect(() => {
     setPageTitle(t('bookings.title', 'Bookings Management'));
     fetchBookings();
-    GetServicesForForceReservation();
-    GetStaffForForceReservation();
   }, [t]);
 
   const fetchBookings = (filterParams?: any) => {
@@ -234,9 +201,8 @@ export default function BookingsIndex() {
   // --- NEW: Force Reservation Submit Handler ---
   const handleForceSubmit = (formData: any) => {
     setForceLoading(true);
-    // Remember to add adminBookingsForce route in your apiRoutes file
     http
-      .post(apiRoutes.adminBookingsForce || '/api/admin/bookings/force', formData)
+      .post(apiRoutes.adminBookingsForce, formData)
       .then(() => {
         toast({
           title: t('common.success', 'Success'),
@@ -428,66 +394,13 @@ export default function BookingsIndex() {
         <BookingCalendarView bookings={data} />
       )}
 
-      {/* NEW: Force Reservation Dialog */}
-      <Dialog open={forceDialog} onOpenChange={setForceDialog}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{t('bookings.forceReservationTitle', 'Force Reservation')}</DialogTitle>
-            <DialogDescription>
-              {t('bookings.forceReservationDescription', 'Manually override schedule and force a reservation.')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
-            <MagicForm
-              title=''
-              fields={[
-                {
-                  group: 'force_reservation',
-                  fields: [
-                    {
-                      name: 'service_id',
-                      label: t('bookings.service', 'Service'),
-                      type: 'select',
-                      required: true,
-                      placeholder: t('bookings.selectService', 'Select Service'),
-                      // TODO: Fetch your services from Laravel API and populate this array
-                      options: servicesForce.map(service => ({ value: service.id.toString(), name: service.name?.fr })),
-                      width: 'half',
-                    },
-                    {
-                      name: 'staff_id',
-                      label: t('bookings.staff', 'Staff'),
-                      type: 'select',
-                      required: true,
-                      placeholder: t('bookings.selectStaff', 'Select Staff'),
-                      // TODO: Fetch your staff members from Laravel API and populate this array
-                      options: staffForce.map(staff => ({ value: staff.id.toString(), name: staff.user.name })),
-                      width: 'half',
-                    },
-                    {
-                      name: 'date',
-                      label: t('bookings.date', 'Date'),
-                      type: 'date',
-                      required: true,
-                      width: 'half',
-                    },
-                    {
-                      name: 'start_time',
-                      label: t('bookings.startTime', 'Heure départ'),
-                      type: 'time',
-                      required: true,
-                      width: 'half',
-                    },
-                  ],
-                },
-              ]}
-              onSubmit={handleForceSubmit}
-              button={t('common.submit', 'Force Reservation')}
-              loading={forceLoading}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ForceReservationDialog
+        open={forceDialog}
+        onOpenChange={setForceDialog}
+        onSubmit={handleForceSubmit}
+        loading={forceLoading}
+        
+      />
 
       {/* Cancel Dialog */}
       <Dialog open={cancelDialog.open} onOpenChange={(open) => setCancelDialog({ open, booking: null })}>

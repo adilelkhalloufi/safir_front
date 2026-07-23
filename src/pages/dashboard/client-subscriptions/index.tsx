@@ -134,6 +134,27 @@ export default function ClientSubscriptionsPage() {
         return subscription.total_sessions - subscription.used_sessions;
     };
 
+    const hasOtherAvailableSubscription = (subscription: ClientSubscription) => {
+        const serviceId = subscription.subscription_plan.service?.id;
+        if (!serviceId) {
+            return false;
+        }
+
+        return subscriptions.some((other) =>
+            other.id !== subscription.id &&
+            other.subscription_plan.service?.id === serviceId &&
+            other.is_active &&
+            getRemainingSessionsCount(other) > 0
+        );
+    };
+
+    const goToRenew = (subscription: ClientSubscription) => {
+        const serviceId = subscription.subscription_plan.service?.id || 0;
+        const planId = subscription.subscription_plan.id;
+        const search = `?plan_id=${planId}&service_id=${serviceId}`;
+        navigate(`${webRoutes.subscriptionCheckout}${search}`);
+    };
+
     return (
         <div className='space-y-6'>
             <div className='flex items-center justify-between'>
@@ -265,6 +286,16 @@ export default function ClientSubscriptionsPage() {
                                             }}
                                         >
                                             {t('clientSubscriptions.bookSession', 'Book a session')}
+                                        </Button>
+                                    )}
+
+                                    {(remainingSessions <= 0 || !subscription.is_active) && !hasOtherAvailableSubscription(subscription) && (
+                                        <Button
+                                            variant='secondary'
+                                            className='w-full'
+                                            onClick={() => goToRenew(subscription)}
+                                        >
+                                            {t('clientSubscriptions.renewSubscription', 'Renew subscription')}
                                         </Button>
                                     )}
                                 </CardContent>

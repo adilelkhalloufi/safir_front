@@ -948,6 +948,7 @@
   },
   "clientSubscriptions": {
     "title": "My subscriptions",
+    "renewSubscription": "Renew subscription",
     "subtitle": "Track sessions and manage shared members",
     "total": "My subscriptions",
     "active": "Active",
