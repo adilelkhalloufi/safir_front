@@ -175,6 +175,16 @@ export default function BookingsView() {
         return colors[status] || 'bg-gray-500';
     };
 
+ 
+
+   
+
+   
+
+  
+ 
+
+
     if (isLoading) {
         return (
             <div className="space-y-6">

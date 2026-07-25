@@ -1,6 +1,7 @@
 import { GetBookingColumns, Booking } from './columns';
 import { BookingsDataTable } from './data-table';
 import { useEffect, useMemo, useState } from 'react';
+import { format } from 'date-fns';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { Button } from '@/components/ui/button';
@@ -9,17 +10,17 @@ import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '@/utils';
- 
+
 import MagicForm from '@/components/custom/MagicForm';
-import { Calendar as CalendarIcon,   X } from 'lucide-react';
- 
+import { Calendar as CalendarIcon, X } from 'lucide-react';
+
 export default function BookingsIndex() {
   const { t } = useTranslation();
   const [data, setData] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  
-   const [filters, setFilters] = useState({
+
+  const [filters, setFilters] = useState({
     dateFrom: undefined as Date | undefined,
     dateTo: undefined as Date | undefined,
     client: '',
@@ -32,37 +33,37 @@ export default function BookingsIndex() {
     fetchBookings();
   }, [t]);
 
- const fetchBookings = (filterParams?: any) => {
-  setLoading(true);
+  const fetchBookings = (filterParams?: any) => {
+    setLoading(true);
 
-  const params: any = {};
+    const params: any = {};
 
-  if (filterParams) {
-    if (filterParams.date_from) params.date_from = filterParams.date_from;
-    if (filterParams.date_to) params.date_to = filterParams.date_to;
-    if (filterParams.client) params.client = filterParams.client;
-    if (filterParams.status && filterParams.status !== 'all') {
-      params.status = filterParams.status;
+    if (filterParams) {
+      if (filterParams.date_from) params.date_from = filterParams.date_from;
+      if (filterParams.date_to) params.date_to = filterParams.date_to;
+      if (filterParams.client) params.client = filterParams.client;
+      if (filterParams.status && filterParams.status !== 'all') {
+        params.status = filterParams.status;
+      }
     }
-  }
 
-  http
-    .get(apiRoutes.adminBookings, { params })
-    .then((res) => {
-      setData(res.data.data || []);
-    })
-    .catch((err) => {
-      console.error('fetch bookings error', err);
-      toast({
-        variant: 'destructive',
-        title: t('common.error', 'Error'),
-        description: t('bookings.fetchError', 'Failed to fetch bookings'),
+    http
+      .get(apiRoutes.adminBookings, { params })
+      .then((res) => {
+        setData(res.data.data || []);
+      })
+      .catch((err) => {
+        console.error('fetch bookings error', err);
+        toast({
+          variant: 'destructive',
+          title: t('common.error', 'Error'),
+          description: t('bookings.fetchError', 'Failed to fetch bookings'),
+        });
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-};
+  };
 
   const handleView = (booking: Booking) => {
     navigate(webRoutes.bookings.view.replace(':id', booking.id.toString()));
@@ -87,8 +88,8 @@ export default function BookingsIndex() {
       });
   };
 
- 
- 
+
+
   const handleNoShow = (booking: Booking) => {
     http
       .post(apiRoutes.adminBookingNoShow(booking.id), {})
@@ -108,16 +109,36 @@ export default function BookingsIndex() {
       });
   };
 
- 
+
 
   const handleFilterSubmit = (filterData: any) => {
+    const normalizeDate = (value: any) => {
+      if (!value) return undefined;
+      if (value instanceof Date) return value;
+      if (typeof value === 'string') {
+        return value.includes('T') ? new Date(value) : new Date(`${value}T00:00:00`);
+      }
+      return undefined;
+    };
+
+    const normalizeDateForApi = (value: any) => {
+      const date = normalizeDate(value);
+      return date ? format(date, 'yyyy-MM-dd') : undefined;
+    };
+
+    const apiFilterData = {
+      ...filterData,
+      date_from: normalizeDateForApi(filterData.date_from),
+      date_to: normalizeDateForApi(filterData.date_to),
+    };
+
     setFilters({
-      dateFrom: filterData.date_from ? new Date(filterData.date_from) : undefined,
-      dateTo: filterData.date_to ? new Date(filterData.date_to) : undefined,
+      dateFrom: normalizeDate(filterData.date_from),
+      dateTo: normalizeDate(filterData.date_to),
       client: filterData.client || '',
       status: filterData.status || 'all',
     });
-    fetchBookings(filterData);
+    fetchBookings(apiFilterData);
     setShowFilters(false);
   };
 
@@ -126,8 +147,8 @@ export default function BookingsIndex() {
       GetBookingColumns({
         onView: handleView,
         onComplete: handleComplete,
-         onNoShow: handleNoShow,
-       }),
+        onNoShow: handleNoShow,
+      }),
     [t]
   );
 
@@ -150,7 +171,7 @@ export default function BookingsIndex() {
               {t('bookings.subtitle', 'Manage and track all bookings')}
             </p>
           </div>
-      
+
         </div>
 
         {/* Filters */}
@@ -187,7 +208,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateFrom', 'Select start date'),
                         width: 'half',
-                        defaultValue: filters.dateFrom ? filters.dateFrom : undefined,
+                        defaultValue: filters.dateFrom ? format(filters.dateFrom, 'yyyy-MM-dd') : undefined,
                       },
                       {
                         name: 'date_to',
@@ -195,7 +216,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateTo', 'Select end date'),
                         width: 'half',
-                        defaultValue: filters.dateTo ? filters.dateTo : undefined,
+                        defaultValue: filters.dateTo ? format(filters.dateTo, 'yyyy-MM-dd') : undefined,
                       },
                       {
                         name: 'client',
@@ -238,8 +259,8 @@ export default function BookingsIndex() {
       <BookingsDataTable columns={columns} data={data} loading={loading} />
 
 
-   
- 
+
+
     </>
   );
 }

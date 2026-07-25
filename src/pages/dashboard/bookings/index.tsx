@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '@/utils';
+import useLocalStorage from '@/hooks/use-local-storage';
 import {
   Dialog,
   DialogContent,
@@ -44,18 +45,37 @@ export default function BookingsIndex() {
   const [forceLoading, setForceLoading] = useState(false);
 
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
-  const [filters, setFilters] = useState({
-    dateFrom: undefined as Date | undefined,
-    dateTo: undefined as Date | undefined,
-    client: '',
-    status: 'all',
+  const [filters, setFilters] = useLocalStorage({
+    key: 'bookingsFilters',
+    defaultValue: {
+      dateFrom: '',
+      dateTo: '',
+      client: '',
+      status: 'all',
+    },
   });
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     setPageTitle(t('bookings.title', 'Bookings Management'));
-    fetchBookings();
+    fetchBookings({
+      date_from: filters.dateFrom,
+      date_to: filters.dateTo,
+      client: filters.client,
+      status: filters.status,
+    });
   }, [t]);
+
+  const normalizeDateValue = (value: any): Date | null => {
+    if (!value) return null;
+    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+    if (typeof value === 'string') {
+      const normalized = value.includes('T') ? value : `${value}T00:00:00`;
+      const date = new Date(normalized);
+      return isNaN(date.getTime()) ? null : date;
+    }
+    return null;
+  };
 
   const fetchBookings = (filterParams?: any) => {
     setLoading(true);
@@ -63,11 +83,13 @@ export default function BookingsIndex() {
     // Build query parameters
     const params: any = {};
     if (filterParams) {
-      if (filterParams.date_from) {
-        params.date_from = format(new Date(filterParams.date_from), 'yyyy-MM-dd');
+      const fromDate = normalizeDateValue(filterParams.date_from);
+      const toDate = normalizeDateValue(filterParams.date_to);
+      if (fromDate) {
+        params.date_from = format(fromDate, 'yyyy-MM-dd');
       }
-      if (filterParams.date_to) {
-        params.date_to = format(new Date(filterParams.date_to), 'yyyy-MM-dd');
+      if (toDate) {
+        params.date_to = format(toDate, 'yyyy-MM-dd');
       }
       if (filterParams.client) {
         params.client = filterParams.client;
@@ -225,8 +247,8 @@ export default function BookingsIndex() {
 
   const handleFilterSubmit = (filterData: any) => {
     setFilters({
-      dateFrom: filterData.date_from ? new Date(filterData.date_from) : undefined,
-      dateTo: filterData.date_to ? new Date(filterData.date_to) : undefined,
+      dateFrom: filterData.date_from || '',
+      dateTo: filterData.date_to || '',
       client: filterData.client || '',
       status: filterData.status || 'all',
     });
@@ -248,8 +270,8 @@ export default function BookingsIndex() {
 
   const clearFilters = () => {
     setFilters({
-      dateFrom: undefined,
-      dateTo: undefined,
+      dateFrom: '',
+      dateTo: '',
       client: '',
       status: 'all',
     });
@@ -340,7 +362,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateFrom', 'Select start date'),
                         width: 'half',
-                        defaultValue: filters.dateFrom ? format(filters.dateFrom, 'yyyy-MM-dd') : undefined,
+                        defaultValue: filters.dateFrom || undefined,
                       },
                       {
                         name: 'date_to',
@@ -348,7 +370,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateTo', 'Select end date'),
                         width: 'half',
-                        defaultValue: filters.dateTo ? format(filters.dateTo, 'yyyy-MM-dd') : undefined,
+                        defaultValue: filters.dateTo || undefined,
                       },
                       {
                         name: 'client',
@@ -399,7 +421,7 @@ export default function BookingsIndex() {
         onOpenChange={setForceDialog}
         onSubmit={handleForceSubmit}
         loading={forceLoading}
-        
+
       />
 
       {/* Cancel Dialog */}
