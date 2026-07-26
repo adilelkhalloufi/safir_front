@@ -58,7 +58,7 @@ export default function AdminSubscriptionPlansView() {
                         <div><strong>Name FR:</strong> {plan?.name.fr || '-'}</div>
                         <div><strong>Name EN:</strong> {plan?.name.en || '-'}</div>
                         <div><strong>{t('subscriptionPublic.sessions', 'Sessions')}:</strong> {plan?.total_sessions}</div>
-                        <div><strong>{t('subscriptions.price', 'Price (DH)')}:</strong> {plan?.price} DH</div>
+                        <div><strong>{t('subscriptions.price', 'Price (DH)')}:</strong> {plan?.price} $</div>
                         <div><strong>{t('subscriptionPublic.duration', 'Duration')}:</strong> {plan?.duration_days} {t('common.days', 'days')}</div>
                         <div><strong>{t('subscriptionPlansAdmin.maxMembers', 'Max members')}:</strong> {plan?.max_members}</div>
                     </CardContent>

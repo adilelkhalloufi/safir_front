@@ -25,30 +25,31 @@ import MagicForm from '@/components/custom/MagicForm';
 
 
 interface BookingFormData {
-  client_id?: number;
-  client_create?: {
-    name: string;
-    email: string;
-    phone: string;
-    address?: string;
-  };
-  services: Array<{
-    id: number;
-    quantity: number;
-    start_datetime: string;
-    end_datetime: string;
-    assigned_staff: Array<{ staff_id: number }>;
-    preferred_gender?: 'female' | 'male' | 'mixed';
-  }>;
-  group_size: number;
-  language: string;
-  notes?: string;
-  payment?: {
-    type: string;
-    amount: number;
-    partial: boolean;
-  };
-  block_slots?: boolean;
+    client_id?: number;
+    client_create?: {
+        name: string;
+        email: string;
+        phone: string;
+        address?: string;
+    };
+    services: Array<{
+        id: number;
+        quantity: number;
+        start_datetime: string;
+        end_datetime: string;
+        assigned_staff: Array<{ staff_id: number }>;
+        preferred_gender?: 'female' | 'male' | 'mixed';
+    }>;
+    group_size: number;
+    language: string;
+    notes?: string;
+    payment?: {
+        type: string;
+        amount: number;
+        partial: boolean;
+        notes?: string;
+    };
+    block_slots?: boolean;
 }
 
 export default function BookingsAdd() {
@@ -68,8 +69,9 @@ export default function BookingsAdd() {
         group_size: 1,
         language: 'en',
     });
-    const [paymentType, setPaymentType] = useState<'cash' | 'card' | 'bank_transfer' | 'online'>('cash');
+    const [paymentType, setPaymentType] = useState<'cash' | 'card' | 'bank_transfer' | 'online' | 'gift_card'>('cash');
     const [paymentAmount, setPaymentAmount] = useState<string>('');
+    const [paymentNote, setPaymentNote] = useState<string>('');
     const [cardHolderName, setCardHolderName] = useState<string>('');
     const [paymentFormKey, setPaymentFormKey] = useState(0);
 
@@ -110,12 +112,12 @@ export default function BookingsAdd() {
         queryKey: ['available-slots', Array.from(selectedServiceIds), Object.values(serviceDates), Array.from(selectedServiceIds).map(id => serviceQuantities[id] || 1)],
         queryFn: async () => {
             if (selectedServiceIds.size === 0) return {};
-            
+
             const slots: Record<number, any[]> = {};
             for (const serviceId of selectedServiceIds) {
                 const date = serviceDates[serviceId];
                 if (!date) continue;
-                
+
                 const response = await http.post(apiRoutes.availability, {
                     services: [
                         {
@@ -125,7 +127,7 @@ export default function BookingsAdd() {
                     ],
                     date: format(date, 'yyyy-MM-dd'),
                 });
-                
+
                 // Extract slots from the new API response structure
                 const combinedSlots = response.data?.data?.combined_available_slots || [];
                 const serviceSlots = combinedSlots.find((s: any) => s.service_id === serviceId);
@@ -234,7 +236,7 @@ export default function BookingsAdd() {
         } as Client);
         setCreateClientMode(false);
         setStep('services');
-     
+
     };
 
     const handleSubmitBooking = (paymentData: any) => {
@@ -274,6 +276,7 @@ export default function BookingsAdd() {
                 ...(paymentData.source_id ? { source_id: paymentData.source_id } : {}),
                 ...(paymentData.card_holder ? { card_holder: paymentData.card_holder } : {}),
                 ...(paymentData.verification_token ? { verification_token: paymentData.verification_token } : {}),
+                ...(paymentData.notes ? { notes: paymentData.notes } : {}),
             },
         };
 
@@ -345,9 +348,9 @@ export default function BookingsAdd() {
                                         </div>
                                     )}
 
-                                    <Button 
-                                        type="button" 
-                                        variant="outline" 
+                                    <Button
+                                        type="button"
+                                        variant="outline"
                                         className="w-full"
                                         onClick={() => setCreateClientMode(true)}
                                     >
@@ -357,9 +360,9 @@ export default function BookingsAdd() {
                                 </>
                             ) : (
                                 <div className="space-y-4">
-                                    <Button 
-                                        type="button" 
-                                        variant="ghost" 
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
                                         className="mb-4"
                                         onClick={() => setCreateClientMode(false)}
                                     >
@@ -420,7 +423,7 @@ export default function BookingsAdd() {
                             )}
 
                             <div className="pt-4 border-t flex justify-end">
-                                <Button 
+                                <Button
                                     onClick={() => setStep('services')}
                                     disabled={!selectedClient}
                                 >
@@ -585,7 +588,7 @@ export default function BookingsAdd() {
                                                                 mode="single"
                                                                 selected={serviceDates[serviceId]}
                                                                 onSelect={(date) => setServiceDates({ ...serviceDates, [serviceId]: date })}
-                                                                disabled={(date) => date < new Date()}
+                                                                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                                                 initialFocus
                                                             />
                                                         </PopoverContent>
@@ -678,13 +681,13 @@ export default function BookingsAdd() {
                             )}
 
                             <div className="pt-4 border-t flex justify-between">
-                                <Button 
+                                <Button
                                     variant="outline"
                                     onClick={() => setStep('client')}
                                 >
                                     ← {t('common.back', 'Back')}
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={handleConfirmServices}
                                     disabled={selectedServiceIds.size === 0}
                                 >
@@ -707,13 +710,13 @@ export default function BookingsAdd() {
                             {/* Detailed Receipt Summary */}
                             <div className="bg-muted p-4 rounded-lg space-y-3">
                                 <p className="font-semibold text-lg">{t('bookings.bookingSummary', 'Booking Summary')}</p>
-                                
+
                                 {/* Client Info */}
                                 <div className="border-b pb-3 space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">{t('common.client', 'Client')}</p>
                                     <p className="text-sm font-semibold">{selectedClient?.name}</p>
                                 </div>
-                                
+
                                 {/* Services Detail */}
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium text-muted-foreground">{t('bookings.services', 'Services')}</p>
@@ -726,7 +729,7 @@ export default function BookingsAdd() {
 
                                             // If no manual staff selection, get highest priority staff
                                             if (!staff && slot?.available_staff && slot.available_staff.length > 0) {
-                                                const highestPriorityStaff = slot.available_staff.reduce((prev: any, current: any) => 
+                                                const highestPriorityStaff = slot.available_staff.reduce((prev: any, current: any) =>
                                                     (current.priority > prev.priority) ? current : prev
                                                 );
                                                 staff = highestPriorityStaff;
@@ -742,7 +745,7 @@ export default function BookingsAdd() {
                                                                 {new Date(service.start_datetime).toLocaleDateString()} • {new Date(service.start_datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </p>
                                                         </div>
-                                                        <p className="font-semibold text-sm">{svc?.price} DH</p>
+                                                        <p className="font-semibold text-sm">{svc?.price} $</p>
                                                     </div>
                                                     {staff && (
                                                         <p className={cn(
@@ -795,9 +798,21 @@ export default function BookingsAdd() {
                                         >
                                             <option value='cash'>{t('payments.method_cash', 'Cash')}</option>
                                             <option value='card'>{t('payments.method_card', 'Card')}</option>
+                                            <option value='gift_card'>{t('payments.method_gift_card', 'Cart cadeau')}</option>
                                             <option value='bank_transfer'>{t('payments.method_transfer', 'Bank Transfer')}</option>
                                             <option value='online'>{t('payments.method_online', 'Online')}</option>
                                         </select>
+                                    </div>
+                                    <div className='space-y-2'>
+                                        <Label htmlFor='payment-note'>{t('payments.paymentNote', 'Payment note')}</Label>
+                                        <textarea
+                                            id='payment-note'
+                                            rows={3}
+                                            value={paymentNote}
+                                            onChange={(event) => setPaymentNote(event.target.value)}
+                                            placeholder={t('payments.paymentNotePlaceholder', 'Send with payment note')}
+                                            className='w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500'
+                                        />
                                     </div>
                                 </div>
 
@@ -881,6 +896,7 @@ export default function BookingsAdd() {
                                                             source_id: tokenResult.token,
                                                             card_holder: cardHolderName.trim(),
                                                             verification_token: verifiedBuyer?.token,
+                                                            notes: paymentNote,
                                                         });
                                                     }}
                                                     createVerificationDetails={() => {
@@ -936,7 +952,7 @@ export default function BookingsAdd() {
                                     </div>
                                 ) : (
                                     <Button
-                                        onClick={() => handleSubmitBooking({ type: paymentType, amount: paymentAmount })}
+                                        onClick={() => handleSubmitBooking({ type: paymentType, amount: paymentAmount, notes: paymentNote })}
                                         disabled={createBookingMutation.isPending}
                                     >
                                         {t('bookings.createBooking', 'Create Booking')}
@@ -947,7 +963,7 @@ export default function BookingsAdd() {
                             {/* Block Slots Checkbox */}
                             <div className="border-t pt-4 space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <Checkbox 
+                                    <Checkbox
                                         id="block-slots"
                                         checked={formData.block_slots || false}
                                         onCheckedChange={(checked) => setFormData({ ...formData, block_slots: !!checked })}
@@ -959,7 +975,7 @@ export default function BookingsAdd() {
                             </div>
 
                             <div className="pt-4 border-t flex justify-between">
-                                <Button 
+                                <Button
                                     variant="outline"
                                     onClick={() => setStep('services')}
                                 >

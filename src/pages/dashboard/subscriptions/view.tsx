@@ -159,7 +159,7 @@ export default function SubscriptionsView() {
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.price', 'Price')}</p>
-                            <p className="text-3xl font-bold">{subscription.price} DH</p>
+                            <p className="text-3xl font-bold">{subscription.price} $</p>
                         </div>
 
                         {subscription.user && (
@@ -198,7 +198,7 @@ export default function SubscriptionsView() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-semibold">{service.price} DH</p>
+                                        <p className="font-semibold">{service.price} $</p>
                                     </div>
                                 </div>
                             ))}

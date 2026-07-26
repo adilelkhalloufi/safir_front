@@ -101,7 +101,7 @@ export default function PaymentsView() {
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('payments.amount', 'Amount')}</p>
-                            <p className="text-3xl font-bold">{payment.amount} DH</p>
+                            <p className="text-3xl font-bold">{payment.amount} $</p>
                         </div>
 
                         <Separator />
