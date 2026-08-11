@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 import {
     nextStep,
@@ -27,6 +28,7 @@ import { Review } from './Review'
 import { AppDispatch, RootState } from '@/store'
 import { defaultHttp } from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
+import { webRoutes } from '@/routes/web'
 import { handleErrorResponse, NotificationType, showNotification } from '@/utils'
 import { SelectServices } from './SelectServices'
 import { SelectOptions } from './SelectOptions'
@@ -37,6 +39,7 @@ import { toast } from 'sonner'
 
 export default function BookingWizard() {
     const { t } = useTranslation()
+    const navigate = useNavigate()
 
     const dispatch = useDispatch<AppDispatch>()
     const {
@@ -155,11 +158,18 @@ export default function BookingWizard() {
                 })
             }
 
-            showNotification(
-                result?.message || 'Payment and booking confirmed successfully.',
-                NotificationType.SUCCESS
-            )
+            // Redirect to success page with booking details
+            const bookingId = result?.data?.id
+            const customerEmail = result?.data?.guest?.email || customerInfo.email
+            const totalAmount = result?.data?.total_amount
+
+            const params = new URLSearchParams()
+            if (bookingId) params.append('id', bookingId.toString())
+            if (customerEmail) params.append('email', customerEmail)
+            if (totalAmount) params.append('total', totalAmount)
+
             dispatch(resetBooking())
+            navigate(`${webRoutes.bookingSuccess}?${params.toString()}`)
         },
         onError: (error: any) => {
             showNotification(

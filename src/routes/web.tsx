@@ -8,6 +8,7 @@ export const webRoutes = {
   logout: '/logout',
   Dashboard: '/Dashbord',
   booking: '/booking',
+  bookingSuccess: '/booking/success',
   subscriptionPlans: '/subscriptions',
   subscriptionCheckout: '/subscriptions/checkout',
   policy: '/policy',

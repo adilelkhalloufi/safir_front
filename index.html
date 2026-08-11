@@ -33,6 +33,25 @@
     />
 
     <meta name="theme-color" content="#fff" />
+    
+    <!-- Google Ads Global Site Tag (gtag.js) -->
+    <!-- Replace VITE_GOOGLE_ADS_ID with your actual Google Ads ID in .env -->
+    <script>
+      // Only load Google Ads if ID is provided via environment variable
+      if (import.meta.env.VITE_GOOGLE_ADS_ID) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GOOGLE_ADS_ID}`;
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', import.meta.env.VITE_GOOGLE_ADS_ID);
+      }
+    </script>
+
+    <!-- Facebook Pixel -->
     <!-- <script>
       !function(f,b,e,v,n,t,s){
         if(f.fbq)return;n=f.fbq=function(){

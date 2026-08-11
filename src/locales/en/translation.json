@@ -874,6 +874,19 @@
       "error": "Payment failed. Please try again."
     }
   },
+  "bookingSuccess": {
+    "title": "Booking Confirmed!",
+    "subtitle": "Your reservation has been successfully confirmed",
+    "bookingNumber": "Booking Number",
+    "emailSent": "A confirmation email has been sent to",
+    "smsSent": "A confirmation SMS has been sent to you",
+    "reminder": "Important Reminder",
+    "reminderText": "You will receive a reminder 24 hours before your appointment. Please arrive 15 minutes before the scheduled time.",
+    "questions": "Questions? Contact us at",
+    "backHome": "Back to Home",
+    "newBooking": "New Booking",
+    "thankYou": "Thank you for your trust! We look forward to welcoming you."
+  },
   "calendar": {
     "sunday": "Sunday",
     "monday": "Monday",

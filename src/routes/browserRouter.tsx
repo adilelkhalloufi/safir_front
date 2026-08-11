@@ -272,6 +272,10 @@ const BookingIndex2 = loadable(() => import('../pages/dashboard/bookings2'), {
   fallback: fallbackElement,
 });
 
+const BookingSuccess = loadable(() => import('../pages/landing/booking/Success'), {
+  fallback: fallbackElement,
+});
+
 export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.home,
@@ -281,6 +285,11 @@ export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.booking,
     element: <LandingPage />,
+    errorElement: errorElement,
+  },
+  {
+    path: webRoutes.bookingSuccess,
+    element: <BookingSuccess />,
     errorElement: errorElement,
   },
 

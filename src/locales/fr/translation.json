@@ -460,6 +460,19 @@
       "error": "Le paiement a échoué. Veuillez réessayer."
     }
   },
+  "bookingSuccess": {
+    "title": "Réservation Confirmée !",
+    "subtitle": "Votre réservation a été confirmée avec succès",
+    "bookingNumber": "Numéro de réservation",
+    "emailSent": "Un email de confirmation a été envoyé à",
+    "smsSent": "Un SMS de confirmation vous a été envoyé",
+    "reminder": "Rappel important",
+    "reminderText": "Vous recevrez un rappel 24h avant votre rendez-vous. Veuillez arriver 15 minutes avant l'heure prévue.",
+    "questions": "Des questions ? Contactez-nous au",
+    "backHome": "Retour à l'accueil",
+    "newBooking": "Nouvelle réservation",
+    "thankYou": "Merci de votre confiance ! Nous avons hâte de vous accueillir."
+  },
   "calendar": {
     "sunday": "Dimanche",
     "monday": "Lundi",
