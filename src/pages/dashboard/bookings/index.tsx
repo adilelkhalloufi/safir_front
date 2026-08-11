@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '@/utils';
-import useLocalStorage from '@/hooks/use-local-storage';
 import {
   Dialog,
   DialogContent,
@@ -45,55 +44,28 @@ export default function BookingsIndex() {
   const [forceLoading, setForceLoading] = useState(false);
 
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
-  const [filters, setFilters] = useLocalStorage({
-    key: 'bookingsFilters',
-    defaultValue: {
-      dateFrom: '',
-      dateTo: '',
-      client: '',
-      status: 'all',
-    },
+  const [filters, setFilters] = useState({
+    dateFrom: undefined as Date | undefined,
+    dateTo: undefined as Date | undefined,
+    client: '',
+    status: 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     setPageTitle(t('bookings.title', 'Bookings Management'));
-    fetchBookings({
-      date_from: filters.dateFrom,
-      date_to: filters.dateTo,
-      client: filters.client,
-      status: filters.status,
-    });
+    fetchBookings();
   }, [t]);
-
-  const normalizeDateValue = (value: any): Date | null => {
-    if (!value) return null;
-    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-    if (typeof value === 'string') {
-      const normalized = value.includes('T') ? value : `${value}T00:00:00`;
-      const date = new Date(normalized);
-      return isNaN(date.getTime()) ? null : date;
-    }
-    return null;
-  };
 
   const fetchBookings = (filterParams?: any) => {
     setLoading(true);
 
-    // Build query parameters
     const params: any = {};
+
     if (filterParams) {
-      const fromDate = normalizeDateValue(filterParams.date_from);
-      const toDate = normalizeDateValue(filterParams.date_to);
-      if (fromDate) {
-        params.date_from = format(fromDate, 'yyyy-MM-dd');
-      }
-      if (toDate) {
-        params.date_to = format(toDate, 'yyyy-MM-dd');
-      }
-      if (filterParams.client) {
-        params.client = filterParams.client;
-      }
+      if (filterParams.date_from) params.date_from = filterParams.date_from;
+      if (filterParams.date_to) params.date_to = filterParams.date_to;
+      if (filterParams.client) params.client = filterParams.client;
       if (filterParams.status && filterParams.status !== 'all') {
         params.status = filterParams.status;
       }
@@ -102,7 +74,7 @@ export default function BookingsIndex() {
     http
       .get(apiRoutes.adminBookings, { params })
       .then((res) => {
-        setData(res.data.data);
+        setData(res.data.data || []);
       })
       .catch(() => {
         toast({
@@ -246,13 +218,33 @@ export default function BookingsIndex() {
   };
 
   const handleFilterSubmit = (filterData: any) => {
+    const normalizeDate = (value: any) => {
+      if (!value) return undefined;
+      if (value instanceof Date) return value;
+      if (typeof value === 'string') {
+        return value.includes('T') ? new Date(value) : new Date(`${value}T00:00:00`);
+      }
+      return undefined;
+    };
+
+    const normalizeDateForApi = (value: any) => {
+      const date = normalizeDate(value);
+      return date ? format(date, 'yyyy-MM-dd') : undefined;
+    };
+
+    const apiFilterData = {
+      ...filterData,
+      date_from: normalizeDateForApi(filterData.date_from),
+      date_to: normalizeDateForApi(filterData.date_to),
+    };
+
     setFilters({
-      dateFrom: filterData.date_from || '',
-      dateTo: filterData.date_to || '',
+      dateFrom: normalizeDate(filterData.date_from),
+      dateTo: normalizeDate(filterData.date_to),
       client: filterData.client || '',
       status: filterData.status || 'all',
     });
-    fetchBookings(filterData);
+    fetchBookings(apiFilterData);
     setShowFilters(false);
   };
 
@@ -270,8 +262,8 @@ export default function BookingsIndex() {
 
   const clearFilters = () => {
     setFilters({
-      dateFrom: '',
-      dateTo: '',
+      dateFrom: undefined,
+      dateTo: undefined,
       client: '',
       status: 'all',
     });
@@ -362,7 +354,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateFrom', 'Select start date'),
                         width: 'half',
-                        defaultValue: filters.dateFrom || undefined,
+                        defaultValue: filters.dateFrom ? format(filters.dateFrom, 'yyyy-MM-dd') : undefined,
                       },
                       {
                         name: 'date_to',
@@ -370,7 +362,7 @@ export default function BookingsIndex() {
                         type: 'date',
                         placeholder: t('bookings.selectDateTo', 'Select end date'),
                         width: 'half',
-                        defaultValue: filters.dateTo || undefined,
+                        defaultValue: filters.dateTo ? format(filters.dateTo, 'yyyy-MM-dd') : undefined,
                       },
                       {
                         name: 'client',
