@@ -48,6 +48,7 @@ export default function BookingsView() {
     const [editStartTime, setEditStartTime] = useState('');
     const [editEndTime, setEditEndTime] = useState('');
     const [editServiceId, setEditServiceId] = useState<number | undefined>(undefined);
+    const [editStaffId, setEditStaffId] = useState<number | undefined>(undefined);
 
     const parseDate = (value?: string | number | Date | null): Date | null => {
         if (!value) return null;
@@ -84,6 +85,14 @@ export default function BookingsView() {
         },
     });
 
+    const { data: staff } = useQuery({
+        queryKey: ['staff'],
+        queryFn: async () => {
+            const response = await http.get(apiRoutes.adminStaff);
+            return response.data.data;
+        },
+    });
+
     const handleEditDateClick = (item: any) => {
         const startDate = parseDate(item.start_datetime) || new Date();
         const endDate = parseDate(item.end_datetime) || new Date();
@@ -92,12 +101,13 @@ export default function BookingsView() {
         setEditStartTime(format(startDate, 'HH:mm'));
         setEditEndTime(format(endDate, 'HH:mm'));
         setEditServiceId(item.service?.id || item.service_id);
+        setEditStaffId(item.staff?.id || item.staff_id || undefined);
         setIsEditDateDialogOpen(true);
     };
 
     const updateBookingMutation = useMutation({
-        mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string; serviceId?: number }) => {
-            const { itemId, date, startTime, endTime, serviceId } = data;
+        mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string; serviceId?: number; staffId?: number }) => {
+            const { itemId, date, startTime, endTime, serviceId, staffId } = data;
 
             // Format date as YYYY-MM-DD
             const year = date.getFullYear();
@@ -116,6 +126,9 @@ export default function BookingsView() {
 
             if (serviceId) {
                 payload.service_id = serviceId;
+            }
+            if (staffId) {
+                payload.staff_id = staffId;
             }
 
             const response = await http.patch(apiRoutes.adminBookingItemUpdate(parseInt(id!), itemId), payload);
@@ -154,6 +167,7 @@ export default function BookingsView() {
             startTime: editStartTime,
             endTime: editEndTime,
             serviceId: editServiceId,
+            staffId: editStaffId,
         });
     };
 
@@ -528,6 +542,21 @@ export default function BookingsView() {
                                     {services?.map((service: any) => (
                                         <SelectItem key={service.id} value={service.id.toString()}>
                                             {service.name?.[booking?.language] || service.name?.en}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-staff">{t('bookings.staff', 'Staff')}</Label>
+                            <Select value={editStaffId?.toString()} onValueChange={(value) => setEditStaffId(parseInt(value))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder={t('bookings.selectStaff', 'Select a staff member')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {staff?.map((member: any) => (
+                                        <SelectItem key={member.id} value={member.id.toString()}>
+                                            {member.user?.name || member.user?.email || `Staff #${member.id}`}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
