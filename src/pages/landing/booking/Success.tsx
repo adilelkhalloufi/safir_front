@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, Calendar, Mail, Phone, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import HeaderBooking from './HeaderBooking'
 import { useTranslation } from 'react-i18next'
 import { webRoutes } from '@/routes/web'
 
@@ -45,7 +46,8 @@ export default function BookingSuccess() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-16 px-4'>
-      <div className='mx-auto max-w-3xl'>
+      <HeaderBooking />
+      <div className='mx-auto max-w-3xl pt-28'>
         {/* Success Header */}
         <div className='mb-8 text-center'>
           <div className='mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100'>
@@ -141,7 +143,7 @@ export default function BookingSuccess() {
           <Button
             size='lg'
             onClick={() => navigate(webRoutes.home)}
-            className='bg-amber-600 hover:bg-amber-700'
+            className='bg-[#001448] hover:bg-[#001a5f]'
           >
             {t('bookingSuccess.backHome', 'Retour à l\'accueil')}
             <ArrowRight className='ml-2 h-5 w-5' />

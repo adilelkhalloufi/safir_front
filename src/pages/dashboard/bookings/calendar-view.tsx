@@ -5,7 +5,6 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Booking } from './columns';
 import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
-import { format } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
 
@@ -121,7 +120,7 @@ export default function BookingCalendarView({ bookings }: BookingCalendarViewPro
             ? item.staff.user?.name || item.staff.user?.email || `Staff #${item.staff.id}`
             : 'No Staff';
           const clientName = booking.client?.name || booking.client?.email || 'Unknown Client';
-          const time = format(new Date(item.start_datetime), 'HH:mm');
+          const time = new Date(item.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
           const title = `\n${serviceName}\n(staff :${staffName}) - client: ${clientName}\n${time}`;
           const baseColor = item.service?.type?.color;

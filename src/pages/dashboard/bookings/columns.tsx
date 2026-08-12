@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
 import { IconMail, IconPhone } from '@tabler/icons-react';
 
 export interface Booking {
@@ -146,8 +145,8 @@ export const GetBookingColumns = ({
         if (!firstItem) return <div>-</div>;
         return (
           <div>
-            <div className='font-medium'>{format(new Date(firstItem.start_datetime), 'MMM dd, yyyy')}</div>
-            <div className='text-sm text-muted-foreground'>{format(new Date(firstItem.start_datetime), 'HH:mm')}</div>
+            <div className='font-medium'>{new Date(firstItem.start_datetime).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</div>
+            <div className='text-sm text-muted-foreground'>{new Date(firstItem.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
         );
       },
