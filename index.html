@@ -16,41 +16,37 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="OpticFlow" />
+    <meta property="og:title" content="SAFIR" />
     <meta
       property="og:description"
       content="SAFIR Moroccan Hammam & Spa - Experience ultimate relaxation and rejuvenation with our traditional Moroccan treatments and modern spa services."
     />
-    <meta property="og:image" />
+    <meta property="og:image" content="/images/og-image.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <!-- <meta property="twitter:url" content="https://opticflow.netlify.app" /> -->
-    <meta property="twitter:title" content="OpticFlow" />
+    <meta property="twitter:title" content="SAFIR" />
     <meta
       property="twitter:description"
-      content="OpticFlow - The ultimate SaaS solution for managing optician stores. | OpticFlow - La solution SaaS ultime pour la gestion des magasins d'optique. | OpticFlow - الحل السحابي الأمثل لإدارة متاجر البصريات."
+      content="SAFIR Moroccan Hammam & Spa - Experience ultimate relaxation and rejuvenation with our traditional Moroccan treatments and modern spa services."
     />
 
     <meta name="theme-color" content="#fff" />
-    
-    <!-- Google Ads Global Site Tag (gtag.js) -->
-    <!-- Replace VITE_GOOGLE_ADS_ID with your actual Google Ads ID in .env -->
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-5G6HFNPP3B"
+    ></script>
     <script>
-      // Only load Google Ads if ID is provided via environment variable
-      if (import.meta.env.VITE_GOOGLE_ADS_ID) {
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GOOGLE_ADS_ID}`;
-        document.head.appendChild(script);
-
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', import.meta.env.VITE_GOOGLE_ADS_ID);
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
       }
+      gtag('js', new Date())
+      gtag('config', 'G-5G6HFNPP3B')
     </script>
-
     <!-- Facebook Pixel -->
     <!-- <script>
       !function(f,b,e,v,n,t,s){
@@ -66,10 +62,32 @@
       fbq('track','PageView');
     </script> -->
     <script>
-
-!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n; n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0; t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)} (window,document,'script','https://connect.facebook.net/en_US/fbevents.js'); fbq('init','1543592993836067'); fbq('track','PageView');
-
-</script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return
+        n = f.fbq = function () {
+          n.callMethod
+            ? n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments)
+        }
+        if (!f._fbq) f._fbq = n
+        n.push = n
+        n.loaded = !0
+        n.version = '2.0'
+        n.queue = []
+        t = b.createElement(e)
+        t.async = !0
+        t.src = v
+        s = b.getElementsByTagName(e)[0]
+        s.parentNode.insertBefore(t, s)
+      })(
+        window,
+        document,
+        'script',
+        'https://connect.facebook.net/en_US/fbevents.js'
+      )
+      fbq('init', '1543592993836067')
+      fbq('track', 'PageView')
+    </script>
   </head>
   <body>
     <div id="root"></div>

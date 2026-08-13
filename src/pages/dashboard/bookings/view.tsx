@@ -107,28 +107,49 @@ export default function BookingsView() {
 
     const updateBookingMutation = useMutation({
         mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string; serviceId?: number; staffId?: number }) => {
+            if (!editingItem) {
+                throw new Error('No item selected for update');
+            }
+
             const { itemId, date, startTime, endTime, serviceId, staffId } = data;
 
-            // Format date as YYYY-MM-DD
+            const originalStartDate = parseDate(editingItem.start_datetime) || new Date();
+            const originalEndDate = parseDate(editingItem.end_datetime) || new Date();
+            const originalServiceId = editingItem.service?.id || editingItem.service_id;
+            const originalStaffId = editingItem.staff?.id || editingItem.staff_id || undefined;
+
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const dateStr = `${year}-${month}-${day}`;
 
-            // Combine date and time without timezone conversion
             const startDateTimeStr = `${dateStr}T${startTime}:00`;
             const endDateTimeStr = `${dateStr}T${endTime}:00`;
 
-            const payload: any = {
-                start_datetime: startDateTimeStr,
-                end_datetime: endDateTimeStr,
-            };
+            const payload: any = {};
 
-            if (serviceId) {
+            const originalDateStr = format(originalStartDate, 'yyyy-MM-dd');
+            const originalStartTime = format(originalStartDate, 'HH:mm');
+            const originalEndTime = format(originalEndDate, 'HH:mm');
+
+            if (dateStr !== originalDateStr || startTime !== originalStartTime) {
+                payload.start_datetime = startDateTimeStr;
+            }
+
+            if (dateStr !== originalDateStr || endTime !== originalEndTime) {
+                payload.end_datetime = endDateTimeStr;
+            }
+
+            if (serviceId !== undefined && serviceId !== originalServiceId) {
                 payload.service_id = serviceId;
             }
-            if (staffId) {
+
+            if (staffId !== undefined && staffId !== originalStaffId) {
                 payload.staff_id = staffId;
+            }
+
+            if (Object.keys(payload).length === 0) {
+                return Promise.resolve({ data: { message: 'No changes to save' } });
             }
 
             const response = await http.patch(apiRoutes.adminBookingItemUpdate(parseInt(id!), itemId), payload);
@@ -189,14 +210,14 @@ export default function BookingsView() {
         return colors[status] || 'bg-gray-500';
     };
 
- 
 
-   
 
-   
 
-  
- 
+
+
+
+
+
 
 
     if (isLoading) {
