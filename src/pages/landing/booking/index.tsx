@@ -2,8 +2,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import {
     nextStep,
@@ -13,6 +14,7 @@ import {
     updateCustomerInfo,
     resetBooking,
     setServiceAnyPreference,
+    setStep,
 } from '../../../store/slices/bookingSlice'
 import { setSettings } from '../../../store/slices/settingsSlice'
 import type {
@@ -40,6 +42,7 @@ import { toast } from 'sonner'
 export default function BookingWizard() {
     const { t } = useTranslation()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
 
     const dispatch = useDispatch<AppDispatch>()
     const {
@@ -66,6 +69,30 @@ export default function BookingWizard() {
             return response.data.data as Service[]
         }
     })
+
+    // When a service_id query param is present, auto-select it and advance to Options
+    useEffect(() => {
+        const serviceIdParam = searchParams.get('service_id')
+        if (!serviceIdParam || step !== 0 || !servicesData) {
+            return
+        }
+
+        const serviceId = Number(serviceIdParam)
+        if (Number.isNaN(serviceId)) {
+            return
+        }
+
+        const service = servicesData.find((svc) => svc.id === serviceId)
+        if (!service) {
+            return
+        }
+
+        const alreadySelected = selectedServices.some((svc) => svc.id === serviceId)
+        if (!alreadySelected) {
+            dispatch(toggleService({ serviceId: service.id, service }))
+        }
+        dispatch(setStep(1))
+    }, [dispatch, searchParams, servicesData, selectedServices, step])
 
     // Fetch availability slots from API (fetch when moving to step 2)
     const { data: availabilityData, isLoading: availabilityLoading } = useQuery({
@@ -152,7 +179,7 @@ export default function BookingWizard() {
         },
         onSuccess: (result) => {
             if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
-                ;(window as any).fbq('track', 'Purchase', {
+                ; (window as any).fbq('track', 'Purchase', {
                     value: 0,
                     currency: 'CAD'
                 })
