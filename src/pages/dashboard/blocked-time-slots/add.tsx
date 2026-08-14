@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LayoutSh as Layout } from '@/components/custom/layout';
- import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
- import { setPageTitle, handleErrorResponse } from '@/utils';
+import { setPageTitle, handleErrorResponse } from '@/utils';
 import MagicForm, { MagicFormGroupProps } from '@/components/custom/MagicForm';
 
 export default function AddBlockedTimeSlot() {
@@ -54,7 +54,7 @@ export default function AddBlockedTimeSlot() {
       type: values.type,
       staff_profile_id: values.type === 'staff' ? values.staff_profile_id : undefined,
       service_id: values.type === 'service' ? values.service_id : undefined,
-      type_service_id: values.type === 'service' ? values.type_service_id : undefined,
+      type_service_id: values.type === 'type_service' ? values.type_service_id : undefined,
       start_datetime: formatDateTime(values.start_datetime),
       end_datetime: formatDateTime(values.end_datetime),
       reason: values.reason,
@@ -126,7 +126,7 @@ export default function AddBlockedTimeSlot() {
             name: type.name?.en || type.name?.fr || type.name || 'N/A',
           })) || [],
           placeholder: isLoadingServiceTypes ? 'Loading...' : t('blockedSlots.selectServiceType', 'Select service type'),
-          condition: (values) => values.type === 'service',
+          condition: (values) => values.type === 'type_service',
         },
         {
           name: 'service_id',
@@ -202,7 +202,7 @@ export default function AddBlockedTimeSlot() {
   return (
     <Layout
       title={t('blockedSlots.addBlockedSlot', 'Add Blocked Time Slot')}
- 
+
     >
       <MagicForm
         fields={formGroups}
