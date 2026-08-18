@@ -70,7 +70,7 @@ export default function StaffMyCalendar() {
         booking,
       }))
     )
-    .sort((a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime());
+    .sort((a:any, b:any) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime());
 
   const handleWriteReview = (item: BookingItemWithBooking) => {
     setReviewDialog({ open: true, item });

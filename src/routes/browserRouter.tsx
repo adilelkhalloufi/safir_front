@@ -1,288 +1,381 @@
+import { createBrowserRouter } from 'react-router-dom'
+import { webRoutes } from './web'
+import loadable from '@loadable/component'
+import ProgressBar from '@/components/loader/progressBar'
+import ErrorPage from '@/components/errors/general-error'
+import RequireAuth from './requireAuth'
+import RequireRole from './requireRole'
+import Layout from '@/components/layout'
+import Logout from '@/pages/auth/logout'
+import LandingPage from '@/pages/landing'
+import { RoleEnum } from '@/interfaces/enum/RoleEnum'
 
-import { createBrowserRouter } from 'react-router-dom';
-import { webRoutes } from './web';
-import loadable from '@loadable/component';
-import ProgressBar from '@/components/loader/progressBar';
-import ErrorPage from '@/components/errors/general-error';
-import RequireAuth from './requireAuth';
-import RequireRole from './requireRole';
-import Layout from '@/components/layout';
-import Logout from '@/pages/auth/logout';
-import LandingPage from '@/pages/landing';
-import { RoleEnum } from '@/interfaces/enum/RoleEnum';
-
-
-
-
-
-const errorElement = <ErrorPage />;
-const fallbackElement = <ProgressBar />;
+const errorElement = <ErrorPage />
+const fallbackElement = <ProgressBar />
 
 const CancelBooking = loadable(() => import('../pages/cancelBooking'), {
   fallback: fallbackElement,
-});
+})
 
 const Dashboard = loadable(() => import('../pages/dashboard'), {
   fallback: fallbackElement,
-});
+})
 
 const BookingsIndex = loadable(() => import('../pages/dashboard/bookings'), {
   fallback: fallbackElement,
-});
+})
 
 const BookingsAdd = loadable(() => import('../pages/dashboard/bookings/add'), {
   fallback: fallbackElement,
-});
+})
 
-const BookingsView = loadable(() => import('../pages/dashboard/bookings/view'), {
-  fallback: fallbackElement,
-});
+const BookingsView = loadable(
+  () => import('../pages/dashboard/bookings/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const ClientsIndex = loadable(() => import('../pages/dashboard/clients'), {
   fallback: fallbackElement,
-});
+})
 
 const ClientsAdd = loadable(() => import('../pages/dashboard/clients/add'), {
   fallback: fallbackElement,
-});
+})
 
 const ClientsEdit = loadable(() => import('../pages/dashboard/clients/edit'), {
   fallback: fallbackElement,
-});
+})
 
 const ClientsView = loadable(() => import('../pages/dashboard/clients/view'), {
   fallback: fallbackElement,
-});
+})
 
 const StaffIndex = loadable(() => import('../pages/dashboard/staff'), {
   fallback: fallbackElement,
-});
+})
 
-const SubscriptionsIndex = loadable(() => import('../pages/dashboard/subscriptions'), {
-  fallback: fallbackElement,
-});
+const SubscriptionsIndex = loadable(
+  () => import('../pages/dashboard/subscriptions'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionsAdd = loadable(() => import('../pages/dashboard/subscriptions/add'), {
-  fallback: fallbackElement,
-});
+const SubscriptionsAdd = loadable(
+  () => import('../pages/dashboard/subscriptions/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionsEdit = loadable(() => import('../pages/dashboard/subscriptions/edit'), {
-  fallback: fallbackElement,
-});
+const SubscriptionsEdit = loadable(
+  () => import('../pages/dashboard/subscriptions/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionsView = loadable(() => import('../pages/dashboard/subscriptions/view'), {
-  fallback: fallbackElement,
-});
-
-
+const SubscriptionsView = loadable(
+  () => import('../pages/dashboard/subscriptions/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const ServicesIndex = loadable(() => import('../pages/dashboard/services'), {
   fallback: fallbackElement,
-});
+})
 
 const ServicesAdd = loadable(() => import('../pages/dashboard/services/add'), {
   fallback: fallbackElement,
-});
+})
 
-const ServicesEdit = loadable(() => import('../pages/dashboard/services/edit'), {
-  fallback: fallbackElement,
-});
+const ServicesEdit = loadable(
+  () => import('../pages/dashboard/services/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const ServicesView = loadable(() => import('../pages/dashboard/services/view'), {
-  fallback: fallbackElement,
-});
+const ServicesView = loadable(
+  () => import('../pages/dashboard/services/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeServices = loadable(() => import('../pages/dashboard/type_services'), {
-  fallback: fallbackElement,
-});
+const TypeServices = loadable(
+  () => import('../pages/dashboard/type_services'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeServicesAdd = loadable(() => import('../pages/dashboard/type_services/add'), {
-  fallback: fallbackElement,
-});
+const TypeServicesAdd = loadable(
+  () => import('../pages/dashboard/type_services/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeServicesEdit = loadable(() => import('../pages/dashboard/type_services/edit'), {
-  fallback: fallbackElement,
-});
+const TypeServicesEdit = loadable(
+  () => import('../pages/dashboard/type_services/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeServicesView = loadable(() => import('../pages/dashboard/type_services/view'), {
-  fallback: fallbackElement,
-});
+const TypeServicesView = loadable(
+  () => import('../pages/dashboard/type_services/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeResources = loadable(() => import('../pages/dashboard/type_resource'), {
-  fallback: fallbackElement,
-});
+const TypeResources = loadable(
+  () => import('../pages/dashboard/type_resource'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeResourcesAdd = loadable(() => import('../pages/dashboard/type_resource/add'), {
-  fallback: fallbackElement,
-});
+const TypeResourcesAdd = loadable(
+  () => import('../pages/dashboard/type_resource/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeResourcesEdit = loadable(() => import('../pages/dashboard/type_resource/edit'), {
-  fallback: fallbackElement,
-});
+const TypeResourcesEdit = loadable(
+  () => import('../pages/dashboard/type_resource/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const TypeResourcesView = loadable(() => import('../pages/dashboard/type_resource/view'), {
-  fallback: fallbackElement,
-});
-
-
+const TypeResourcesView = loadable(
+  () => import('../pages/dashboard/type_resource/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const ResourcesIndex = loadable(() => import('../pages/dashboard/resources'), {
   fallback: fallbackElement,
-});
+})
 
+const ResourcesAdd = loadable(
+  () => import('../pages/dashboard/resources/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const ResourcesAdd = loadable(() => import('../pages/dashboard/resources/add'), {
-  fallback: fallbackElement,
-});
+const ResourcesEdit = loadable(
+  () => import('../pages/dashboard/resources/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const ResourcesEdit = loadable(() => import('../pages/dashboard/resources/edit'), {
-  fallback: fallbackElement,
-});
-
-const ResourcesView = loadable(() => import('../pages/dashboard/resources/view'), {
-  fallback: fallbackElement,
-});
-
-
+const ResourcesView = loadable(
+  () => import('../pages/dashboard/resources/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const StaffAdd = loadable(() => import('../pages/dashboard/staff/add'), {
   fallback: fallbackElement,
-});
+})
 
 const StaffEdit = loadable(() => import('../pages/dashboard/staff/edit'), {
   fallback: fallbackElement,
-});
+})
 
 const StaffView = loadable(() => import('../pages/dashboard/staff/view'), {
   fallback: fallbackElement,
-});
+})
 
-const StaffCalendar = loadable(() => import('../pages/dashboard/staff/calendar'), {
-  fallback: fallbackElement,
-});
+const StaffCalendar = loadable(
+  () => import('../pages/dashboard/staff/calendar'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const MyStaffCalendar = loadable(() => import('../pages/dashboard/staff/my-calendar'), {
-  fallback: fallbackElement,
-});
+const MyStaffCalendar = loadable(
+  () => import('../pages/dashboard/staff/my-calendar'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const PaymentsIndex = loadable(() => import('../pages/dashboard/payments'), {
   fallback: fallbackElement,
-});
+})
 
 const PaymentsAdd = loadable(() => import('../pages/dashboard/payments/add'), {
   fallback: fallbackElement,
-});
+})
 
-const PaymentsView = loadable(() => import('../pages/dashboard/payments/view'), {
-  fallback: fallbackElement,
-});
+const PaymentsView = loadable(
+  () => import('../pages/dashboard/payments/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const CommunicationsIndex = loadable(() => import('../pages/dashboard/communications'), {
-  fallback: fallbackElement,
-});
+const CommunicationsIndex = loadable(
+  () => import('../pages/dashboard/communications'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const ReportsIndex = loadable(() => import('../pages/dashboard/reports'), {
   fallback: fallbackElement,
-});
+})
 
 const SettingsIndex = loadable(() => import('../pages/dashboard/settings'), {
   fallback: fallbackElement,
-});
+})
 
 const ProfileIndex = loadable(() => import('../pages/dashboard/profile'), {
   fallback: fallbackElement,
-});
+})
 
-const BlockedTimeSlotsIndex = loadable(() => import('../pages/dashboard/blocked-time-slots'), {
-  fallback: fallbackElement,
-});
+const BlockedTimeSlotsIndex = loadable(
+  () => import('../pages/dashboard/blocked-time-slots'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const BlockedTimeSlotsAdd = loadable(() => import('../pages/dashboard/blocked-time-slots/add'), {
-  fallback: fallbackElement,
-});
+const BlockedTimeSlotsAdd = loadable(
+  () => import('../pages/dashboard/blocked-time-slots/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const BlockedTimeSlotsEdit = loadable(() => import('../pages/dashboard/blocked-time-slots/edit'), {
-  fallback: fallbackElement,
-});
+const BlockedTimeSlotsEdit = loadable(
+  () => import('../pages/dashboard/blocked-time-slots/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const BlockedTimeSlotsView = loadable(() => import('../pages/dashboard/blocked-time-slots/view'), {
-  fallback: fallbackElement,
-});
+const BlockedTimeSlotsView = loadable(
+  () => import('../pages/dashboard/blocked-time-slots/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const Register = loadable(() => import('../pages/auth/components/register'), {
   fallback: fallbackElement,
-});
-
+})
 
 const Login = loadable(() => import('../pages/auth/sign-in'), {
   fallback: fallbackElement,
-});
+})
 
-const SubscriptionPlansPage = loadable(() => import('../pages/landing/subscriptions'), {
-  fallback: fallbackElement,
-});
+const SubscriptionPlansPage = loadable(
+  () => import('../pages/landing/subscriptions'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionCheckoutPage = loadable(() => import('../pages/landing/subscriptions/checkout'), {
-  fallback: fallbackElement,
-});
+const SubscriptionCheckoutPage = loadable(
+  () => import('../pages/landing/subscriptions/checkout'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const ClientSubscriptionsPage = loadable(() => import('../pages/dashboard/client-subscriptions'), {
-  fallback: fallbackElement,
-});
+const ClientSubscriptionsPage = loadable(
+  () => import('../pages/dashboard/client-subscriptions'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
+const SubscriptionPlansAdminIndex = loadable(
+  () => import('../pages/dashboard/subscription-plans'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
+const SubscriptionPlansAdminAdd = loadable(
+  () => import('../pages/dashboard/subscription-plans/add'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionPlansAdminIndex = loadable(() => import('../pages/dashboard/subscription-plans'), {
-  fallback: fallbackElement,
-});
+const SubscriptionPlansAdminEdit = loadable(
+  () => import('../pages/dashboard/subscription-plans/edit'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const SubscriptionPlansAdminAdd = loadable(() => import('../pages/dashboard/subscription-plans/add'), {
-  fallback: fallbackElement,
-});
-
-const SubscriptionPlansAdminEdit = loadable(() => import('../pages/dashboard/subscription-plans/edit'), {
-  fallback: fallbackElement,
-});
-
-const SubscriptionPlansAdminView = loadable(() => import('../pages/dashboard/subscription-plans/view'), {
-  fallback: fallbackElement,
-});
+const SubscriptionPlansAdminView = loadable(
+  () => import('../pages/dashboard/subscription-plans/view'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 const PolicyPage = loadable(() => import('../pages/landing/policy'), {
   fallback: fallbackElement,
-});
+})
 
 const StaffPage = loadable(() => import('../pages/landing/staff'), {
   fallback: fallbackElement,
-});
+})
 
 const Docs = loadable(() => import('../pages/docs'), {
   fallback: fallbackElement,
-});
+})
 
 const HealthFormClient = loadable(() => import('../pages/healthFormClient'), {
   fallback: fallbackElement,
-});
+})
 
 const ReviewsClient = loadable(() => import('../pages/reviewsClient'), {
   fallback: fallbackElement,
-});
+})
 
 const BookingIndex2 = loadable(() => import('../pages/dashboard/bookings2'), {
   fallback: fallbackElement,
-});
+})
 
-const BookingSuccess = loadable(() => import('../pages/landing/booking/Success'), {
-  fallback: fallbackElement,
-});
+const BookingSuccess = loadable(
+  () => import('../pages/landing/booking/Success'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const StaffEditProfile = loadable(() => import('../pages/dashboard/staff/editStaff'), {
-  fallback: fallbackElement,
-});
+const StaffEditProfile = loadable(
+  () => import('../pages/dashboard/staff/editStaff'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
-const StaffViewProfile = loadable(() => import('../pages/dashboard/staff/viewStaff'), {
-  fallback: fallbackElement,
-});
+const StaffViewProfile = loadable(
+  () => import('../pages/dashboard/staff/viewStaff'),
+  {
+    fallback: fallbackElement,
+  }
+)
 
 export const browserRouter = createBrowserRouter([
   {
@@ -340,18 +433,16 @@ export const browserRouter = createBrowserRouter([
     path: webRoutes.login,
     element: <Login />,
     errorElement: errorElement,
-
-  }, {
+  },
+  {
     path: webRoutes.register,
     element: <Register />,
     errorElement: errorElement,
-
   },
   {
     path: webRoutes.logout,
     element: <Logout />,
     errorElement: errorElement,
-
   },
   {
     element: (
@@ -365,7 +456,9 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.Dashboard,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Client]}>
+          <RequireRole
+            allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Client]}
+          >
             <Dashboard />
           </RequireRole>
         ),
@@ -382,7 +475,9 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.docs,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Staff]}>
+          <RequireRole
+            allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Staff]}
+          >
             <Docs />
           </RequireRole>
         ),
@@ -397,11 +492,11 @@ export const browserRouter = createBrowserRouter([
       },
       {
         path: webRoutes.bookings.index2,
-        element:
-
-          (<RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <BookingIndex2 />
-          </RequireRole>),
+          </RequireRole>
+        ),
       },
       {
         path: webRoutes.bookings.add,
@@ -505,6 +600,22 @@ export const browserRouter = createBrowserRouter([
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin]}>
             <StaffAdd />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.edit,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
+            <StaffEdit />
+          </RequireRole>
+        ),
+      },
+      {
+        path: webRoutes.staff.view,
+        element: (
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
+            <StaffView />
           </RequireRole>
         ),
       },
@@ -783,4 +894,4 @@ export const browserRouter = createBrowserRouter([
     element: <ErrorPage />,
     errorElement: errorElement,
   },
-]);
+])
