@@ -27,6 +27,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import http from '@/utils/http'
+import { encodeUrlId } from '@/utils'
 import { apiRoutes } from '@/routes/api'
 import { webRoutes } from '@/routes/web'
 import HealthQuestionsForm from '@/components/custom/HealthQuestionsForm'
@@ -345,7 +346,7 @@ export default function ViewService() {
                       className='rounded-lg border p-4 hover:bg-accent/50 transition-colors hover:cursor-pointer'
                       onClick={() => {
                         // send it to view detail staff
-                        navigate(webRoutes.staff.view.replace(':id', staff.id.toString()));
+                        navigate(webRoutes.staff.view.replace(':id', encodeUrlId(staff.id)));
 
                       }}
                     >

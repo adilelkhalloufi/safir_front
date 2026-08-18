@@ -6,6 +6,7 @@ import Nav from './nav'
 import { cn } from '@/lib/utils'
 import { sidelinks } from '@/data/sidelinks'
  import { t } from 'i18next'
+ import LogoIcon from '@/assets/logo.png'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean
@@ -49,7 +50,7 @@ export default function Sidebar({
         >
           <div className={`flex items-center ${!isCollapsed ? 'gap-2' : ''}`}>
             <img
-              src='./logo.png'
+              src={LogoIcon}
               width={24}
               height={24}
               className='mr-2'

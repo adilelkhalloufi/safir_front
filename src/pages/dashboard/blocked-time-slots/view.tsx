@@ -22,6 +22,7 @@ import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
 import ViewLoading from '@/components/skeleton/ViewLoading';
 import { BlockedTimeSlot, BlockedSlotReason } from '@/interfaces/models/blockedTimeSlot';
+import moment from 'moment';
 
 const reasonMap: Record<BlockedSlotReason, string> = {
   sick_leave: 'Sick Leave',
@@ -39,18 +40,14 @@ const typeMap: Record<string, string> = {
 };
 
 const formatDateTime = (dateTimeStr: string): string => {
-  try {
-    const date = new Date(dateTimeStr);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
+  if (!dateTimeStr) return '';
+
+  const momentDate = moment.parseZone(dateTimeStr);
+  if (!momentDate.isValid()) {
     return dateTimeStr;
   }
+
+  return momentDate.format('MMM DD, YYYY, hh:mm A');
 };
 
 export default function ViewBlockedTimeSlot() {

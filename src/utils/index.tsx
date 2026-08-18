@@ -22,6 +22,48 @@ export const setPageTitle = (title: string) => {
   window.document.title = title;
 };
 
+const URL_ID_SALT = 'safir_staff_secret_2026';
+
+export const encodeUrlId = (value: string | number) => {
+  const raw = String(value);
+  const payload = `${raw}:${URL_ID_SALT}`;
+
+  try {
+    return window
+      .btoa(payload)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  } catch {
+    return encodeURIComponent(raw);
+  }
+};
+
+export const decodeUrlId = (encoded?: string) => {
+  if (!encoded) {
+    return '';
+  }
+
+  if (encoded === ':id') {
+    return encoded;
+  }
+
+  try {
+    const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const decoded = window.atob(padded);
+    const [raw, salt] = decoded.split(':');
+
+    if (salt !== URL_ID_SALT) {
+      return decodeURIComponent(encoded);
+    }
+
+    return raw;
+  } catch {
+    return decodeURIComponent(encoded);
+  }
+};
+
 export const showNotification = (
   message = "Something went wrong",
   type: NotificationType = NotificationType.ERROR,

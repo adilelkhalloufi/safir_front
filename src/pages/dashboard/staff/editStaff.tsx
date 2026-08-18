@@ -74,7 +74,7 @@ export default function EditStaff() {
       service_ids: values.service_ids?.map((item: any) => item.service_id) || [],
     };
 
-    const targetId = id === ':id' ? user?.profil?.id : decodedId;
+    const targetId = user?.profil?.id;  
 
     http
       .put(apiRoutes.adminStaffById(Number(targetId)), submitData)

@@ -41,7 +41,8 @@ export default function ViewStaff() {
   const user = useSelector((state: RootState) => state.admin?.user);
 
   useEffect(() => {
-    const staffId = id === ':id' ? user?.profil?.id : decodedId;
+ 
+    const staffId = user?.profil?.id;
     fetchStaff(staffId);
   }, [id, user?.profil?.id, decodedId]);
 
@@ -101,17 +102,19 @@ export default function ViewStaff() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
+              
               {staff?.user?.first_name && staff?.user?.last_name
                 ? `${staff.user.first_name} ${staff.user.last_name}`
-                : staff?.user?.email || 'N/A'}
+                : staff?.user?.email || 'N/A'} 
             </h1>
             <p className="text-muted-foreground">{t('staff.subtitle')}</p>
+            rezzerze
           </div>
         </div>
         <Button
           onClick={() => {
-            const editId = id === ':id' ? encodeUrlId(user?.profil?.id || '') : encodeUrlId(decodedId);
-            navigate(webRoutes.staff.edit.replace(':id', editId));
+            const editId =  encodeUrlId(user?.profil?.id || '')  
+            navigate(webRoutes.staff.editProfile.replace(':id', editId));
           }}
         >
           <IconEdit className="mr-2 h-4 w-4" />

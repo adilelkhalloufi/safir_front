@@ -31,6 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 
 type BookingItem = Booking['booking_items'][0];
 
@@ -50,20 +51,26 @@ export default function StaffMyCalendar() {
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['staffBookings', staffId],
-    queryFn: () =>
-      staffId
-        ? http.get(`${apiRoutes.adminBookings}?staff_id=${staffId}`).then(res => res.data?.data || [])
-        : Promise.resolve([]),
+    queryFn: () => {
+      if (!staffId) return Promise.resolve([]);
+
+      const today = format(new Date(), 'yyyy-MM-dd');
+      return http
+        .get(`${apiRoutes.adminBookings}?staff_id=${staffId}&date_from=${today}`)
+        .then(res => res.data?.data || []);
+    },
     enabled: !!staffId,
   });
 
-  // Flatten bookings to booking items for table view
-  const bookingItems: BookingItemWithBooking[] = bookings.flatMap((booking: Booking) =>
-    booking.booking_items.map((item: BookingItem) => ({
-      ...item,
-      booking,
-    }))
-  );
+  // Flatten bookings to booking items for table view and sort by start date old-to-new
+  const bookingItems: BookingItemWithBooking[] = bookings
+    .flatMap((booking: Booking) =>
+      booking.booking_items.map((item: BookingItem) => ({
+        ...item,
+        booking,
+      }))
+    )
+    .sort((a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime());
 
   const handleWriteReview = (item: BookingItemWithBooking) => {
     setReviewDialog({ open: true, item });
@@ -114,7 +121,14 @@ export default function StaffMyCalendar() {
       fields: reviewFields,
     },
   ];
-
+const statusConfig = {
+  draft: { label: 'Draft', variant: 'secondary' as const, color: 'text-gray-600' },
+  confirmed: { label: 'Confirmed', variant: 'default' as const, color: 'text-green-600' },
+  deposit_paid: { label: 'Deposit Paid', variant: 'default' as const, color: 'text-emerald-600' },
+  completed: { label: 'Completed', variant: 'outline' as const, color: 'text-blue-600' },
+  cancelled: { label: 'Cancelled', variant: 'destructive' as const, color: 'text-red-600' },
+  'no-show': { label: 'No-show', variant: 'secondary' as const, color: 'text-orange-600' },
+};
   const itemColumns: ColumnDef<BookingItemWithBooking>[] = [
     {
       accessorKey: 'start_datetime',
@@ -151,7 +165,7 @@ export default function StaffMyCalendar() {
         return (
           <div>
             <div className='font-medium'>{client.name || 'N/A'}</div>
-            <div className='text-sm text-muted-foreground'>{client.email}</div>
+            {/* <div className='text-sm text-muted-foreground'>{client.email}</div> */}
           </div>
         );
       },
@@ -161,9 +175,9 @@ export default function StaffMyCalendar() {
       header: 'Status',
       cell: ({ row }) => {
         const item = row.original;
-        return (
-          <div className='capitalize'>{item.booking.status}</div>
-        );
+        const status = item.booking.status as keyof typeof statusConfig;
+        const config = statusConfig[status] || { label: status || 'Unknown', variant: 'secondary' as const };
+        return <Badge variant={config.variant}>{config.label}</Badge>;
       },
     },
     {

@@ -92,7 +92,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'My Profile',
     label: '',
-    href: webRoutes.staff.view, // This will be dynamically set based on current user
+    href: webRoutes.staff.viewProfile, // This will be dynamically set based on current user
     icon: <IconUserCog size={18} />,
     roles: [RoleEnum.Staff],
   },

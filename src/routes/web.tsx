@@ -60,6 +60,8 @@ export const webRoutes = {
     view: '/dashboard/staff/:id',
     add: '/dashboard/staff/add',
     edit: '/dashboard/staff/:id/edit',
+    editProfile: '/dashboard/staff/:id/edit-profile',
+    viewProfile: '/dashboard/staff/:id/view-profile',
   },
   services: {
     index: '/dashboard/services',

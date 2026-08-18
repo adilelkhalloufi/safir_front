@@ -276,6 +276,14 @@ const BookingSuccess = loadable(() => import('../pages/landing/booking/Success')
   fallback: fallbackElement,
 });
 
+const StaffEditProfile = loadable(() => import('../pages/dashboard/staff/editStaff'), {
+  fallback: fallbackElement,
+});
+
+const StaffViewProfile = loadable(() => import('../pages/dashboard/staff/viewStaff'), {
+  fallback: fallbackElement,
+});
+
 export const browserRouter = createBrowserRouter([
   {
     path: webRoutes.home,
@@ -501,18 +509,18 @@ export const browserRouter = createBrowserRouter([
         ),
       },
       {
-        path: webRoutes.staff.edit,
+        path: webRoutes.staff.editProfile,
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
-            <StaffEdit />
+            <StaffEditProfile />
           </RequireRole>
         ),
       },
       {
-        path: webRoutes.staff.view,
+        path: webRoutes.staff.viewProfile,
         element: (
           <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Staff]}>
-            <StaffView />
+            <StaffViewProfile />
           </RequireRole>
         ),
       },

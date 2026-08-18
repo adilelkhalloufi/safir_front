@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import moment from 'moment';
  import { BlockedTimeSlot, BlockedSlotReason } from '@/interfaces/models/blockedTimeSlot';
 
 interface BlockedTimeSlotsColumnsProps {
@@ -34,18 +35,14 @@ const typeMap: Record<string, string> = {
 };
 
 const formatDateTime = (dateTimeStr: string): string => {
-  try {
-    const date = new Date(dateTimeStr);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
+  if (!dateTimeStr) return '';
+
+  const momentDate = moment.parseZone(dateTimeStr);
+  if (!momentDate.isValid()) {
     return dateTimeStr;
   }
+
+  return momentDate.format('MMM DD, YYYY, hh:mm A');
 };
 
 export const GetBlockedTimeSlotsColumns = ({

@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { RootState } from '../store';
 import { webRoutes } from './web';
+import { encodeUrlId } from '@/utils';
 import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 
 export type RequireRoleProps = {
@@ -25,7 +26,7 @@ const RequireRole = ({ children, allowedRoles }: RequireRoleProps) => {
     if (!hasAccess) {
         // If user is staff, redirect to their profile page
         if (userRole === RoleEnum.Staff) {
-            return <Navigate to={webRoutes.staff.view.replace(':id', String(user?.profil?.id || ''))} replace />;
+            return <Navigate to={webRoutes.staff.viewProfile.replace(':id', encodeUrlId(user?.profil?.id || ''))} replace />;
         }
         if (userRole === RoleEnum.Client) {
             return <Navigate to={webRoutes.client.subscriptions} replace />;

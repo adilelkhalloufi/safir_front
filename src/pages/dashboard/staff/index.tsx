@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { setPageTitle } from '@/utils';
+import { encodeUrlId, setPageTitle } from '@/utils';
 import { Calendar } from 'lucide-react';
 
 export default function StaffIndex() {
@@ -50,16 +50,16 @@ export default function StaffIndex() {
   };
 
   const handleView = (staff: Staff) => {
-    navigate(webRoutes.staff.view.replace(':id', staff.id.toString()));
+    navigate(webRoutes.staff.view.replace(':id', encodeUrlId(staff.id)));
   };
 
   const handleEdit = (staff: Staff) => {
-    navigate(webRoutes.staff.edit.replace(':id', staff.id.toString()));
+    navigate(webRoutes.staff.edit.replace(':id', encodeUrlId(staff.id)));
   };
 
   const handleSchedule = (staff: Staff) => {
     // Navigate to schedule management or open modal
-    navigate(webRoutes.staff.view.replace(':id', staff.id.toString()) + '?tab=schedule');
+    navigate(webRoutes.staff.view.replace(':id', encodeUrlId(staff.id)) + '?tab=schedule');
   };
 
   const columns = useMemo(
