@@ -83,9 +83,9 @@ export function SubscriptionsDataTable<TData, TValue>({
       <div className='flex items-center gap-4'>
         <Input
           placeholder={t('subscriptions.searchPlaceholder', 'Search by client name...')}
-          value={(table.getColumn('client_name')?.getFilterValue() as string) ?? ''}
+          value={(table.getColumn('client')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('client_name')?.setFilterValue(event.target.value)
+            table.getColumn('client')?.setFilterValue(event.target.value)
           }
           className='max-w-sm'
         />
@@ -115,9 +115,9 @@ export function SubscriptionsDataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>

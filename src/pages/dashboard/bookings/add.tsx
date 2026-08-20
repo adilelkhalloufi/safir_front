@@ -258,7 +258,8 @@ export default function BookingsAdd() {
             return;
         }
 
-        if (!paymentData.amount || Number(paymentData.amount) <= 0) {
+        const paymentAmountValue = Number(paymentData.amount ?? 0);
+        if (Number.isNaN(paymentAmountValue) || paymentAmountValue < 0) {
             toast({
                 variant: 'destructive',
                 title: t('common.error', 'Error'),
@@ -271,7 +272,7 @@ export default function BookingsAdd() {
             ...formData,
             payment: {
                 type: paymentData.type,
-                amount: parseFloat(paymentData.amount),
+                amount: paymentAmountValue,
                 partial: false,
                 ...(paymentData.source_id ? { source_id: paymentData.source_id } : {}),
                 ...(paymentData.card_holder ? { card_holder: paymentData.card_holder } : {}),

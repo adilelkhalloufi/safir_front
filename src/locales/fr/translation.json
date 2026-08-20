@@ -146,6 +146,8 @@
     "blockSlots": "Bloquer les créneaux pour éviter d'autres réservations",
     "paymentDetails": "Détails du paiement",
     "bookingSummary": "Résumé de la réservation",
+    "subscriberBooking": "Réservation par abonnement (autoriser paiement zéro)",
+    "subscriberPaymentZero": "Cette réservation est marquée comme abonnement — le paiement zéro est autorisé.",
     "addPaymentDesc": "Configurez le paiement pour cette réservation",
     "client": "Client",
     "totalBookings": "Réservations totales",

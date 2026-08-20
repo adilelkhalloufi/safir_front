@@ -146,6 +146,8 @@
     "blockSlots": "Block slots to prevent other bookings",
     "paymentDetails": "Payment Details",
     "bookingSummary": "Booking Summary",
+    "subscriberBooking": "Subscriber reservation (allow zero payment)",
+    "subscriberPaymentZero": "This reservation is marked as subscriber — zero payment is allowed.",
     "addPaymentDesc": "Configure payment for this booking",
     "client": "Client",
     "totalBookings": "Total Bookings",
