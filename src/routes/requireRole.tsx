@@ -31,6 +31,9 @@ const RequireRole = ({ children, allowedRoles }: RequireRoleProps) => {
         if (userRole === RoleEnum.Client) {
             return <Navigate to={webRoutes.client.subscriptions} replace />;
         }
+        if (userRole === RoleEnum.Reception) {
+            return <Navigate to={webRoutes.bookings.index} replace />;
+        }
         // Otherwise, redirect to dashboard or first accessible page
         return <Navigate to={webRoutes.Dashboard} replace />;
     }

@@ -14,16 +14,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 
 const subscriptionFormSchema = z.object({
-    name: z.string().min(3, 'Name must be at least 3 characters'),
-    description: z.string().optional(),
     total_sessions: z.number().min(1, 'Total sessions must be at least 1'),
-    validity_days: z.number().min(1, 'Validity days must be at least 1'),
-    price: z.number().min(0, 'Price must be positive'),
+    used_sessions: z.number().min(0, 'Used sessions must be zero or more'),
+    start_date: z.string().min(1, 'Start date is required'),
+    end_date: z.string().min(1, 'End date is required'),
 });
 
 type SubscriptionFormValues = z.infer<typeof subscriptionFormSchema>;
@@ -42,7 +40,7 @@ export default function SubscriptionsEdit() {
         queryKey: ['subscription', id],
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminSubscriptionById(parseInt(id!)));
-            return response.data;
+            return response.data?.data ?? response.data;
         },
         enabled: !!id,
     });
@@ -51,11 +49,10 @@ export default function SubscriptionsEdit() {
         resolver: zodResolver(subscriptionFormSchema),
         values: subscription
             ? {
-                name: subscription.name || '',
-                description: subscription.description || '',
                 total_sessions: subscription.total_sessions || 10,
-                validity_days: subscription.validity_days || 30,
-                price: parseFloat(subscription.price) || 0,
+                used_sessions: subscription.used_sessions ?? 0,
+                start_date: subscription.start_date || '',
+                end_date: subscription.end_date || '',
             }
             : undefined,
     });
@@ -115,42 +112,16 @@ export default function SubscriptionsEdit() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {subscription?.user && (
+                        <div className="rounded-lg border border-secondary/20 bg-secondary/5 p-4 mb-4">
+                            <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.client', 'Client')}</p>
+                            <p className="text-base font-semibold">
+                                {subscription.user.name || `${subscription.user.first_name || ''} ${subscription.user.last_name || ''}`.trim() || subscription.user.email}
+                            </p>
+                        </div>
+                    )}
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('subscriptions.name', 'Subscription Name')}</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder={t('subscriptions.namePlaceholder', 'e.g., Monthly Wellness Package')}
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('subscriptions.description', 'Description')}</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder={t('subscriptions.descriptionPlaceholder', 'Describe the subscription package')}
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <FormField
                                     control={form.control}
@@ -176,20 +147,40 @@ export default function SubscriptionsEdit() {
 
                                 <FormField
                                     control={form.control}
-                                    name="validity_days"
+                                    name="used_sessions"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t('subscriptions.validityDays', 'Validity (Days)')}</FormLabel>
+                                            <FormLabel>{t('subscriptions.usedSessions', 'Used Sessions')}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
-                                                    min={1}
+                                                    min={0}
                                                     {...field}
                                                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                {t('subscriptions.validityDaysDesc', 'Subscription duration')}
+                                                {t('subscriptions.usedSessionsDesc', 'Number of sessions already used')}
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                    <FormField
+                                    control={form.control}
+                                    name="start_date"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t('subscriptions.startDate', 'Start Date')}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="date"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                {t('subscriptions.startDateDesc', 'Subscription start date')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -198,21 +189,18 @@ export default function SubscriptionsEdit() {
 
                                 <FormField
                                     control={form.control}
-                                    name="price"
+                                    name="end_date"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t('subscriptions.price', 'Price (DH)')}</FormLabel>
+                                            <FormLabel>{t('subscriptions.endDate', 'End Date')}</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="number"
-                                                    min={0}
-                                                    step="0.01"
+                                                    type="date"
                                                     {...field}
-                                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                {t('subscriptions.priceDesc', 'Total package price')}
+                                                {t('subscriptions.endDateDesc', 'Subscription end date')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

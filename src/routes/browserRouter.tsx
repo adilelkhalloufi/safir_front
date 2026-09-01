@@ -457,7 +457,7 @@ export const browserRouter = createBrowserRouter([
         path: webRoutes.Dashboard,
         element: (
           <RequireRole
-            allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Client]}
+            allowedRoles={[RoleEnum.Admin,RoleEnum.Client]}
           >
             <Dashboard />
           </RequireRole>
@@ -646,7 +646,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.subscriptions.index,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <SubscriptionsIndex />
           </RequireRole>
         ),
@@ -662,7 +662,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.subscriptions.edit,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <SubscriptionsEdit />
           </RequireRole>
         ),
@@ -670,7 +670,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.subscriptions.view,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <SubscriptionsView />
           </RequireRole>
         ),
@@ -742,7 +742,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.typeServices.index,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <TypeServices />
           </RequireRole>
         ),
@@ -750,7 +750,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.typeServices.add,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <TypeServicesAdd />
           </RequireRole>
         ),
@@ -758,7 +758,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.typeServices.edit,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <TypeServicesEdit />
           </RequireRole>
         ),
@@ -766,7 +766,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.typeServices.view,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <TypeServicesView />
           </RequireRole>
         ),
@@ -846,7 +846,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.settings.index,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <SettingsIndex />
           </RequireRole>
         ),
@@ -858,7 +858,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.blockedSlots.index,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <BlockedTimeSlotsIndex />
           </RequireRole>
         ),
@@ -866,7 +866,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.blockedSlots.add,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <BlockedTimeSlotsAdd />
           </RequireRole>
         ),
@@ -874,7 +874,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.blockedSlots.edit,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <BlockedTimeSlotsEdit />
           </RequireRole>
         ),
@@ -882,7 +882,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.blockedSlots.view,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
             <BlockedTimeSlotsView />
           </RequireRole>
         ),

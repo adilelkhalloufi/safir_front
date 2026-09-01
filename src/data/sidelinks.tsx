@@ -6,7 +6,7 @@ import {
   IconUsers,
   IconUserCog,
   IconMassage,
-  IconHome,
+ 
   IconCreditCard,
   IconMessage,
   IconTicket,
@@ -32,7 +32,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.Dashboard,
     icon: <IconLayoutDashboard size={18} />,
-    roles: [RoleEnum.Admin, RoleEnum.Reception],
+    roles: [RoleEnum.Admin],
   },
   {
     title: 'Bookings',
@@ -41,13 +41,13 @@ export const sidelinks: SideLink[] = [
     icon: <IconCalendar size={18} />,
     roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
-  {
-    title: 'Bookings (test)',
-    label: '',
-    href: webRoutes.bookings.index2,
-    icon: <IconCalendar size={18} />,
-    roles: [RoleEnum.Admin, RoleEnum.Reception],
-  },
+  // {
+  //   title: 'Bookings (test)',
+  //   label: '',
+  //   href: webRoutes.bookings.index2,
+  //   icon: <IconCalendar size={18} />,
+  //   roles: [RoleEnum.Admin, RoleEnum.Reception],
+  // },
   {
     title: 'Clients',
     label: '',
@@ -74,7 +74,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.subscriptions.index,
     icon: <IconTicket size={18} />,
-    roles: [RoleEnum.Admin],
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
   },
   // {
   //   title: 'Health Forms',
@@ -128,14 +128,14 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.payments.index,
     icon: <IconCreditCard size={18} />,
-    roles: [RoleEnum.Admin, RoleEnum.Reception],
+    roles: [RoleEnum.Admin],
   },
   {
     title: 'Communications',
     label: '',
     href: webRoutes.communications.index,
     icon: <IconMessage size={18} />,
-    roles: [RoleEnum.Admin, RoleEnum.Reception],
+    roles: [RoleEnum.Admin],
   },
 
   // {
@@ -149,18 +149,18 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '',
     icon: <IconSettings size={18} />,
-    roles: [RoleEnum.Admin],
+    roles: [RoleEnum.Admin, RoleEnum.Reception],
     sub: [
       {
         title: 'Type Services',
         href: webRoutes.typeServices.index,
         icon: <IconMassage size={18} />,
       },
-      {
-        title: 'Type Resources',
-        href: webRoutes.typeResources.index,
-        icon: <IconHome size={18} />,
-      },
+      // {
+      //   title: 'Type Resources',
+      //   href: webRoutes.typeResources.index,
+      //   icon: <IconHome size={18} />,
+      // },
       // {
       //   title: 'types of Resources',
       //   href: webRoutes.settings.typeResources,

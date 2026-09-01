@@ -11,11 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { Calendar, Package, Clock, CheckCircle2 } from 'lucide-react';
 
 export default function SubscriptionsView() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
@@ -27,7 +27,7 @@ export default function SubscriptionsView() {
         queryKey: ['subscription', id],
         queryFn: async () => {
             const response = await http.get(apiRoutes.adminSubscriptionById(parseInt(id!)));
-            return response.data;
+            return response.data?.data ?? response.data?.subscription ?? response.data;
         },
         enabled: !!id,
     });
@@ -37,9 +37,39 @@ export default function SubscriptionsView() {
             active: 'bg-green-500',
             expired: 'bg-red-500',
             suspended: 'bg-orange-500',
+            inactive: 'bg-gray-500',
         };
         return colors[status] || 'bg-gray-500';
     };
+
+    const getStatusFromSubscription = (subscription: any) => {
+        if (!subscription?.is_active) return 'inactive';
+        if (subscription.end_date) {
+            const endDate = new Date(subscription.end_date);
+            if (endDate < new Date()) return 'expired';
+        }
+        return 'active';
+    };
+
+    const status = getStatusFromSubscription(subscription);
+    const subscriptionPlan = subscription?.subscription_plan;
+    const planName = subscriptionPlan
+        ? subscriptionPlan.name?.[i18n.language as 'fr' | 'en'] ?? subscriptionPlan.name?.en ?? subscriptionPlan.name?.fr
+        : undefined;
+    const planDescription = subscriptionPlan
+        ? subscriptionPlan.description?.[i18n.language as 'fr' | 'en'] ?? subscriptionPlan.description?.en ?? subscriptionPlan.description?.fr
+        : undefined;
+    const planPrice = subscriptionPlan?.price;
+    const planTotalSessions = subscriptionPlan?.total_sessions;
+    const totalSessions = subscription?.total_sessions ?? 0;
+    const usedSessions = subscription?.used_sessions ?? 0;
+    const remainingSessions = subscription?.remaining_sessions ?? (totalSessions - usedSessions);
+    const priceValue = subscription?.price_paid ?? subscription?.price ?? 0;
+    const validityDays = subscription?.validity_days ?? (
+        subscription?.start_date && subscription?.end_date
+            ? Math.max(0, differenceInCalendarDays(new Date(subscription.end_date), new Date(subscription.start_date)))
+            : undefined
+    );
 
     if (isLoading) {
         return (
@@ -65,7 +95,7 @@ export default function SubscriptionsView() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">{subscription.name}</h1>
+                    <h1 className="text-3xl font-bold">{subscription.name || t('subscriptions.unnamedSubscription', 'Unnamed subscription')}</h1>
                     <p className="text-muted-foreground">
                         {t('subscriptions.viewSubtitle', 'Subscription package details')}
                     </p>
@@ -91,8 +121,8 @@ export default function SubscriptionsView() {
                     <CardContent className="space-y-4">
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.status', 'Status')}</p>
-                            <Badge className={getStatusColor(subscription.status)}>
-                                {t(`subscriptions.status_${subscription.status}`) as string}
+                            <Badge className={getStatusColor(status)}>
+                                {t(`subscriptions.status_${status}`, status) as string}
                             </Badge>
                         </div>
 
@@ -108,19 +138,19 @@ export default function SubscriptionsView() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.totalSessions', 'Total Sessions')}</p>
-                                <p className="text-2xl font-bold">{subscription.total_sessions}</p>
+                                <p className="text-2xl font-bold">{totalSessions}</p>
                             </div>
 
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.usedSessions', 'Used Sessions')}</p>
-                                <p className="text-2xl font-bold">{subscription.used_sessions || 0}</p>
+                                <p className="text-2xl font-bold">{usedSessions}</p>
                             </div>
                         </div>
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.remainingSessions', 'Remaining Sessions')}</p>
                             <p className="text-2xl font-bold text-green-600">
-                                {subscription.total_sessions - (subscription.used_sessions || 0)}
+                                {remainingSessions}
                             </p>
                         </div>
 
@@ -128,7 +158,7 @@ export default function SubscriptionsView() {
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.validityDays', 'Validity')}</p>
-                            <p className="text-base">{subscription.validity_days} {t('common.days', 'days')}</p>
+                            <p className="text-base">{validityDays ?? '-'} {t('common.days', 'days')}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -159,7 +189,7 @@ export default function SubscriptionsView() {
 
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.price', 'Price')}</p>
-                            <p className="text-3xl font-bold">{subscription.price} $</p>
+                            <p className="text-3xl font-bold">{priceValue} $</p>
                         </div>
 
                         {subscription.user && (
@@ -168,7 +198,7 @@ export default function SubscriptionsView() {
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.client', 'Client')}</p>
                                     <p className="text-base">
-                                        {subscription.user.first_name} {subscription.user.last_name}
+                                        {subscription.user.name  || subscription.user.email}
                                     </p>
                                 </div>
                             </>
@@ -176,6 +206,70 @@ export default function SubscriptionsView() {
                     </CardContent>
                 </Card>
             </div>
+
+            {subscriptionPlan && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Package className="h-5 w-5" />
+                            {t('subscriptions.planDetails', 'Plan Details')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.planName', 'Plan')}</p>
+                            <p className="text-base font-semibold">{planName || t('subscriptions.planUnknown', 'Unknown plan')}</p>
+                        </div>
+
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.planDescription', 'Plan Description')}</p>
+                            <p className="text-base">{planDescription || '-'}</p>
+                        </div>
+
+                        <Separator />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.planSessions', 'Plan Sessions')}</p>
+                                <p className="text-2xl font-bold">{planTotalSessions ?? '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">{t('subscriptions.planPrice', 'Plan Price')}</p>
+                                <p className="text-2xl font-bold">{planPrice != null ? `${planPrice} $` : '-'}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5" />
+                        {t('subscriptions.payments', 'Payments')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {(subscription.payments && subscription.payments.length > 0) ? (
+                        <div className="space-y-4">
+                            {subscription.payments.map((payment: any) => (
+                                <div key={payment.id ?? `${payment.reference}-${payment.created_at}`} className="flex items-center justify-between p-4 border rounded-lg">
+                                    <div>
+                                        <p className="font-semibold">{payment.reference ?? `#${payment.id}`}</p>
+                                        {payment.status && <p className="text-sm text-muted-foreground">{payment.status}</p>}
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-semibold">{payment.amount ?? payment.total ?? payment.price ?? '-'} $</p>
+                                        {payment.created_at && <p className="text-sm text-muted-foreground">{format(new Date(payment.created_at), 'PPP')}</p>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">{t('subscriptions.noPayments', 'No payments found')}</p>
+                    )}
+                </CardContent>
+            </Card>
 
             {subscription.services && subscription.services.length > 0 && (
                 <Card>
