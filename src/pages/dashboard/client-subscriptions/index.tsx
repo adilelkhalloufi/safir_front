@@ -171,8 +171,15 @@ export default function ClientSubscriptionsPage() {
                 <p className='text-muted-foreground'>{t('common.loading', 'Loading...')}</p>
             ) : subscriptions.length === 0 ? (
                 <Card>
-                    <CardContent className='pt-6 text-muted-foreground'>
-                        {t('clientSubscriptions.empty', 'No subscriptions yet. Choose a plan to get started.')}
+                    <CardContent className='pt-6'>
+                        <div className='space-y-4'>
+                            <p className='text-muted-foreground'>
+                                {t('clientSubscriptions.empty', 'No subscriptions yet. Choose a plan to get started.')}
+                            </p>
+                            <Button onClick={() => navigate(webRoutes.subscriptionPlans)}>
+                                {t('clientSubscriptions.createNewSubscription', 'Create new subscription')}
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             ) : (
