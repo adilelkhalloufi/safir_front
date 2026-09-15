@@ -23,6 +23,7 @@ import { defaultHttp } from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
 import { Admin } from '@/interfaces/models/admin'
 import { login } from '@/store/slices/adminSlice'
+import { RoleEnum } from '@/interfaces/enum/RoleEnum'
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -69,9 +70,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   }, []);
 
   useEffect(() => {
-    if (admin) {
-      navigate(`${fromPathname}${fromSearch}`, { replace: true });
+    if (!admin) return;
+
+    if (admin.user?.role === RoleEnum.Client) {
+      navigate(webRoutes.client.subscriptions, { replace: true });
+      return;
     }
+
+    navigate(`${fromPathname}${fromSearch}`, { replace: true });
   }, [admin, fromPathname, fromSearch, navigate]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
