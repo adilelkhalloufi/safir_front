@@ -11,14 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Calendar, Clock, User, Package, CreditCard, FileText, ExternalLink, Edit } from 'lucide-react';
+import { Calendar, Clock, User, Package, CreditCard, FileText, ExternalLink, Edit, Trash2 } from 'lucide-react';
 
 export default function BookingsView() {
     const { t } = useTranslation();
@@ -43,6 +43,8 @@ export default function BookingsView() {
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEditDateDialogOpen, setIsEditDateDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<any>(null);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [editDate, setEditDate] = useState<Date | undefined>(undefined);
     const [editStartTime, setEditStartTime] = useState('');
@@ -104,6 +106,40 @@ export default function BookingsView() {
         setEditStaffId(item.staff?.id || item.staff_id || undefined);
         setIsEditDateDialogOpen(true);
     };
+
+    const handleDeleteClick = (item: any, event?: React.MouseEvent) => {
+        event?.stopPropagation();
+        setItemToDelete(item);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const deleteBookingItemMutation = useMutation({
+        mutationFn: async (itemId: number) => {
+            if (!id) {
+                throw new Error('No booking id provided');
+            }
+
+            const response = await http.delete(apiRoutes.adminBookingItemDelete(parseInt(id), itemId));
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['booking', id] });
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+            toast({
+                title: t('common.success', 'Success'),
+                description: t('bookings.itemDeleted', 'Booking item deleted successfully'),
+            });
+            setIsDeleteDialogOpen(false);
+            setItemToDelete(null);
+        },
+        onError: (error: any) => {
+            toast({
+                title: t('common.error', 'Error'),
+                description: error?.response?.data?.message || t('bookings.itemDeleteError', 'Failed to delete booking item'),
+                variant: 'destructive',
+            });
+        },
+    });
 
     const updateBookingMutation = useMutation({
         mutationFn: async (data: { itemId: number; date: Date; startTime: string; endTime: string; serviceId?: number; staffId?: number }) => {
@@ -397,7 +433,7 @@ export default function BookingsView() {
                                         )}
                                     </div>
                                 </div>
-                                <div className="border-t px-4 py-2 bg-gray-50 flex justify-end">
+                                <div className="border-t px-4 py-2 bg-gray-50 flex justify-end gap-2">
                                     <Button
                                         size="sm"
                                         variant="outline"
@@ -409,6 +445,16 @@ export default function BookingsView() {
                                     >
                                         <Edit className="h-4 w-4" />
                                         {t('bookings.changeService', 'Change Service')}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={(e) => handleDeleteClick(item, e)}
+                                        className="flex items-center gap-1"
+                                        aria-label={t('bookings.deleteBookingItem', 'Delete booking item')}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        {t('common.delete', 'Delete')}
                                     </Button>
                                 </div>
                             </div>
@@ -537,6 +583,29 @@ export default function BookingsView() {
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('bookings.deleteBookingItem', 'Delete Booking Item')}</DialogTitle>
+                        <DialogDescription>
+                            {t('bookings.deleteBookingItemConfirmation', 'Do you want delete this booking item?')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                            {t('common.cancel', 'Cancel')}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => itemToDelete && deleteBookingItemMutation.mutate(itemToDelete.id)}
+                            disabled={deleteBookingItemMutation.isPending}
+                        >
+                            {deleteBookingItemMutation.isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

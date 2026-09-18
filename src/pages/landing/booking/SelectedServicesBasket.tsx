@@ -51,7 +51,7 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
 
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                        {t('bookingWizard.selectServices.quantityNote', 'Note: The quantity indicates the number of persons for each service (max 4). Services will be scheduled sequentially in the order selected to avoid time conflicts.')}
+                        {t('bookingWizard.selectServices.quantityNote', 'Note: The quantity indicates the number of persons for each service (max 8). Services will be scheduled sequentially in the order selected to avoid time conflicts.')}
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -111,10 +111,10 @@ export function SelectedServicesBasket({ selectedServices, selected, step }: Sel
                                                     size="sm"
                                                     variant="outline"
                                                     className="h-6 w-6 p-0"
-                                                    disabled={(svc.quantity || 1) >= 4}
+                                                    disabled={(svc.quantity || 1) >= 8}
                                                     onClick={() => {
                                                         const currentCount = svc.quantity || 1
-                                                        if (currentCount < 4) {
+                                                        if (currentCount < 8) {
                                                             dispatch(setServicePersonCount({ serviceId: svc.id, count: currentCount + 1 }))
                                                         }
                                                     }}

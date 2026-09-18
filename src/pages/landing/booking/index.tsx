@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -45,6 +45,7 @@ export default function BookingWizard() {
     const [searchParams] = useSearchParams()
 
     const dispatch = useDispatch<AppDispatch>()
+    const lastAutoSelectedServiceRef = useRef<string | null>(null)
     const {
         step,
         selectedServices,
@@ -70,10 +71,10 @@ export default function BookingWizard() {
         }
     })
 
-    // When a service_id query param is present, auto-select it and advance to Options
+    // When a service_id query param is present, replace the basket with that service and advance to Options.
     useEffect(() => {
         const serviceIdParam = searchParams.get('service_id')
-        if (!serviceIdParam || step !== 0 || !servicesData) {
+        if (!serviceIdParam || !servicesData) {
             return
         }
 
@@ -87,12 +88,26 @@ export default function BookingWizard() {
             return
         }
 
+        const serviceKey = String(service.id)
         const alreadySelected = selectedServices.some((svc) => svc.id === serviceId)
-        if (!alreadySelected) {
+        const hasOtherSelections = selectedServices.some((svc) => svc.id !== serviceId)
+
+        if (lastAutoSelectedServiceRef.current === serviceKey && alreadySelected && !hasOtherSelections) {
+            dispatch(setStep(1))
+            return
+        }
+
+        if (selectedServices.length > 0 && (hasOtherSelections || !alreadySelected)) {
+            dispatch(resetBooking())
+        }
+
+        if (!alreadySelected || hasOtherSelections) {
             dispatch(toggleService({ serviceId: service.id, service }))
         }
+
+        lastAutoSelectedServiceRef.current = serviceKey
         dispatch(setStep(1))
-    }, [dispatch, searchParams, servicesData, selectedServices, step])
+    }, [dispatch, searchParams, servicesData, selectedServices])
 
     // Fetch availability slots from API (fetch when moving to step 2)
     const { data: availabilityData, isLoading: availabilityLoading } = useQuery({

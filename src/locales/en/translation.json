@@ -754,7 +754,7 @@
       "basketEmpty": "Basket is empty",
       "confirmClearBasketTitle": "Clear Basket",
       "confirmClearBasket": "Are you sure you want to clear your basket? This action cannot be undone.",
-      "quantityNote": "Note: The quantity indicates the number of persons for each service (max 4). Services will be scheduled sequentially in the order selected to avoid time conflicts.",
+      "quantityNote": "Note: The quantity indicates the number of persons for each service. Services will be scheduled sequentially in the order selected to avoid time conflicts.",
       "search": "Search services...",
       "allServices": "All Services",
       "noResults": "No services found",
