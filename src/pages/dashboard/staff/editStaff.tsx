@@ -68,10 +68,23 @@ export default function EditStaff() {
   const handleSubmit = (values: any) => {
     setLoading(true);
 
+    const normalizedAvailability = (values.availability || []).map((item: any) => {
+      const recurrenceType = item.recurrence_type || 'weekly';
+      return {
+        day_of_week: Number(item.day_of_week),
+        start_time: item.start_time,
+        end_time: item.end_time,
+        is_available: item.is_available === 1 || item.is_available === true,
+        recurrence_type: recurrenceType,
+        biweekly_anchor_date: recurrenceType === 'biweekly' ? item.biweekly_anchor_date || null : null,
+      };
+    });
+
     // Transform service_ids from array of objects to array of IDs
     const submitData = {
       ...values,
       service_ids: values.service_ids?.map((item: any) => item.service_id) || [],
+      availability: normalizedAvailability,
     };
 
     const targetId = user?.profil?.id;  
@@ -253,6 +266,29 @@ export default function EditStaff() {
               type: 'checkbox',
               defaultValue: 1,
             },
+            {
+              name: 'recurrence_type',
+              label: t('staff.repeat', 'Repeat'),
+              type: 'select',
+              required: true,
+              defaultValue: 'weekly',
+              options: [
+                { value: 'weekly', name: t('staff.repeatWeekly', 'Every week') },
+                { value: 'biweekly', name: t('staff.repeatBiweekly', 'Every 2 weeks') },
+              ],
+              placeholder: t('staff.selectRepeat', 'Select repeat'),
+            },
+            {
+              name: 'biweekly_anchor_date',
+              label: t('staff.anchorWeekDate', 'Anchor week date'),
+              type: 'date',
+              required: true,
+              condition: (row: any) => row?.recurrence_type === 'biweekly',
+              helpText: t(
+                'staff.anchorWeekHelp',
+                'This date decides which week is active (week on / week off pattern).'
+              ),
+            },
           ],
         },
       ],
@@ -300,6 +336,8 @@ export default function EditStaff() {
         start_time: avail.start_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
         end_time: avail.end_time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
         is_available: avail.is_available ? 1 : 0,
+        recurrence_type: avail.recurrence_type || 'weekly',
+        biweekly_anchor_date: avail.biweekly_anchor_date || '',
       })) || [],
     };
   }, [staffData]);

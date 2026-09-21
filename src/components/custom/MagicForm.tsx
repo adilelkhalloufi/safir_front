@@ -20,6 +20,7 @@ export interface MagicFormOptionProps {
 export interface MagicFormFieldProps {
   name: string;
   label?: string;
+  helpText?: string;
   error?: string;
   value?: any;
   defaultValue?: any;
@@ -151,7 +152,11 @@ const MagicForm = memo(({
     setFormData((prev: any) => {
       const currentTable = Array.isArray(prev[field]) ? prev[field] : [];
       const newRow = columns.reduce((acc: Record<string, any>, col) => {
-        acc[col.name] = col.type === "checkbox" || col.type === "rating" ? 0 : "";
+        if (col.defaultValue !== undefined) {
+          acc[col.name] = col.defaultValue;
+        } else {
+          acc[col.name] = col.type === "checkbox" || col.type === "rating" ? 0 : "";
+        }
         return acc;
       }, {});
       return { ...prev, [field]: [...currentTable, newRow] };
@@ -195,6 +200,10 @@ const MagicForm = memo(({
         if (type === 'table' && columns && Array.isArray(formData[name])) {
           formData[name].forEach((row: any, rowIndex: number) => {
             columns.forEach(column => {
+              if (column.condition && !column.condition(row)) {
+                return;
+              }
+
               if (column.required) {
                 const cellValue = row[column.name];
                 const isEmpty = cellValue === undefined || cellValue === null || cellValue === '';
@@ -271,6 +280,10 @@ const MagicForm = memo(({
     const cellKey = `${name}-${rowIndex}-${col.name}`;
     const hasError = !!cellError;
 
+    if (col.condition && !col.condition(row)) {
+      return null;
+    }
+
     if (col.type === "select") {
       return (
         <div className="flex flex-col gap-1">
@@ -289,6 +302,7 @@ const MagicForm = memo(({
             }}
           />
           {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+          {col.helpText && <p className="text-xs text-muted-foreground">{col.helpText}</p>}
         </div>
       );
     }
@@ -303,6 +317,7 @@ const MagicForm = memo(({
             onCheckedChange={(checked) => handleTableChange(name, rowIndex, col.name, checked ? 1 : 0)}
           />
           {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+          {col.helpText && <p className="text-xs text-muted-foreground">{col.helpText}</p>}
         </div>
       );
     }
@@ -325,6 +340,7 @@ const MagicForm = memo(({
             </label>
           ))}
           {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+          {col.helpText && <p className="text-xs text-muted-foreground">{col.helpText}</p>}
         </div>
       );
     }
@@ -350,6 +366,7 @@ const MagicForm = memo(({
             ))}
           </div>
           {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+          {col.helpText && <p className="text-xs text-muted-foreground">{col.helpText}</p>}
         </div>
       );
     }
@@ -374,6 +391,7 @@ const MagicForm = memo(({
           placeholder={col.placeholder}
         />
         {hasError && <p className="text-red-500 text-xs">{cellError}</p>}
+        {col.helpText && <p className="text-xs text-muted-foreground">{col.helpText}</p>}
       </div>
     );
   }, [handleTableChange]);

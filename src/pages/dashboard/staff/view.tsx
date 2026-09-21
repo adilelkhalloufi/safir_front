@@ -79,6 +79,12 @@ export default function ViewStaff() {
     return days[dayOfWeek] || dayOfWeek;
   };
 
+  const getRecurrenceLabel = (recurrenceType?: string) => {
+    return recurrenceType === 'biweekly'
+      ? t('staff.repeatBiweekly', 'Every 2 weeks')
+      : t('staff.repeatWeekly', 'Every week');
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -232,15 +238,23 @@ export default function ViewStaff() {
                         <Badge variant={avail.is_available ? 'default' : 'secondary'}>
                           {getDayName(avail.day_of_week)}
                         </Badge>
-                        {avail.is_available ? (
-                          <span className='text-sm'>
-                            {avail.start_time?.substring(0, 5)} - {avail.end_time?.substring(0, 5)}
+                        <div className='flex flex-col'>
+                          {avail.is_available ? (
+                            <span className='text-sm'>
+                              {avail.start_time?.substring(0, 5)} - {avail.end_time?.substring(0, 5)}
+                            </span>
+                          ) : (
+                            <span className='text-sm text-muted-foreground'>
+                              {t('staff.unavailable', 'Unavailable')}
+                            </span>
+                          )}
+                          <span className='text-xs text-muted-foreground'>
+                            {getRecurrenceLabel(avail.recurrence_type)}
+                            {avail.recurrence_type === 'biweekly' && avail.biweekly_anchor_date
+                              ? ` • ${t('staff.anchorWeekDate', 'Anchor week date')}: ${avail.biweekly_anchor_date}`
+                              : ''}
                           </span>
-                        ) : (
-                          <span className='text-sm text-muted-foreground'>
-                            {t('staff.unavailable', 'Unavailable')}
-                          </span>
-                        )}
+                        </div>
                       </div>
                     </div>
                   ))}

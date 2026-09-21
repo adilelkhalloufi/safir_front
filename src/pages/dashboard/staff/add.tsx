@@ -39,10 +39,23 @@ export default function AddStaff() {
   const handleSubmit = (values: any) => {
     setLoading(true);
 
+    const normalizedAvailability = (values.availability || []).map((item: any) => {
+      const recurrenceType = item.recurrence_type || 'weekly';
+      return {
+        day_of_week: Number(item.day_of_week),
+        start_time: item.start_time,
+        end_time: item.end_time,
+        is_available: item.is_available === 1 || item.is_available === true,
+        recurrence_type: recurrenceType,
+        biweekly_anchor_date: recurrenceType === 'biweekly' ? item.biweekly_anchor_date || null : null,
+      };
+    });
+
     // Transform service_ids from array of objects to array of IDs
     const submitData = {
       ...values,
       service_ids: values.service_ids?.map((item: any) => item.service_id) || [],
+      availability: normalizedAvailability,
     };
 
     http
@@ -221,6 +234,29 @@ export default function AddStaff() {
               label: t('staff.isAvailable', 'Available'),
               type: 'checkbox',
               defaultValue: 1,
+            },
+            {
+              name: 'recurrence_type',
+              label: t('staff.repeat', 'Repeat'),
+              type: 'select',
+              required: true,
+              defaultValue: 'weekly',
+              options: [
+                { value: 'weekly', name: t('staff.repeatWeekly', 'Every week') },
+                { value: 'biweekly', name: t('staff.repeatBiweekly', 'Every 2 weeks') },
+              ],
+              placeholder: t('staff.selectRepeat', 'Select repeat'),
+            },
+            {
+              name: 'biweekly_anchor_date',
+              label: t('staff.anchorWeekDate', 'Anchor week date'),
+              type: 'date',
+              required: true,
+              condition: (row: any) => row?.recurrence_type === 'biweekly',
+              helpText: t(
+                'staff.anchorWeekHelp',
+                'This date decides which week is active (week on / week off pattern).'
+              ),
             },
           ],
         },
