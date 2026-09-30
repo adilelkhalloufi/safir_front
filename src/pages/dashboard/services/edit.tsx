@@ -277,7 +277,7 @@ export default function EditService() {
               options: [
                 { value: 'male', name: t('services.male', 'Male') },
                 { value: 'female', name: t('services.female', 'Female') },
-                { value: 'other', name: t('services.other', 'Other') },
+                { value: 'mixed', name: t('services.other', 'Other') },
               ],
             },
             {
