@@ -2,8 +2,8 @@ import { CONFIG } from "@/CONFIG";
 import { AxiosError } from "axios";
 import { toast as sonnerToast } from "sonner";
 
-export const API_URL = `https://back.safirhammam.com/api`;
-//  export const API_URL = `http://127.0.0.1:8000/api`;
+// export const API_URL = `https://back.safirhammam.com/api`;
+export const API_URL = `http://127.0.0.1:8000/api`;
 
 export enum NotificationType {
   ERROR = "error",
@@ -72,32 +72,69 @@ export const showNotification = (
   showToast(message, type, description);
 };
 
+export const getApiErrorMessage = (error: any, fallback = "Something went wrong") => {
+  if (typeof error === "string") {
+    try {
+      error = JSON.parse(error);
+    } catch {
+      return error || fallback;
+    }
+  }
+
+  if (error instanceof AxiosError) {
+    const responseData = error?.response?.data;
+
+    if (typeof responseData?.error === "string" && responseData.error.trim()) {
+      return responseData.error;
+    }
+
+    if (typeof responseData?.message === "string" && responseData.message.trim()) {
+      return responseData.message;
+    }
+
+    const paymentErrors = responseData?.errors?.payment_errors;
+    if (Array.isArray(paymentErrors) && paymentErrors.length > 0) {
+      const detail = paymentErrors[0]?.detail;
+      if (typeof detail === "string" && detail.trim()) {
+        return detail;
+      }
+    }
+  }
+
+  if (error?.response?.data) {
+    const responseData = error.response.data;
+
+    if (typeof responseData?.message === "string" && responseData.message.trim()) {
+      return responseData.message;
+    }
+
+    if (typeof responseData?.error === "string" && responseData.error.trim()) {
+      return responseData.error;
+    }
+
+    const paymentErrors = responseData?.errors?.payment_errors;
+    if (Array.isArray(paymentErrors) && paymentErrors.length > 0) {
+      const detail = paymentErrors[0]?.detail;
+      if (typeof detail === "string" && detail.trim()) {
+        return detail;
+      }
+    }
+  }
+
+  if (typeof error?.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
 export const handleErrorResponse = (
   error: any,
   callback?: () => void,
   errorMessage?: string
 ) => {
   if (!errorMessage) {
-    errorMessage = "Something went wrong";
-
-    if (typeof error === "string") {
-      try {
-        error = JSON.parse(error);
-      } catch (error) {
-        // do nothing
-        console.log("error", error);
-      }
-    }
-
-    if (error instanceof AxiosError) {
-      if (error?.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-    } else if (error?.message) {
-      errorMessage = error.message;
-    }
+    errorMessage = getApiErrorMessage(error, "Something went wrong");
   }
 
   const formattedMessage = errorMessage &&

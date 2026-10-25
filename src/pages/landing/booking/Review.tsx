@@ -29,6 +29,7 @@ import { IconUserFilled } from '@tabler/icons-react'
 import { setTermsAccepted } from '@/store/slices/bookingSlice'
 import { RootState } from '@/store'
 import { webRoutes } from '@/routes/web'
+import { getApiErrorMessage } from '@/utils'
 
 interface ReviewProps {
   selectedServices: Service[]
@@ -204,16 +205,18 @@ export function Review({
         })
       )
     } catch (error: any) {
+      const normalizedMessage = String(error?.message || '').toLowerCase()
+      const backendMessage = getApiErrorMessage(error, t('bookingWizard.payment.error', 'Payment failed. Please try again.'))
+
       // If booking submission fails, reset the form for retry
-      if (error?.message?.toLowerCase().includes('expired') ||
-        error?.message?.toLowerCase().includes('token')) {
+      if (normalizedMessage.includes('expired') || normalizedMessage.includes('token')) {
         toast.error(
           t('bookingWizard.payment.tokenExpired',
             'Payment token expired. Please try again with your card details.')
         )
         setPaymentFormKey(prev => prev + 1)
       } else {
-        toast.error(error?.message || t('bookingWizard.payment.error', 'Payment failed. Please try again.'))
+        toast.error(backendMessage)
       }
     }
   }

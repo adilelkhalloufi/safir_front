@@ -31,7 +31,7 @@ import { AppDispatch, RootState } from '@/store'
 import { defaultHttp } from '@/utils/http'
 import { apiRoutes } from '@/routes/api'
 import { webRoutes } from '@/routes/web'
-import { handleErrorResponse, NotificationType, showNotification } from '@/utils'
+import { getApiErrorMessage, handleErrorResponse, NotificationType, showNotification } from '@/utils'
 import { SelectServices } from './SelectServices'
 import { SelectOptions } from './SelectOptions'
 import { SelectDateTime } from './SelectDateTime'
@@ -215,7 +215,7 @@ export default function BookingWizard() {
         },
         onError: (error: any) => {
             showNotification(
-                error?.response?.data?.message || error?.message || t('bookingWizard.bookingCreateError'),
+                getApiErrorMessage(error, t('bookingWizard.bookingCreateError')),
                 NotificationType.ERROR
             )
         }
