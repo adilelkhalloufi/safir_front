@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -74,6 +74,7 @@ export default function BookingsAdd() {
     const [paymentNote, setPaymentNote] = useState<string>('');
     const [cardHolderName, setCardHolderName] = useState<string>('');
     const [paymentFormKey, setPaymentFormKey] = useState(0);
+    const submitInFlightRef = useRef(false);
 
     const squareApplicationId = import.meta.env.VITE_SQUARE_APP_ID;
     const squareLocationId = import.meta.env.VITE_SQUARE_LOCATION_ID;
@@ -155,6 +156,9 @@ export default function BookingsAdd() {
                 title: t('common.error', 'Error'),
                 description: error?.response?.data?.message || t('bookings.createError', 'Failed to create booking'),
             });
+        },
+        onSettled: () => {
+            submitInFlightRef.current = false;
         },
     });
 
@@ -240,6 +244,10 @@ export default function BookingsAdd() {
     };
 
     const handleSubmitBooking = (paymentData: any) => {
+        if (createBookingMutation.isPending || submitInFlightRef.current) {
+            return;
+        }
+
         if (!formData.client_id && !formData.client_create) {
             toast({
                 variant: 'destructive',
@@ -281,6 +289,7 @@ export default function BookingsAdd() {
             },
         };
 
+        submitInFlightRef.current = true;
         createBookingMutation.mutate(bookingData);
     };
 

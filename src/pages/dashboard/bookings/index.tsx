@@ -1,6 +1,6 @@
 import { GetBookingColumns, Booking } from './columns';
 import { BookingsDataTable } from './data-table';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ export default function BookingsIndex() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [forceDialog, setForceDialog] = useState(false);
   const [forceLoading, setForceLoading] = useState(false);
+  const forceSubmitInFlightRef = useRef(false);
 
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [filters, setFilters] = useState({
@@ -194,6 +195,9 @@ export default function BookingsIndex() {
 
   // --- NEW: Force Reservation Submit Handler ---
   const handleForceSubmit = (formData: any) => {
+    if (forceLoading || forceSubmitInFlightRef.current) return;
+
+    forceSubmitInFlightRef.current = true;
     setForceLoading(true);
     http
       .post(apiRoutes.adminBookingsForce, formData)
@@ -213,6 +217,7 @@ export default function BookingsIndex() {
         });
       })
       .finally(() => {
+        forceSubmitInFlightRef.current = false;
         setForceLoading(false);
       });
   };
