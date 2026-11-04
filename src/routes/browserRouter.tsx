@@ -457,7 +457,7 @@ export const browserRouter = createBrowserRouter([
         path: webRoutes.Dashboard,
         element: (
           <RequireRole
-            allowedRoles={[RoleEnum.Admin,RoleEnum.Client]}
+            allowedRoles={[RoleEnum.Admin, RoleEnum.Client, RoleEnum.Viewer]}
           >
             <Dashboard />
           </RequireRole>
@@ -485,7 +485,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.bookings.index,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Viewer]}>
             <BookingsIndex />
           </RequireRole>
         ),
@@ -493,7 +493,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.bookings.index2,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Viewer]}>
             <BookingIndex2 />
           </RequireRole>
         ),
@@ -509,7 +509,7 @@ export const browserRouter = createBrowserRouter([
       {
         path: webRoutes.bookings.view,
         element: (
-          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception]}>
+          <RequireRole allowedRoles={[RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Viewer]}>
             <BookingsView />
           </RequireRole>
         ),

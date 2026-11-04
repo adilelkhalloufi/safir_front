@@ -39,7 +39,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: webRoutes.bookings.index,
     icon: <IconCalendar size={18} />,
-    roles: [RoleEnum.Admin, RoleEnum.Reception],
+    roles: [RoleEnum.Admin, RoleEnum.Reception, RoleEnum.Viewer],
   },
   // {
   //   title: 'Bookings (test)',

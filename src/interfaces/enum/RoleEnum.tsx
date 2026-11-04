@@ -3,6 +3,7 @@ export enum RoleEnum {
     Reception = "RECEPTION",
     Client = "CLIENT",
     Staff = "STAFF",
+    Viewer = "VIEWER"
 
 }
  

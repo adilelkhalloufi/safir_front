@@ -6,9 +6,12 @@ import { apiRoutes } from '@/routes/api';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { webRoutes } from '@/routes/web';
 import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '@/utils';
+import { RootState } from '@/store';
+import { RoleEnum } from '@/interfaces/enum/RoleEnum';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +30,8 @@ import { format } from 'date-fns';
 
 export default function BookingsIndex() {
   const { t } = useTranslation();
+  const userRole = useSelector((state: RootState) => state.admin?.user?.role as RoleEnum | undefined);
+  const isViewer = userRole === RoleEnum.Viewer;
   const [data, setData] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
@@ -257,12 +262,12 @@ export default function BookingsIndex() {
     () =>
       GetBookingColumns({
         onView: handleView,
-        onComplete: handleComplete,
-        onCancel: handleCancelOpen,
-        onNoShow: handleNoShow,
-        onPayment: handlePaymentOpen,
+        onComplete: isViewer ? undefined : handleComplete,
+        onCancel: isViewer ? undefined : handleCancelOpen,
+        onNoShow: isViewer ? undefined : handleNoShow,
+        onPayment: isViewer ? undefined : handlePaymentOpen,
       }),
-    [t]
+    [isViewer, t]
   );
 
   const clearFilters = () => {
@@ -285,23 +290,26 @@ export default function BookingsIndex() {
             </p>
           </div>
           <div className='flex gap-2'>
-            {/* NEW: Force Reservation Button */}
-            <Button
-              variant="secondary"
-              onClick={() => setForceDialog(true)}
-              className='gap-2'
-            >
-              <Zap className='h-4 w-4' />
-              {t('bookings.forceReservation', 'Force Reservation')}
-            </Button>
+            {!isViewer && (
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => setForceDialog(true)}
+                  className='gap-2'
+                >
+                  <Zap className='h-4 w-4' />
+                  {t('bookings.forceReservation', 'Force Reservation')}
+                </Button>
 
-            <Button
-              onClick={() => navigate(webRoutes.bookings.add)}
-              className='gap-2'
-            >
-              <span>+</span>
-              {t('bookings.createNew', 'Create Booking')}
-            </Button>
+                <Button
+                  onClick={() => navigate(webRoutes.bookings.add)}
+                  className='gap-2'
+                >
+                  <span>+</span>
+                  {t('bookings.createNew', 'Create Booking')}
+                </Button>
+              </>
+            )}
             <div className='flex rounded-md border'>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}

@@ -26,6 +26,7 @@ export const apiRoutes = {
   adminClients: `${API_URL}/admin/clients`,
   adminClientById: (id: number) => `${API_URL}/admin/clients/${id}`,
   adminClientNote: (id: number) => `${API_URL}/admin/clients/${id}/note`,
+  adminClientResetPassword: (id: number) => `${API_URL}/admin/clients/${id}/reset-password`,
 
   adminSubscriptions: `${API_URL}/admin/subscriptions`,
   adminSubscriptionById: (id: number) => `${API_URL}/admin/subscriptions/${id}`,
