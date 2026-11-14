@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
-import http from '@/utils/http';
+ import http from '@/utils/http';
 import { apiRoutes } from '@/routes/api';
 import { webRoutes } from '@/routes/web';
 import { toast } from '@/components/ui/use-toast';
@@ -52,22 +51,7 @@ export default function ClientsEdit() {
         },
     });
 
-    const resetPasswordMutation = useMutation({
-        mutationFn: () => http.post(apiRoutes.adminClientResetPassword(parseInt(id!)), {}),
-        onSuccess: () => {
-            toast({
-                title: t('common.success', 'Success'),
-                description: t('clients.resetPasswordSuccess', 'Password reset successfully'),
-            });
-        },
-        onError: (error: any) => {
-            toast({
-                variant: 'destructive',
-                title: t('common.error', 'Error'),
-                description: error?.response?.data?.message || error?.message || t('clients.resetPasswordError', 'Failed to reset client password'),
-            });
-        },
-    });
+     
 
     const clientFields: MagicFormGroupProps[] = [
         {
