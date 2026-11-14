@@ -1,9 +1,11 @@
-import { t } from 'i18next'
 import { Link } from 'react-router-dom'
 import { UserAuthForm } from './components/user-auth-form'
+import { useTranslation } from 'react-i18next'
 
 
 export default function SignIn() {
+  const { t } = useTranslation()
+
   return (
     <>
       <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
@@ -52,28 +54,28 @@ export default function SignIn() {
                     alt='Vite'
                   />
                 </Link>
-                <h1 className='text-2xl font-semibold tracking-tight'>Connexion</h1>
+                <h1 className='text-2xl font-semibold tracking-tight'>{t('auth.signIn.title')}</h1>
               </div>
               <p className='text-sm text-muted-foreground'>
-                Entrez votre email et mot de passe ci-dessous <br />
-                pour vous connecter à votre compte
+                {t('auth.signIn.descriptionLine1')} <br />
+                {t('auth.signIn.descriptionLine2')}
               </p>
             </div>
             <UserAuthForm />
             <p className='px-8 text-center text-sm text-muted-foreground'>
-              En cliquant sur connexion, vous acceptez nos{' '}
+              {t('auth.signIn.termsPrefix')}{' '}
               <a
                 href='/terms'
                 className='underline underline-offset-4 hover:text-primary'
               >
-                Conditions d'utilisation
+                {t('auth.signIn.termsLink')}
               </a>{' '}
-              et notre{' '}
+              {t('auth.signIn.and')}{' '}
               <a
                 href='/privacy'
                 className='underline underline-offset-4 hover:text-primary'
               >
-                Politique de confidentialité
+                {t('auth.signIn.privacyLink')}
               </a>
               .
             </p>

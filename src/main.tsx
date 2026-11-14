@@ -23,8 +23,10 @@ import i18next from "./i18n";
 
 i18next.on('languageChanged', (lng) => {
   document.documentElement.setAttribute('dir', lng === 'ar' ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', lng);
 });
 document.documentElement.setAttribute('dir', i18next.language === 'ar' ? 'rtl' : 'ltr');
+document.documentElement.setAttribute('lang', i18next.resolvedLanguage || i18next.language || 'fr');
 
 const persistor = persistStore(store);
 injectStore(store);

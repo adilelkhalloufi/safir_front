@@ -1,6 +1,18 @@
 {
   "website": "SAFIR Hammam & Spa",
   "website.description": "est la solution SaaS ultime pour gérer votre Hammam & Spa de manière efficace et efficiente.",
+  "login": "Se connecter",
+  "auth": {
+    "signIn": {
+      "title": "Connexion",
+      "descriptionLine1": "Entrez votre email et votre mot de passe ci-dessous",
+      "descriptionLine2": "pour accéder à votre compte",
+      "termsPrefix": "En vous connectant, vous acceptez nos",
+      "termsLink": "Conditions d'utilisation",
+      "and": "et notre",
+      "privacyLink": "Politique de confidentialité"
+    }
+  },
   "common": {
     "loading": "Chargement...",
     "all": "Tous",
@@ -287,6 +299,7 @@
     "accountCreated": "Compte créé"
   },
   "bookingWizard": {
+    "pageTitle": "SAFIR - Réservation",
     "title": "SAFIR Hammam & Spa Moroccan",
     "subtitle": "Réservez votre moment de détente",
     "bookingCreated": "Réservation créée! Confirmation du paiement...",

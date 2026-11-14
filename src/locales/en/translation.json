@@ -1,6 +1,18 @@
 {
   "website": "SAFIR Hammam & Spa",
   "website.description": "is the ultimate SaaS solution for managing optician stores efficiently and effectively.",
+  "login": "Sign in",
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "descriptionLine1": "Enter your email and password below",
+      "descriptionLine2": "to access your account",
+      "termsPrefix": "By signing in, you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and our",
+      "privacyLink": "Privacy Policy"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "all": "All",
@@ -721,6 +733,7 @@
     "accountCreated": "Account Created"
   },
   "bookingWizard": {
+    "pageTitle": "SAFIR - Booking",
     "title": "SAFIR Hammam & Spa Moroccan",
     "subtitle": "Book your moment of relaxation",
     "bookingCreated": "Booking created! Payment confirmation...",

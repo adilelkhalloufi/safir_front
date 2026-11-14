@@ -12,9 +12,16 @@ import frNs1 from "./locales/fr/translation.json";
   .use(initReactI18next)
   .init({
     fallbackLng: "fr",
-    debug: true,
-    lng: "fr",
+    debug: false,
     defaultNS: "ns1",
+    supportedLngs: ["fr", "en"],
+    load: "languageOnly",
+    nonExplicitSupportedLngs: true,
+    detection: {
+      order: ["querystring", "localStorage", "navigator"],
+      lookupQuerystring: "lang",
+      caches: ["localStorage"],
+    },
     resources: {
       en: {
         ns1: enNs1,
