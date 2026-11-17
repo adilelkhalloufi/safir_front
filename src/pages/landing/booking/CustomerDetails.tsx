@@ -20,6 +20,10 @@ export function CustomerDetails({
     mobileBasket
 }: CustomerDetailsProps) {
     const { t } = useTranslation()
+    const namePattern = /^[\p{L}\s'’-]+$/u
+    const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+    const phonePattern = /^\+?[0-9\s()-]{7,20}$/
+    const notesPattern = /^[\p{L}\p{N}\s.,'’\-()!?/:;@&]*$/u
 
     const fields: MagicFormGroupProps[] = [
         {
@@ -32,6 +36,8 @@ export function CustomerDetails({
                     placeholder: t('bookingWizard.customerDetails.namePlaceholder'),
                     type: 'text',
                     required: true,
+                    pattern: namePattern,
+                    patternError: t('bookingWizard.customerDetails.validation.nameInvalid'),
                 },
                 {
                     name: 'email',
@@ -39,6 +45,8 @@ export function CustomerDetails({
                     placeholder: t('bookingWizard.customerDetails.emailPlaceholder'),
                     type: 'text',
                     required: true,
+                    pattern: emailPattern,
+                    patternError: t('bookingWizard.customerDetails.validation.emailInvalid'),
                 },
                 {
                     name: 'phone',
@@ -46,6 +54,8 @@ export function CustomerDetails({
                     placeholder: t('bookingWizard.customerDetails.phonePlaceholder'),
                     type: 'text',
                     required: true,
+                    pattern: phonePattern,
+                    patternError: t('bookingWizard.customerDetails.validation.phoneInvalid'),
                 },
                 {
                     name: 'notes',
@@ -53,17 +63,24 @@ export function CustomerDetails({
                     placeholder: t('bookingWizard.customerDetails.notesPlaceholder'),
                     type: 'textarea',
                     required: false,
+                    pattern: notesPattern,
+                    patternError: t('bookingWizard.customerDetails.validation.notesInvalid'),
                 }
             ]
         }
     ]
 
     const handleSubmit = (data: any) => {
+        const trimmedName = data.name?.trim?.() ?? data.name
+        const trimmedEmail = data.email?.trim?.() ?? data.email
+        const trimmedPhone = data.phone?.trim?.() ?? data.phone
+        const trimmedNotes = data.notes?.trim?.() ?? data.notes
+
         // MagicForm returns an object matching field names
-        if (data.name !== undefined) onUpdateCustomer('name', data.name)
-        if (data.email !== undefined) onUpdateCustomer('email', data.email)
-        if (data.phone !== undefined) onUpdateCustomer('phone', data.phone)
-        if (data.notes !== undefined) onUpdateCustomer('notes', data.notes || '')
+        if (trimmedName !== undefined) onUpdateCustomer('name', trimmedName)
+        if (trimmedEmail !== undefined) onUpdateCustomer('email', trimmedEmail)
+        if (trimmedPhone !== undefined) onUpdateCustomer('phone', trimmedPhone)
+        if (trimmedNotes !== undefined) onUpdateCustomer('notes', trimmedNotes || '')
 
         // proceed to next step
         onNext()

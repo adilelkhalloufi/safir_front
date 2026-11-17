@@ -39,6 +39,8 @@ export interface MagicFormFieldProps {
   returnFullObject?: boolean; // Add this line
   showIf?: (data: any) => boolean; // Conditional rendering
   condition?: (values: any) => boolean; // Add this line for conditional rendering based on other field values
+  pattern?: RegExp;
+  patternError?: string;
 }
 
 export interface MagicFormGroupProps {
@@ -174,7 +176,7 @@ const MagicForm = memo(({
   const validate = useCallback(() => {
     let newErrors: any = {};
     fields.forEach(group => {
-      group.fields.forEach(({ name, required, type, columns }) => {
+      group.fields.forEach(({ name, required, type, columns, pattern, patternError }) => {
         if (required) {
           // Special handling for table type - check if at least one row exists
           if (type === 'table') {
@@ -193,6 +195,16 @@ const MagicForm = memo(({
             }
           } else if (!formData[name] && formData[name] !== 0) {
             newErrors[name] = "This field is required";
+          }
+        }
+
+        if (!newErrors[name] && pattern) {
+          const value = formData[name];
+          if (value !== undefined && value !== null && value !== "") {
+            const valueToValidate = typeof value === "string" ? value.trim() : String(value);
+            if (!pattern.test(valueToValidate)) {
+              newErrors[name] = patternError || "Invalid format";
+            }
           }
         }
 

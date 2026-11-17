@@ -816,6 +816,12 @@
       "phonePlaceholder": "+1 XXX XXX XXXX",
       "notes": "Notes (optional)",
       "notesPlaceholder": "Additional information...",
+      "validation": {
+        "nameInvalid": "Name can contain letters, spaces, apostrophes, and hyphens only.",
+        "emailInvalid": "Please enter a valid email address.",
+        "phoneInvalid": "Phone can contain digits, spaces, parentheses, hyphens, and optional leading + only.",
+        "notesInvalid": "Notes contain unsupported characters."
+      },
       "back": "Back",
       "continue": "Continue"
     },

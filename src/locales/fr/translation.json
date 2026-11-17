@@ -409,6 +409,12 @@
       "phonePlaceholder": "+1 XXX XXX XXXX",
       "notes": "Notes (optionnel)",
       "notesPlaceholder": "Informations supplémentaires...",
+      "validation": {
+        "nameInvalid": "Le nom peut contenir uniquement des lettres, espaces, apostrophes et tirets.",
+        "emailInvalid": "Veuillez saisir une adresse email valide.",
+        "phoneInvalid": "Le téléphone peut contenir des chiffres, espaces, parenthèses, tirets et un + initial optionnel.",
+        "notesInvalid": "Les notes contiennent des caractères non autorisés."
+      },
       "back": "Retour",
       "continue": "Continuer"
     },
