@@ -384,6 +384,11 @@ export const browserRouter = createBrowserRouter([
     errorElement: errorElement,
   },
   {
+    path: webRoutes.ServicesPage,
+    element: <LandingPage />,
+    errorElement: errorElement,
+  },
+  {
     path: webRoutes.booking,
     element: <LandingPage />,
     errorElement: errorElement,

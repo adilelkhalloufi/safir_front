@@ -16,7 +16,7 @@ export const webRoutes = {
   cancelBooking: '/booking/:id/cancel',
   healthFormClient: '/booking/:id/health-form',
   reviewsClient: '/booking/:id/reviews',
-
+  ServicesPage: '/services-page',
   docs: '/docs',
   // Admin routes
   bookings: {
